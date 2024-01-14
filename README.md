@@ -1,2 +1,4 @@
 # Rowing-GPX-Analysis
-2nd version of GPX Analysis for rowing. This time in Python
+## Introduction
+I couldn't find the code for the old GPX analysis tool I wrote, so I'm taking the
+opportunity to build a better one.
