@@ -22,28 +22,31 @@ class TrackPoint:
         :param cad: The cadence (stroke rate)
         :param raw_time: the string form of the UTC time
         """
-        self.lat = lat
-        self.lon = lon
+        self.dis_x = lon
+        self.dis_y = lat
         self.cad = cad
 
         self.time = None
         self.formatted_time = datetime.strptime(raw_time, '%Y-%m-%dT%H:%M:%SZ')
 
-    def get_latitude(self) -> float:
+    def get_position(self) -> (float, float):
         """
-        Getter for latitude
+        Getter for the position
 
-        :return: the latitude of the track point
+        :return: the position of the track point
         """
-        return self.lat
+        return self.dis_x, self.dis_y
 
-    def get_longitude(self) -> float:
+    def set_position(self, nex_x:float, new_y:float) -> None:
         """
-        Getter for longitude
+        Update the track point position fields
 
-        :return: the longitude of the track point
+        :param nex_x: The updated x value
+        :param new_y: The updated y value
+        :return: None
         """
-        return self.lon
+        self.dis_x = nex_x
+        self.dis_y = new_y
 
     def get_cadence(self) -> int:
         """
