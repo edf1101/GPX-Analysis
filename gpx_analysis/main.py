@@ -1,11 +1,22 @@
 import gpx_parser as gpx
 import geo_components as geo
-import matplotlib.pyplot as plt
+import graph_handler as gh
+import matplotlib as mpl
 
 track = gpx.Track("example_data/Exeter Head.gpx")
 
-track_after = geo.standardise_gpx_distances(track)
+track = geo.standardise_gpx_distances(track)
 
+bounds = geo.get_track_bounds(track)
+images = gh.get_all_images_in_bounds(bounds)
 
-for point in track_after.get_track_points():
-    print(point.get_position())
+mpl_graph = gh.MapClass()
+mpl_graph.set_image_dict(images)
+mpl_graph.set_gpx_bounds(bounds)
+mpl_graph.plot_images()
+
+for point in track.get_track_points():
+    # print(point.get_position_standard())
+    mpl_graph.draw_point(point.get_position_degrees())
+
+mpl_graph.show_plot()

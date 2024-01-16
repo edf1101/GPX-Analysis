@@ -2,8 +2,8 @@
 This file contains functions used for doing geographic calculations
 """
 import math
-import gpx_parser as gpx
 from copy import deepcopy
+import gpx_parser as gpx
 
 
 def geo_distance(latitude1: float, longitude1: float, latitude2: float, longitude2: float) -> float:
@@ -43,17 +43,34 @@ def standardise_gpx_distances(input_track: gpx.Track) -> gpx.Track:
     # Get the bottom left of the track
     all_track_points = modify_track.get_track_points()
 
-    most_left = min([i.get_position()[0] for i in all_track_points])
-    most_bottom = min([i.get_position()[1] for i in all_track_points])
-    bottom_left = (most_left, most_bottom)
+    bounds = get_track_bounds(modify_track)
+    bottom_left = (bounds[3], bounds[2])
 
     # Convert all the points to meters from the bottom left
     for point in all_track_points:
-        point_lon, point_lat = point.get_position()
+        point_lon, point_lat = point.get_position_degrees()
 
         new_y = geo_distance(bottom_left[1], bottom_left[0], point_lat, bottom_left[0])
         new_x = geo_distance(bottom_left[1], bottom_left[0], bottom_left[1], point_lon)
 
-        point.set_position(new_x, new_y)  # Update the point
+        point.set_position_standard(new_x, new_y)  # Update the point
 
     return modify_track
+
+
+def get_track_bounds(input_track: gpx.Track) -> tuple:
+    """
+    Return the bounding regions of the track
+
+    :param input_track: The input track
+    :return: North latitude, east longitude, south latitude, west longitude
+    """
+    # Get the bottom left of the track
+    all_track_points = input_track.get_track_points()
+
+    west = min(i.get_position_degrees()[0] for i in all_track_points)
+    south = min(i.get_position_degrees()[1] for i in all_track_points)
+    east = max(i.get_position_degrees()[0] for i in all_track_points)
+    north = max(i.get_position_degrees()[1] for i in all_track_points)
+
+    return north, east, south, west

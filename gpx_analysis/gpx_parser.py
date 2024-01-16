@@ -22,22 +22,34 @@ class TrackPoint:
         :param cad: The cadence (stroke rate)
         :param raw_time: the string form of the UTC time
         """
-        self.dis_x = lon
-        self.dis_y = lat
+        self.standard_x = None
+        self.standard_y = None
+
+        self.lat = lat
+        self.lon = lon
+
         self.cad = cad
 
         self.time = None
         self.formatted_time = datetime.strptime(raw_time, '%Y-%m-%dT%H:%M:%SZ')
 
-    def get_position(self) -> (float, float):
+    def get_position_degrees(self) -> (float, float):
         """
-        Getter for the position
+        Getter for the position in degrees
 
         :return: the position of the track point
         """
-        return self.dis_x, self.dis_y
+        return self.lat, self.lon
 
-    def set_position(self, nex_x:float, new_y:float) -> None:
+    def get_position_standard(self) -> (float, float):
+        """
+        Getter for the position in meters
+
+        :return: the position of the track point
+        """
+        return self.standard_x, self.standard_y
+
+    def set_position_standard(self, nex_x: float, new_y: float) -> None:
         """
         Update the track point position fields
 
@@ -45,8 +57,8 @@ class TrackPoint:
         :param new_y: The updated y value
         :return: None
         """
-        self.dis_x = nex_x
-        self.dis_y = new_y
+        self.standard_x = nex_x
+        self.standard_y = new_y
 
     def get_cadence(self) -> int:
         """
@@ -94,12 +106,14 @@ class Track:
         :param file_name: path to gpx file
         """
         self.file_name = file_name
+
+        # Define namespaces
         self.namespaces = {'gpx': 'http://www.topografix.com/GPX/1/1',
                            'gpxdata': 'http://www.cluetrust.com/XML/GPXDATA/1/0'}
         self.track_points = []
         self.__create_track_points()
 
-        self.redo_timings()
+        self.__redo_timings()
 
     def __create_track_points(self) -> None:
         """
@@ -110,13 +124,16 @@ class Track:
         tree = ET.parse(self.file_name)
         root = tree.getroot()
 
-        # Define namespaces
-
         # Iterate through each track segment and track point
         for track_segment in root.findall(".//gpx:trkseg", namespaces=self.namespaces):
             for point in track_segment.findall("gpx:trkpt", namespaces=self.namespaces):
-                lat = float(point.get('lat'))
-                lon = float(point.get('lon'))
+
+                # Error checking for lat and long values
+                try:
+                    lat = float(point.get('lat'))
+                    lon = float(point.get('lon'))
+                except ValueError as exc:
+                    raise ValueError('lat or long in the file isnt of type float') from exc
 
                 time = None
                 if point.find("gpx:time", namespaces=self.namespaces) is not None:
@@ -134,7 +151,7 @@ class Track:
 
                 self.track_points.append(TrackPoint(lat, lon, int(cadence), time))
 
-    def redo_timings(self) -> None:
+    def __redo_timings(self) -> None:
         """
         Convert all the original datetime times into a relative time made of just seconds as a float
 
