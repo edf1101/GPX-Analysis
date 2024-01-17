@@ -170,8 +170,8 @@ class MapClass:
                                 (tile_ind_bounds[1] - tile_ind_bounds[3]+1) * self.tile_size,
                                 0, 0)
 
-        bottom_left = num2deg(tile_ind_bounds[3], tile_ind_bounds[2], 17)
-        top_right = num2deg(tile_ind_bounds[1]+1, tile_ind_bounds[0]+1, 17)
+        bottom_left = num2deg(tile_ind_bounds[3], tile_ind_bounds[2]+1, 17)
+        top_right = num2deg(tile_ind_bounds[1]+1, tile_ind_bounds[0], 17)
         self.tile_bounds_deg = (top_right[0], top_right[1], bottom_left[0], bottom_left[1])
 
     def __reindex_tiles(self) -> None:
@@ -196,7 +196,7 @@ class MapClass:
             new_key = (old_key[0] - tile_ind_bounds[3], tile_ind_bounds[2] - old_key[1])
             new_dict[new_key] = value
 
-        self.image_dict = new_dicti
+        self.image_dict = new_dict
 
     def plot_images(self) -> None:
         """

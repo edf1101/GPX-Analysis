@@ -1,7 +1,7 @@
 import gpx_parser as gpx
 import geo_components as geo
 import graph_handler as gh
-import matplotlib as mpl
+
 
 track = gpx.Track("example_data/Exeter Head.gpx")
 
