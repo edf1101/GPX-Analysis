@@ -7,8 +7,8 @@ import graph_handler as gh
 import sporting as sport
 
 
-track_1 = gpx.Track("example_data/Exeter-take-1.gpx")
-track_2 = gpx.Track("example_data/Exeter-take-2.gpx")
+track_1 = gpx.Track("example_data/Race-take-1.gpx")
+track_2 = gpx.Track("example_data/Race-take-2.gpx")
 
 mpl_graph = gh.MapClass()
 mpl_graph.add_track(track_1)
