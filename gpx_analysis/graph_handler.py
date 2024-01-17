@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
+import geo_components as geo
+import gpx_parser as gpx
+
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
     """
@@ -126,39 +129,65 @@ class MapClass:
         self.fig.patch.set_facecolor('white')
 
         self.tile_size = 50
-        self.image_dict = {}
+        self.__image_dict = {}
+        self.__raw_image_dict = {}
 
         self.gpx_bounds_deg = None
         self.tile_bounds_plt = None
         self.tile_bounds_deg = None
 
-    def set_image_dict(self, _image_dict: dict[tuple[int, int], PIL.Image]) -> None:
+        self.gpx_tracks = []
+
+    def add_track(self, track: gpx.Track) -> None:
+        """
+        Add a track to the graph handler instance
+
+        :param track: The track to add
+        :return: None
+        """
+        self.gpx_tracks.append(track)
+
+        # Add its bounds to the graph handler's bounds
+        self.__set_gpx_bounds(geo.get_track_bounds(track))
+
+        # Redo the images for the graph handler with the new bounds
+        self.__add_images(get_all_images_in_bounds(self.gpx_bounds_deg))
+
+    def __add_images(self, _image_dict: dict[tuple[int, int], PIL.Image]) -> None:
         """
         Set the image dictionary
 
         :param _image_dict: The image dictionary
         """
-        self.image_dict = _image_dict
+
+        # Only add the new images to the dict
+        for k, v in _image_dict.items():
+            if k not in self.__raw_image_dict:
+                self.__raw_image_dict[k] = v
 
         # recalibrate this dict
         self.__reindex_tiles()
 
-    def set_gpx_bounds(self, _gpx_bounds: tuple[int, int, int, int]) -> None:
+    def __set_gpx_bounds(self, _gpx_bounds: tuple[int, int, int, int]) -> None:
         """
         Set the gpx bounds
 
         :param _gpx_bounds: The gpx bounds
         """
-        self.gpx_bounds_deg = _gpx_bounds
+
+        if self.gpx_bounds_deg is None:  # If it hasn't been set yet just set it
+            self.gpx_bounds_deg = _gpx_bounds
+        else:  # Otherwise do a union of the two bounds
+            self.gpx_bounds_deg = geo.union_bounds(_gpx_bounds, self.gpx_bounds_deg)
 
     def __set_tile_bounds(self) -> None:
         """
         Set the tile bounds based on the tile image array
         """
-        if self.image_dict == {}:
+        if self.__raw_image_dict == {}:
             raise ValueError("Image dictionary not set")
 
-        tile_indexes = self.image_dict.keys()
+        tile_indexes = self.__raw_image_dict.keys()
 
         # North (min y val since it goes up as you go down on OSM tiles)
         tile_ind_bounds = (min(i[1] for i in tile_indexes),  # north
@@ -166,12 +195,12 @@ class MapClass:
                            max(i[1] for i in tile_indexes),  # south
                            min(i[0] for i in tile_indexes))  # west
 
-        self.tile_bounds_plt = ((tile_ind_bounds[2] - tile_ind_bounds[0]+1) * self.tile_size,
-                                (tile_ind_bounds[1] - tile_ind_bounds[3]+1) * self.tile_size,
+        self.tile_bounds_plt = ((tile_ind_bounds[2] - tile_ind_bounds[0] + 1) * self.tile_size,
+                                (tile_ind_bounds[1] - tile_ind_bounds[3] + 1) * self.tile_size,
                                 0, 0)
 
-        bottom_left = num2deg(tile_ind_bounds[3], tile_ind_bounds[2]+1, 17)
-        top_right = num2deg(tile_ind_bounds[1]+1, tile_ind_bounds[0], 17)
+        bottom_left = num2deg(tile_ind_bounds[3], tile_ind_bounds[2] + 1, 17)
+        top_right = num2deg(tile_ind_bounds[1] + 1, tile_ind_bounds[0], 17)
         self.tile_bounds_deg = (top_right[0], top_right[1], bottom_left[0], bottom_left[1])
 
     def __reindex_tiles(self) -> None:
@@ -182,7 +211,7 @@ class MapClass:
         # Make sure we set tile bounds before we remove original tile indexes in this func
         self.__set_tile_bounds()
 
-        tile_indexes = self.image_dict.keys()
+        tile_indexes = self.__raw_image_dict.keys()
 
         # North (min y val since it goes up as you go down on OSM tiles)
         tile_ind_bounds = (min(i[1] for i in tile_indexes),  # north
@@ -192,11 +221,11 @@ class MapClass:
 
         # Go through the dict and remake it with keys starting at (0, 0)
         new_dict = {}
-        for old_key, value in self.image_dict.items():
+        for old_key, value in self.__raw_image_dict.items():
             new_key = (old_key[0] - tile_ind_bounds[3], tile_ind_bounds[2] - old_key[1])
             new_dict[new_key] = value
 
-        self.image_dict = new_dict
+        self.__image_dict = new_dict
 
     def plot_images(self) -> None:
         """
@@ -204,7 +233,7 @@ class MapClass:
         :return: None
         """
 
-        for tile_index, image in self.image_dict.items():
+        for tile_index, image in self.__image_dict.items():
             plt.imshow(np.asarray(image), extent=(tile_index[0] * self.tile_size,
                                                   (tile_index[0] + 1) * self.tile_size,
                                                   tile_index[1] * self.tile_size,
@@ -217,9 +246,20 @@ class MapClass:
         """
         plt.show()
 
-    def draw_point(self, pos):
+    def draw_point(self, pos: tuple[float, float],
+                   color: str = 'green',
+                   size: float = 1) -> None:
+        """
+        Draw a point on the graph
+
+        :param pos: tuple x,y coordinates
+        :param color: colour of the point default green
+        :param size: radius of the point default 1
+        :return: None
+        """
         graph_pos = self.degrees_to_graph(pos)
-        plt.plot(graph_pos[0], graph_pos[1], marker="o", markersize=1, markeredgecolor="red", markerfacecolor="green")
+        plt.plot(graph_pos[0], graph_pos[1], marker="o", markersize=size,
+                 markeredgecolor=color, markerfacecolor=color)
 
     def degrees_to_graph(self, degrees: tuple[float, float]) -> tuple[float, float]:
         """
@@ -234,9 +274,9 @@ class MapClass:
         if self.tile_bounds_deg is None:
             raise ValueError("Tile bounds not set")
 
-        y = ((degrees[0] - self.tile_bounds_deg[2]) / (self.tile_bounds_deg[0] - self.tile_bounds_deg[2])) * \
-            self.tile_bounds_plt[0]
-        x = ((degrees[1] - self.tile_bounds_deg[3]) / (self.tile_bounds_deg[1] - self.tile_bounds_deg[3])) * \
-            self.tile_bounds_plt[1]
+        y = ((degrees[0] - self.tile_bounds_deg[2]) /
+             (self.tile_bounds_deg[0] - self.tile_bounds_deg[2])) * self.tile_bounds_plt[0]
+        x = ((degrees[1] - self.tile_bounds_deg[3]) /
+             (self.tile_bounds_deg[1] - self.tile_bounds_deg[3])) * self.tile_bounds_plt[1]
 
         return x, y

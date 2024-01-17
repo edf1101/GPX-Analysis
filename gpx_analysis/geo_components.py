@@ -74,3 +74,17 @@ def get_track_bounds(input_track: gpx.Track) -> tuple:
     north = max(i.get_position_degrees()[1] for i in all_track_points)
 
     return north, east, south, west
+
+
+def union_bounds(bounds1: tuple, bounds2: tuple) -> tuple:
+    """
+    Return the union of two bounds
+
+    :param bounds1: The first bounds
+    :param bounds2: The second bounds
+    :return: The union of the two bounds
+    """
+    return (max(bounds1[0], bounds2[0]),
+            max(bounds1[1], bounds2[1]),
+            min(bounds1[2], bounds2[2]),
+            min(bounds1[3], bounds2[3]))
