@@ -1,6 +1,8 @@
 """
 This module handles the graphing of the GPX file and the fetching of OSM tiles
 """
+# pylint: disable=R0902
+
 import math
 import urllib.request
 import io
@@ -88,9 +90,9 @@ def get_img(x: int, y: int, zoom: int):
     else:  # Otherwise download it and cache
         image_url = (f'https://server.arcgisonline.com/ArcGIS/rest/services/'
                      f'World_Topo_Map/MapServer/tile/{zoom}/{y}/{x}')
-        response = urllib.request.urlopen(image_url)
-        img = PIL.Image.open(io.BytesIO(response.read()))
-        img.save(f'image_cache/{zoom}-{y}-{x}.jpg')  # Save as jpg into cache folder
+        with urllib.request.urlopen(image_url)as response:
+            img = PIL.Image.open(io.BytesIO(response.read()))
+            img.save(f'image_cache/{zoom}-{y}-{x}.jpg')  # Save as jpg into cache folder
 
     return img
 
@@ -184,7 +186,7 @@ class MapClass:
         """
         Set the tile bounds based on the tile image array
         """
-        if self.__raw_image_dict == {}:
+        if not self.__raw_image_dict:
             raise ValueError("Image dictionary not set")
 
         tile_indexes = self.__raw_image_dict.keys()
@@ -246,13 +248,46 @@ class MapClass:
         """
         plt.show()
 
+    def draw_track(self, track_index:int, color: str = 'green') -> None:
+        """
+        Draw a track on the graph
+
+        :param track_index: The index of the track to draw in the track list
+        :param color: The color of the track
+        :return: None
+        """
+        track = self.gpx_tracks[track_index]
+        for i in range(len(track.get_track_points()) - 1):
+            self.draw_line(track.get_track_points()[i].get_position_degrees(),
+                           track.get_track_points()[i + 1].get_position_degrees(),
+                           color=color)
+
+    def draw_line(self, start: tuple[float, float],
+                  end: tuple[float, float],
+                  color: str = 'green', width: int = 2) -> None:
+        """
+        Draw a line on the graph
+
+        :param start: tuple lat,lon coordinates
+        :param end: tuple lat,lon coordinates
+        :param color: colour of the point default green
+        :param width: width of the line default 2
+        :return: None
+        """
+
+        start_graph_pos = self.degrees_to_graph(start)
+        end_graph_pos = self.degrees_to_graph(end)
+        plt.plot([start_graph_pos[0], end_graph_pos[0]],
+                 [start_graph_pos[1], end_graph_pos[1]],
+                 color=color, linewidth=width)
+
     def draw_point(self, pos: tuple[float, float],
                    color: str = 'green',
                    size: float = 1) -> None:
         """
         Draw a point on the graph
 
-        :param pos: tuple x,y coordinates
+        :param pos: tuple lat,lon coordinates
         :param color: colour of the point default green
         :param size: radius of the point default 1
         :return: None

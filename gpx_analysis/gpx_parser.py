@@ -37,7 +37,7 @@ class TrackPoint:
         """
         Getter for the position in degrees
 
-        :return: the position of the track point
+        :return: the position of the track point (lat,lon)
         """
         return self.lat, self.lon
 
@@ -115,6 +115,8 @@ class Track:
 
         self.__redo_timings()
 
+        self.__has_cadence = False
+
     def __create_track_points(self) -> None:
         """
         This function parses the gpx file and creates track points
@@ -149,6 +151,8 @@ class Track:
                                                  namespaces=self.namespaces)
                     cadence = cadence_element.text if cadence_element is not None else None
 
+                self.__has_cadence = cadence is not None
+
                 self.track_points.append(TrackPoint(lat, lon, int(cadence), time))
 
     def __redo_timings(self) -> None:
@@ -170,3 +174,11 @@ class Track:
         :return: The list of track points
         """
         return self.track_points
+
+    def get_has_cadence(self) -> bool:
+        """
+        Getter for has_cadence
+
+        :return: Whether the track has cadence
+        """
+        return self.__has_cadence
