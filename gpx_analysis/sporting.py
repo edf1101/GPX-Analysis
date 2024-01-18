@@ -3,8 +3,13 @@ This module contains the functions needed for the sporting analysis
 eg. getting position,velocity etc. at a given time
 """
 
-import geo_components as geo
-import gpx_parser as gpx
+try:
+    from gpx_analysis import gpx_parser as gpx
+    from gpx_analysis import geo_components as geo
+
+except ImportError:
+    import gpx_parser as gpx
+    import geo_components as geo
 
 
 def map_ranges(value: float, in_min: float, in_max: float, out_min: float, out_max: float) -> float:

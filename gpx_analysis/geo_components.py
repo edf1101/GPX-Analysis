@@ -3,7 +3,10 @@ This file contains functions used for doing geographic calculations
 """
 import math
 from copy import deepcopy
-import gpx_parser as gpx
+try:
+    from gpx_analysis import gpx_parser as gpx
+except ImportError:
+    import gpx_parser as gpx
 
 
 def geo_distance(latitude1: float, longitude1: float, latitude2: float, longitude2: float) -> float:

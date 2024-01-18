@@ -13,8 +13,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-import geo_components as geo
-import gpx_parser as gpx
+try:
+    from gpx_analysis import gpx_parser as gpx
+    from gpx_analysis import geo_components as geo
+
+except ImportError:
+    import gpx_parser as gpx
+    import geo_components as geo
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -126,9 +131,6 @@ class MapClass:
     def __init__(self):
         # Set up the matplotlib figure
         mpl.use('macosx')  # if macOS need to sort out Windows version
-
-        self.fig = plt.figure()
-        self.fig.patch.set_facecolor('white')
 
         self.tile_size = 50
         self.__image_dict = {}
@@ -246,7 +248,39 @@ class MapClass:
         Show the plot
         :return: None
         """
+        self.reset_viewpoint()
         plt.show()
+
+    def get_figure(self) -> plt.Figure:
+        """
+        Return the figure
+
+        :return: The figure
+        """
+        self.reset_viewpoint()
+        return plt.gcf()
+
+    def reset_viewpoint(self) -> None:
+        """
+        Make the viewpoint start around the 100px square around the start of the track
+
+        :return: None
+        """
+        if self.gpx_bounds_deg is None:
+            raise ValueError("GPX bounds not set")
+
+        if self.tile_bounds_deg is None:
+            raise ValueError("Tile bounds not set")
+
+        # Get the start of the track
+        start = self.gpx_tracks[0].get_track_points()[0].get_position_degrees()
+
+        # Get the start of the track in graph coordinates
+        start_graph_pos = self.degrees_to_graph(start)
+
+        # Set the viewpoint to be a 100px square around the start of the track
+        plt.axis((start_graph_pos[0] - self.tile_size, start_graph_pos[0] + self.tile_size,
+                  start_graph_pos[1] - self.tile_size, start_graph_pos[1] + self.tile_size))
 
     def draw_track(self, track_index:int, color: str = 'green') -> None:
         """
