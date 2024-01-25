@@ -83,20 +83,24 @@ def get_img(x_coord: int, y_coord: int, zoom: int):
     :return: The image
     """
 
-    # Check if its cached first
-    if os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')
-    elif os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpeg')
-    elif os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.png')
+    # get abs path
+    working_directory = os.path.dirname(os.path.abspath(__file__))
 
-    else:  # Otherwise download it and cache
+    # Check if its cached first
+    endings = ['jpg', 'jpeg', 'png']  # the acceptable filetypes to use
+    img = None
+    for f_type in endings:
+        name = os.path.join(working_directory, f'image_cache/{zoom}-{y_coord}-{x_coord}.{f_type}')
+        if os.path.isfile(name):
+            img = PIL.Image.open(name)
+
+    if img is None:  # Otherwise download it and cache
         image_url = (f'https://server.arcgisonline.com/ArcGIS/rest/services/'
                      f'World_Topo_Map/MapServer/tile/{zoom}/{y_coord}/{x_coord}')
         with urllib.request.urlopen(image_url) as response:
             img = PIL.Image.open(io.BytesIO(response.read()))
-            img.save(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')  # Save as jpg into cache folder
+            path = os.path.join(working_directory, f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')
+            img.save(path)  # Save as jpg into cache folder
 
     return img
 
