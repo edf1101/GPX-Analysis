@@ -23,12 +23,11 @@ def geo_distance(latitude1: float, longitude1: float, latitude2: float, longitud
     radius = 6378.137  # Radius of earth in KM
     d_lat = latitude2 * math.pi / 180 - latitude1 * math.pi / 180
     d_lon = longitude2 * math.pi / 180 - longitude1 * math.pi / 180
-    a = math.sin(d_lat / 2) * math.sin(d_lat / 2) + \
+    a_val = math.sin(d_lat / 2) * math.sin(d_lat / 2) + \
         math.cos(latitude1 * math.pi / 180) * math.cos(latitude2 * math.pi / 180) * \
         math.sin(d_lon / 2) * math.sin(d_lon / 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    d = radius * c
-    return d * 1000  # meters
+    c_val = 2 * math.atan2(math.sqrt(a_val), math.sqrt(1 - a_val))
+    return radius * c_val * 1000  # meters
 
 
 def standardise_gpx_distances(input_track: gpx.Track) -> gpx.Track:

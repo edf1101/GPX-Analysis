@@ -18,15 +18,14 @@ try:
     from gpx_analysis import geo_components as geo
 
 except ImportError:
-    import gpx_parser as gpx
     import geo_components as geo
+    import gpx_parser as gpx
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
     """
     Code for converting lat lon to tile number from
-    https://stackoverflow.com/questions/28476117/easy-openstreetmap-tile-displaying-for-python
-    ~ BenrdGit
+    https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
     :param lat_deg: Input latitude
     :param lon_deg: Input longitude
@@ -34,26 +33,26 @@ def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
     :return: the OSM tile position
     """
     lat_rad = math.radians(lat_deg)
-    n = 2.0 ** zoom
-    xtile = int((lon_deg + 180.0) / 360.0 * n)
-    ytile = int((1.0 - math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi) / 2.0 * n)
+    exp_zoom = 2.0 ** zoom
+    xtile = int((lon_deg + 180.0) / 360.0 * exp_zoom)
+    ytile = int((1.0 - math.log(math.tan(lat_rad) +
+                                (1 / math.cos(lat_rad))) / math.pi) / 2.0 * exp_zoom)
     return xtile, ytile
 
 
 def num2deg(xtile: int, ytile: int, zoom: int) -> tuple[float, float]:
     """
     Code for converting tile number to lat lon from
-    https://stackoverflow.com/questions/28476117/easy-openstreetmap-tile-displaying-for-python
-    ~ BenrdGit
+    https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
     :param xtile: The tile x coordinate
     :param ytile: The tile y corrdinate
     :param zoom: The osm zoom level
     :return: (latitude, longitude)
     """
-    n = 2.0 ** zoom
-    lon_deg = xtile / n * 360.0 - 180.0
-    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+    exp_zoom = 2.0 ** zoom
+    lon_deg = xtile / exp_zoom * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / exp_zoom)))
     lat_deg = math.degrees(lat_rad)
     return lat_deg, lon_deg
 
@@ -74,7 +73,7 @@ def get_images(bounds: tuple[float, float, float, float],
     print(top_right_tile_num)
 
 
-def get_img(x: int, y: int, zoom: int):
+def get_img(x_coord: int, y_coord: int, zoom: int):
     """
     Get the image from the tile either from cache or downloading
 
@@ -85,19 +84,19 @@ def get_img(x: int, y: int, zoom: int):
     """
 
     # Check if its cached first
-    if os.path.isfile(f'image_cache/{zoom}-{y}-{x}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y}-{x}.jpg')
-    elif os.path.isfile(f'image_cache/{zoom}-{y}-{x}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y}-{x}.jpeg')
-    elif os.path.isfile(f'image_cache/{zoom}-{y}-{x}.jpg'):
-        img = PIL.Image.open(f'image_cache/{zoom}-{y}-{x}.png')
+    if os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
+        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')
+    elif os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
+        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpeg')
+    elif os.path.isfile(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg'):
+        img = PIL.Image.open(f'image_cache/{zoom}-{y_coord}-{x_coord}.png')
 
     else:  # Otherwise download it and cache
         image_url = (f'https://server.arcgisonline.com/ArcGIS/rest/services/'
-                     f'World_Topo_Map/MapServer/tile/{zoom}/{y}/{x}')
-        with urllib.request.urlopen(image_url)as response:
+                     f'World_Topo_Map/MapServer/tile/{zoom}/{y_coord}/{x_coord}')
+        with urllib.request.urlopen(image_url) as response:
             img = PIL.Image.open(io.BytesIO(response.read()))
-            img.save(f'image_cache/{zoom}-{y}-{x}.jpg')  # Save as jpg into cache folder
+            img.save(f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')  # Save as jpg into cache folder
 
     return img
 
@@ -115,10 +114,10 @@ def get_all_images_in_bounds(bounds):
     top_right_tile_num = deg2num(bounds[1], bounds[0], 17)
 
     tiles = {}
-    for x in range(bottom_left_tile_num[0] - 1, top_right_tile_num[0] + 1):
-        for y in range(top_right_tile_num[1] - 1, bottom_left_tile_num[1] + 1):
-            if (x, y) not in tiles:
-                tiles[(x, y)] = get_img(x, y, 17)
+    for x_coord in range(bottom_left_tile_num[0] - 1, top_right_tile_num[0] + 1):
+        for y_coord in range(top_right_tile_num[1] - 1, bottom_left_tile_num[1] + 1):
+            if (x_coord, y_coord) not in tiles:
+                tiles[(x_coord, y_coord)] = get_img(x_coord, y_coord, 17)
 
     return tiles
 
@@ -141,6 +140,8 @@ class MapClass:
         self.tile_bounds_deg = None
 
         self.gpx_tracks = []
+
+        self.__boat_markers = {}
 
     def add_track(self, track: gpx.Track) -> None:
         """
@@ -165,9 +166,9 @@ class MapClass:
         """
 
         # Only add the new images to the dict
-        for k, v in _image_dict.items():
-            if k not in self.__raw_image_dict:
-                self.__raw_image_dict[k] = v
+        for key, value in _image_dict.items():
+            if key not in self.__raw_image_dict:
+                self.__raw_image_dict[key] = value
 
         # recalibrate this dict
         self.__reindex_tiles()
@@ -248,8 +249,13 @@ class MapClass:
         Show the plot
         :return: None
         """
-        self.reset_viewpoint()
+
         plt.show()
+        plt.gcf().canvas.draw()
+        plt.gcf().canvas.flush_events()
+
+    def get_plt(self):
+        return plt
 
     def get_figure(self) -> plt.Figure:
         """
@@ -257,7 +263,7 @@ class MapClass:
 
         :return: The figure
         """
-        self.reset_viewpoint()
+
         return plt.gcf()
 
     def reset_viewpoint(self) -> None:
@@ -282,7 +288,39 @@ class MapClass:
         plt.axis((start_graph_pos[0] - self.tile_size, start_graph_pos[0] + self.tile_size,
                   start_graph_pos[1] - self.tile_size, start_graph_pos[1] + self.tile_size))
 
-    def draw_track(self, track_index:int, color: str = 'green') -> None:
+    def center_viewpoint(self, positions: list[tuple[float, float]]) -> None:
+        """
+        This rebounds the viewpoint of the mpl figure so it includes all the boats
+        and its roughly centered around them
+
+        :param positions: A list of the tuple (lat,lon) coordinates of the boats
+        :return: None
+        """
+
+        # convert all lat lon positions to x,y graph coords
+        positions = [self.degrees_to_graph(pos) for pos in positions]
+
+        offset = 20  # offset of 50px around the bounds
+
+        # Get the highest and lowest position for the boats
+        max_x, max_y = max(pos[0] for pos in positions), max(pos[1] for pos in positions)
+        min_x, min_y = min(pos[0] for pos in positions), min(pos[1] for pos in positions)
+
+        # We always want the viewpoint to be a square, this determines whether we
+        # Scale by the y or the x-axis. Pick the larger one so we always fit everything in
+        focus_on = 'y' if abs(max_y - min_y) > abs(max_x - min_x) else 'x'
+
+        if focus_on == 'y':  # focusing on the y-axis
+            graph_size = abs(max_y - min_y)
+        else:  # focusing on the x-axis
+            graph_size = abs(max_x - min_x)
+
+        # get the center of the boats
+        center_x, center_y = (max_x + min_x) / 2, (max_y + min_y) / 2
+        plt.axis((center_x - graph_size / 2 - offset, center_x + graph_size / 2 + offset,
+                  center_y - graph_size / 2 - offset, center_y + graph_size / 2 + offset))
+
+    def draw_track(self, track_index: int, color: str = 'green') -> None:
         """
         Draw a track on the graph
 
@@ -315,20 +353,37 @@ class MapClass:
                  [start_graph_pos[1], end_graph_pos[1]],
                  color=color, linewidth=width)
 
-    def draw_point(self, pos: tuple[float, float],
+    def draw_point(self, boat_id: int,
+                   pos: tuple[float, float],
                    color: str = 'green',
                    size: float = 1) -> None:
         """
         Draw a point on the graph
 
-        :param pos: tuple lat,lon coordinates
+        :param boat_id: The id of the boat, mainly used for removing points
+        :param pos: tuple (lat,lon) coordinates
         :param color: colour of the point default green
         :param size: radius of the point default 1
         :return: None
         """
+        if boat_id in self.__boat_markers:
+            self.remove_point(boat_id)
+
         graph_pos = self.degrees_to_graph(pos)
-        plt.plot(graph_pos[0], graph_pos[1], marker="o", markersize=size,
-                 markeredgecolor=color, markerfacecolor=color)
+        self.__boat_markers[boat_id] = plt.plot(graph_pos[0], graph_pos[1], marker="o",
+                                                markersize=size, markeredgecolor=color,
+                                                markerfacecolor=color)
+
+    def remove_point(self, boat_id: int) -> None:
+        """
+        Remove a point plotted earlier
+
+        :param boat_id: The int id of the boat marked earlier
+        :return:  None
+        """
+
+        if boat_id in self.__boat_markers:
+            self.__boat_markers[boat_id][0].remove()
 
     def degrees_to_graph(self, degrees: tuple[float, float]) -> tuple[float, float]:
         """
@@ -343,9 +398,9 @@ class MapClass:
         if self.tile_bounds_deg is None:
             raise ValueError("Tile bounds not set")
 
-        y = ((degrees[0] - self.tile_bounds_deg[2]) /
-             (self.tile_bounds_deg[0] - self.tile_bounds_deg[2])) * self.tile_bounds_plt[0]
-        x = ((degrees[1] - self.tile_bounds_deg[3]) /
-             (self.tile_bounds_deg[1] - self.tile_bounds_deg[3])) * self.tile_bounds_plt[1]
+        y_coord = ((degrees[0] - self.tile_bounds_deg[2]) /
+                   (self.tile_bounds_deg[0] - self.tile_bounds_deg[2])) * self.tile_bounds_plt[0]
+        x_coord = ((degrees[1] - self.tile_bounds_deg[3]) /
+                   (self.tile_bounds_deg[1] - self.tile_bounds_deg[3])) * self.tile_bounds_plt[1]
 
-        return x, y
+        return x_coord, y_coord

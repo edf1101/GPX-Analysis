@@ -6,7 +6,6 @@ eg. getting position,velocity etc. at a given time
 try:
     from gpx_analysis import gpx_parser as gpx
     from gpx_analysis import geo_components as geo
-
 except ImportError:
     import gpx_parser as gpx
     import geo_components as geo
@@ -180,13 +179,13 @@ def get_cumulative_dist_at_time(track: gpx.Track, time: float) -> float:
             total_dist += map_ranges(time, time_below, time_above, 0, dist_between)
             break
 
-        else:
-            # No Add the distance between this point and the last point to the total distance
-            point_below = track_points[point_id - 1]
-            total_dist += abs(geo.geo_distance(point.get_position_degrees()[0],
-                                               point.get_position_degrees()[1],
-                                               point_below.get_position_degrees()[0],
-                                               point_below.get_position_degrees()[1]))
+        # No need for an else since it broke in the last if
+        # No Add the distance between this point and the last point to the total distance
+        point_below = track_points[point_id - 1]
+        total_dist += abs(geo.geo_distance(point.get_position_degrees()[0],
+                                           point.get_position_degrees()[1],
+                                           point_below.get_position_degrees()[0],
+                                           point_below.get_position_degrees()[1]))
 
     return round(total_dist, 2)
 

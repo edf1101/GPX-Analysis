@@ -16,14 +16,13 @@
             mpld3_load_lib("https://mpld3.github.io/js/d3.v3.min.js", function () {
                 mpld3_load_lib("https://mpld3.github.io/js/mpld3.v0.2.js", function () {
                 mpld3.draw_figure("mpl_graph",{{mpl_data | tojson}} );
+
+                d3.select("mpl_graph")
+                .attr("width", "10")
                 })
             });
 
-            d3.select("#mpl_graph")
-                          .selectAll(".mpld3-figure")
-                          .attr("width", null)   // remove "width" and "height" attributes as set by mpld3
-                          .attr("height", null)
-                          .attr("viewBox", `0 0 ${10} ${10}`)
+
 
 
 

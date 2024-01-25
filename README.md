@@ -1,6 +1,6 @@
 # Rowing-GPX-Analysis
 ## Introduction
-_GPX Analysis for rowing written in Python with a Flask/ React Web Interface_
+_GPX Analysis for rowing written in Python with a tkinter matplotlib interface_
 #### Why?
 I couldn't find the code for the old GPX analysis tool I wrote, so I'm taking the
 opportunity to build a better/ more robust one.
@@ -11,13 +11,8 @@ opportunity to build a better/ more robust one.
 - Numpy ```pip install numpy```
 - Matplotlib ```pip install matplotlib```
 - Pillow (may already be installed with mpl) ```pip install pillow```
-- Flask ```pip install flask```
-- mpld3 ```pip install mpld3```
-#### Javascript Requirements
-- D3 is installed from the internet at runtime
-- mpl3 is installed from the internet at runtime
 
-_These two requirements mean that the application requires an internet connection to run._
+_Given it downloads map images from online it requires an internet connection to run._
 ## Installation & Getting Started
 
 ## Details
