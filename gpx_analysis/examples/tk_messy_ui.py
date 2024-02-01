@@ -203,51 +203,6 @@ style_playback_button.configure('playback.TButton', font=('Helvetica', 40))
 but_playback_menu = ttk.Button(master=frm_map_playback_menu, text='\u23F8', style='playback.TButton', width=1)
 but_playback_menu.grid(row=5, column=0)
 
-# Create the stats menu widgets
-frm_stats_menu.grid_columnconfigure(0, weight=1)
-label_stats_menu = ttk.Label(master=frm_stats_menu,
-                             text="Statistics Menu",
-                             font=('Minion Pro', 14, 'bold'))
-label_stats_menu.grid(row=0, column=0, sticky='s')
 
-# Encapsulate dropdown and dropdown label in a frame
-frm_stats_dropdown = ttk.Frame(frm_stats_menu, relief=tk.FLAT, borderwidth=0)
-frm_stats_dropdown.grid(row=1, column=0, sticky='nsew')
-# Create the dropdown menu
-speed_options = ['s/500m', 'm/s', 'kmh','mph']
-value_speed_selected_option = tk.StringVar()
-value_speed_selected_option.set(speed_options[0])
-print(speed_options)
-speed_dropdown = ttk.OptionMenu(frm_stats_dropdown, value_speed_selected_option, *speed_options)
-speed_dropdown.grid(row=0, column=1, sticky='nsew')
-# Create the label for it
-label_stats_speed_choice = ttk.Label(master = frm_stats_dropdown,text="Choose Speed Units:     ")
-label_stats_speed_choice.grid(row=0,column=0)
-
-# Test code to have a checklist of which athletes are on the stats monitor
-menubutton = tk.Menubutton(frm_stats_menu, text="Choose Which athletes to show:",
-                                   indicatoron=True)
-menu = tk.Menu(menubutton, tearoff=False)
-menubutton.configure(menu=menu)
-menubutton.grid(row=2,column=0,sticky='w')
-choices = {}
-options = ['BoatA','BoatB','BoatC']
-for choice in options:
-    choices[choice] = tk.IntVar(value=0)
-    menu.add_checkbutton(label=choice, variable=choices[choice],
-                         onvalue=1, offvalue=0)
-
-# Space in the grid
-frm_stats_menu.rowconfigure(3,minsize=20)
-
-# Big label below to show all of the stats
-
-disp_text = '''
-1: BoatA-  1500m    1:48 s/500m     38 s/m
-2: Winchester-  1001m   1:20 s/500m      60 s/m
-3: Canford- 1000m       1:57 s/500m      20 s/m 
-'''
-label_stats_text = ttk.Label(master = frm_stats_menu,text=disp_text)
-label_stats_text.grid(row=4,column=0,sticky='w')
 
 window.mainloop()
