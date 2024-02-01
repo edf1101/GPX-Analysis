@@ -133,7 +133,8 @@ class MapClass:
 
     def __init__(self):
         # Set up the matplotlib figure
-        mpl.use('macosx')  # if macOS need to sort out Windows version
+        # mpl.use('macosx')  # if macOS need to sort out Windows version
+        # mpl.use("Qt5Agg")
 
         self.tile_size = 50
         self.__image_dict = {}
@@ -258,7 +259,13 @@ class MapClass:
         plt.gcf().canvas.draw()
         plt.gcf().canvas.flush_events()
 
+    def __remove_axis(self):
+        axis =plt.gca()
+        axis.get_xaxis().set_visible(False)
+        axis.get_yaxis().set_visible(False)
+        pass
     def get_plt(self):
+        self.__remove_axis()
         return plt
 
     def get_figure(self) -> plt.Figure:
@@ -267,7 +274,11 @@ class MapClass:
 
         :return: The figure
         """
-
+        self.__remove_axis()
+        plt.gcf().tight_layout()
+        # plt.gca().set_position((0, 0, 1, 1))
+        plt.gcf().set_size_inches(4.8,4.8)
+        plt.gcf().set_dpi(100)
         return plt.gcf()
 
     def reset_viewpoint(self) -> None:

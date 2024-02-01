@@ -34,6 +34,6 @@ mpl_graph.draw_point(0, pos_1, size=5, color='#AA0000')
 mpl_graph.draw_point(1, pos_2, size=5, color='#00AA00')
 mpl_graph.draw_point(1, sport.get_position_at_time(track_2, 20), size=5, color='#00AA00')
 
-
+mpl_graph.center_viewpoint([pos_1,pos_2])
 # mpl_graph.reset_viewpoint()
 mpl_graph.show_plot()
