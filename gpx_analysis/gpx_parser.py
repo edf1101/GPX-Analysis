@@ -105,17 +105,25 @@ class Track:
 
         :param file_name: path to gpx file
         """
-        self.file_name = file_name
+        self.__file_name = file_name
 
         # Define namespaces
-        self.namespaces = {'gpx': 'http://www.topografix.com/GPX/1/1',
+        self.__namespaces = {'gpx': 'http://www.topografix.com/GPX/1/1',
                            'gpxdata': 'http://www.cluetrust.com/XML/GPXDATA/1/0'}
-        self.track_points = []
+        self.__track_points = []
         self.__create_track_points()
 
         self.__redo_timings()
 
         self.__has_cadence = False
+
+    def get_filename(self) -> str:
+        """
+        returns the filename of this gpx track
+
+        :return: filename as a string
+        """
+        return self.__file_name
 
     def __create_track_points(self) -> None:
         """
@@ -123,12 +131,12 @@ class Track:
 
         :return: None
         """
-        tree = ET.parse(self.file_name)
+        tree = ET.parse(self.__file_name)
         root = tree.getroot()
 
         # Iterate through each track segment and track point
-        for track_segment in root.findall(".//gpx:trkseg", namespaces=self.namespaces):
-            for point in track_segment.findall("gpx:trkpt", namespaces=self.namespaces):
+        for track_segment in root.findall(".//gpx:trkseg", namespaces=self.__namespaces):
+            for point in track_segment.findall("gpx:trkpt", namespaces=self.__namespaces):
 
                 # Error checking for lat and long values
                 try:
@@ -138,22 +146,22 @@ class Track:
                     raise ValueError('lat or long in the file isnt of type float') from exc
 
                 time = None
-                if point.find("gpx:time", namespaces=self.namespaces) is not None:
-                    time = point.find("gpx:time", namespaces=self.namespaces).text
+                if point.find("gpx:time", namespaces=self.__namespaces) is not None:
+                    time = point.find("gpx:time", namespaces=self.__namespaces).text
 
                 cadence_element = point.find("gpx:extensions/gpxdata:cadence",
-                                             namespaces=self.namespaces)
+                                             namespaces=self.__namespaces)
 
                 if cadence_element is not None:
                     cadence = cadence_element.text
                 else:
                     cadence_element = point.find("gpx:extensions/gpx:cadence",
-                                                 namespaces=self.namespaces)
+                                                 namespaces=self.__namespaces)
                     cadence = cadence_element.text if cadence_element is not None else None
 
                 self.__has_cadence = cadence is not None
 
-                self.track_points.append(TrackPoint(lat, lon, int(cadence), time))
+                self.__track_points.append(TrackPoint(lat, lon, int(cadence), time))
 
     def __redo_timings(self) -> None:
         """
@@ -161,10 +169,10 @@ class Track:
 
         :return: None
         """
-        all_original_times = [i.get_formatted_time() for i in self.track_points]
+        all_original_times = [i.get_formatted_time() for i in self.__track_points]
         min_time = min(all_original_times)
 
-        for point in self.track_points:
+        for point in self.__track_points:
             point.set_relative_time((point.formatted_time - min_time).total_seconds())
 
     def get_track_points(self) -> list[TrackPoint]:
@@ -173,7 +181,7 @@ class Track:
 
         :return: The list of track points
         """
-        return self.track_points
+        return self.__track_points
 
     def get_has_cadence(self) -> bool:
         """

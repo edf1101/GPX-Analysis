@@ -11,15 +11,13 @@ import PIL.Image
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+import matplotlib.patches as mpatches
 
 try:
-    from gpx_analysis import gpx_parser as gpx
     from gpx_analysis import geo_components as geo
 
 except ImportError:
     import geo_components as geo
-    import gpx_parser as gpx
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -144,24 +142,68 @@ class MapClass:
         self.tile_bounds_plt = None
         self.tile_bounds_deg = None
 
-        self.gpx_tracks = []
+        self.__athletes = {}
 
-        self.__boat_markers = {}
-
-    def add_track(self, track: gpx.Track) -> None:
+    def add_athlete(self, athlete_key: str, athlete_value: dict) -> None:
         """
         Add a track to the graph handler instance
 
-        :param track: The track to add
+        :param athlete_key: The key that gets added to the dictionary (simple filename)
+        :param athlete_value: The dict of athlete data
         :return: None
         """
-        self.gpx_tracks.append(track)
+        self.__athletes[athlete_key] = athlete_value
 
         # Add its bounds to the graph handler's bounds
-        self.__set_gpx_bounds(geo.get_track_bounds(track))
+        self.__set_gpx_bounds(geo.get_track_bounds(athlete_value['track']))
 
         # Redo the images for the graph handler with the new bounds
         self.__add_images(get_all_images_in_bounds(self.gpx_bounds_deg))
+
+        self.plot_images()
+        self.draw_track(athlete_key, athlete_value['colour'])
+        self.__draw_legend()
+
+    def modify_athlete(self,athlete_key:str, new_value:dict) -> None:
+        """
+        gets called when an athlete changes something (either a colour or display name)
+
+        :param athlete_key: The key to modify in the dictionary
+        :param new_value: The new value
+        :return: None
+        """
+
+        # modify new parts individually so we don't remove references to drawn tracks/ points
+        self.__athletes[athlete_key]['colour'] = new_value['colour']
+        self.__athletes[athlete_key]['display_name'] = new_value['display_name']
+
+        # redo track / legend which contain old data / colours
+        self.draw_track(athlete_key, new_value['colour'])
+        self.__draw_legend()
+
+    def remove_athlete(self, athlete_key:str) -> None:
+        """
+        Remove an athlete + track and points from the graph
+
+        :param athlete_key: the dictionary key to remove
+        :return: None
+        """
+
+        athlete_data = self.__athletes[athlete_key]
+
+        # first remove any points if they have them
+        if 'draw_point' in athlete_data:
+            self.remove_point(athlete_key)
+
+        # next remove any lines if they have them
+        if 'draw_track' in athlete_data:
+            self.__remove_drawn_track(athlete_key)
+
+        # then we can remove them from the athletes dict
+        del self.__athletes[athlete_key]
+
+        # update the legend
+        self.__draw_legend()
 
     def __add_images(self, _image_dict: dict[tuple[int, int], PIL.Image]) -> None:
         """
@@ -249,24 +291,10 @@ class MapClass:
                                                   tile_index[1] * self.tile_size,
                                                   (tile_index[1] + 1) * self.tile_size))
 
-    def show_plot(self) -> None:
-        """
-        Show the plot
-        :return: None
-        """
-
-        plt.show()
-        plt.gcf().canvas.draw()
-        plt.gcf().canvas.flush_events()
-
     def __remove_axis(self):
-        axis =plt.gca()
+        axis = plt.gca()
         axis.get_xaxis().set_visible(False)
         axis.get_yaxis().set_visible(False)
-        pass
-    def get_plt(self):
-        self.__remove_axis()
-        return plt
 
     def get_figure(self) -> plt.Figure:
         """
@@ -277,31 +305,9 @@ class MapClass:
         self.__remove_axis()
         plt.gcf().tight_layout()
         # plt.gca().set_position((0, 0, 1, 1))
-        plt.gcf().set_size_inches(4.8,4.8)
+        plt.gcf().set_size_inches(4.8, 4.8)
         plt.gcf().set_dpi(100)
         return plt.gcf()
-
-    def reset_viewpoint(self) -> None:
-        """
-        Make the viewpoint start around the 100px square around the start of the track
-
-        :return: None
-        """
-        if self.gpx_bounds_deg is None:
-            raise ValueError("GPX bounds not set")
-
-        if self.tile_bounds_deg is None:
-            raise ValueError("Tile bounds not set")
-
-        # Get the start of the track
-        start = self.gpx_tracks[0].get_track_points()[0].get_position_degrees()
-
-        # Get the start of the track in graph coordinates
-        start_graph_pos = self.degrees_to_graph(start)
-
-        # Set the viewpoint to be a 100px square around the start of the track
-        plt.axis((start_graph_pos[0] - self.tile_size, start_graph_pos[0] + self.tile_size,
-                  start_graph_pos[1] - self.tile_size, start_graph_pos[1] + self.tile_size))
 
     def center_viewpoint(self, positions: list[tuple[float, float]]) -> None:
         """
@@ -335,23 +341,50 @@ class MapClass:
         plt.axis((center_x - graph_size / 2 - offset, center_x + graph_size / 2 + offset,
                   center_y - graph_size / 2 - offset, center_y + graph_size / 2 + offset))
 
-    def draw_track(self, track_index: int, color: str = 'green') -> None:
+    def draw_track(self, athlete_key: str, color: str | tuple = 'green') -> None:
         """
         Draw a track on the graph
 
-        :param track_index: The index of the track to draw in the track list
+        :param athlete_key: The key of the athlete's track to draw in the track list (filename)
         :param color: The color of the track
         :return: None
         """
-        track = self.gpx_tracks[track_index]
+
+        if ('draw_track' in self.__athletes[athlete_key] and
+                self.__athletes[athlete_key]['draw_track'] is not None):
+            self.__remove_drawn_track(athlete_key)
+
+        track = self.__athletes[athlete_key]['track']
+        line_data = []
         for i in range(len(track.get_track_points()) - 1):
-            self.draw_line(track.get_track_points()[i].get_position_degrees(),
-                           track.get_track_points()[i + 1].get_position_degrees(),
-                           color=color)
+            single_line = self.draw_line(track.get_track_points()[i].get_position_degrees(),
+                                         track.get_track_points()[i + 1].get_position_degrees(),
+                                         color=color)
+            line_data.append(single_line)
+
+        self.__athletes[athlete_key]['draw_track'] = line_data
+
+    def __remove_drawn_track(self, athlete_key: str) -> None:
+        """
+        Removes a track drawn onto the map
+
+        :param athlete_key: The athletes track to remove
+        :return: None
+        """
+
+        if ('draw_track' in self.__athletes[athlete_key] and
+                self.__athletes[athlete_key]['draw_track'] is not None):
+
+            # Go through the list of lines making up the track we drew and remove each
+            for line in self.__athletes[athlete_key]['draw_track']:
+                line.remove()
+
+            # Set the list to be None at the end
+            self.__athletes[athlete_key]['draw_track'] = None
 
     def draw_line(self, start: tuple[float, float],
                   end: tuple[float, float],
-                  color: str = 'green', width: int = 2) -> None:
+                  color: str = 'green', width: int = 2) -> plt.Line2D:
         """
         Draw a line on the graph
 
@@ -359,46 +392,55 @@ class MapClass:
         :param end: tuple lat,lon coordinates
         :param color: colour of the point default green
         :param width: width of the line default 2
-        :return: None
+        :return: the line data
         """
 
         start_graph_pos = self.degrees_to_graph(start)
         end_graph_pos = self.degrees_to_graph(end)
-        plt.plot([start_graph_pos[0], end_graph_pos[0]],
-                 [start_graph_pos[1], end_graph_pos[1]],
-                 color=color, linewidth=width)
 
-    def draw_point(self, boat_id: int,
+        # return the plotted line, its default in a list, but its only ever of
+        # length one so take it out of the list
+        return plt.plot([start_graph_pos[0], end_graph_pos[0]],
+                        [start_graph_pos[1], end_graph_pos[1]],
+                        color=color, linewidth=width)[0]
+
+    def draw_point(self, athlete_key: str,
                    pos: tuple[float, float],
                    color: str = 'green',
                    size: float = 1) -> None:
         """
         Draw a point on the graph
 
-        :param boat_id: The id of the boat, mainly used for removing points
+        :param athlete_key: The key of the athlete whose marker we're adding
         :param pos: tuple (lat,lon) coordinates
         :param color: colour of the point default green
         :param size: radius of the point default 1
         :return: None
         """
-        if boat_id in self.__boat_markers:
-            self.remove_point(boat_id)
+
+        # if this athlete has a point already remove it
+        if ('draw_point' in self.__athletes[athlete_key] and
+                self.__athletes[athlete_key]['draw_point'] is not None):
+            self.remove_point(athlete_key)
 
         graph_pos = self.degrees_to_graph(pos)
-        self.__boat_markers[boat_id] = plt.plot(graph_pos[0], graph_pos[1], marker="o",
-                                                markersize=size, markeredgecolor=color,
-                                                markerfacecolor=color)
+        self.__athletes[athlete_key]['draw_point'] = plt.plot(graph_pos[0], graph_pos[1],
+                                                              marker="o", markersize=size,
+                                                              markeredgecolor=color,
+                                                              markerfacecolor=color)[0]
 
-    def remove_point(self, boat_id: int) -> None:
+    def remove_point(self, athlete_key: str) -> None:
         """
         Remove a point plotted earlier
 
-        :param boat_id: The int id of the boat marked earlier
+        :param athlete_key: The str key of the athlete in the dict (simple filename usually)
         :return:  None
         """
 
-        if boat_id in self.__boat_markers:
-            self.__boat_markers[boat_id][0].remove()
+        if ('point' in self.__athletes[athlete_key] and
+                self.__athletes[athlete_key]['draw_point'] is not None):
+            self.__athletes[athlete_key]['draw_point'].remove()
+            self.__athletes[athlete_key]['draw_point'] = None
 
     def degrees_to_graph(self, degrees: tuple[float, float]) -> tuple[float, float]:
         """
@@ -419,3 +461,18 @@ class MapClass:
                    (self.tile_bounds_deg[1] - self.tile_bounds_deg[3])) * self.tile_bounds_plt[1]
 
         return x_coord, y_coord
+
+    def __draw_legend(self) -> None:
+        """
+        draws a legend onto the plot
+
+        :return: None
+        """
+
+        all_patches = []
+        for single_athlete_data in self.__athletes.values():
+            athlete_col = single_athlete_data['colour']
+            athlete_name = single_athlete_data['display_name']
+            all_patches.append(mpatches.Patch(color=athlete_col, label=athlete_name))
+
+        plt.legend(handles=all_patches, fontsize="9")

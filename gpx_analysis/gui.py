@@ -4,35 +4,22 @@ The AppGUI class is the only one to use outside of this class
 """
 # Pylint ignores
 # pylint: disable=R0902
-
+# pylint: disable=R0914
 
 import tkinter as tk
 from tkinter import ttk
-import tkinter.messagebox as msgbox
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import tkinter.messagebox as msgbox  # for popups
+from tkinter import filedialog  # for choosing gpx file to open
+
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
 try:
-    from gpx_analysis import gpx_parser as gpx
     from gpx_analysis import graph_handler as gh
     from gpx_analysis import sporting as sport
 
 except ImportError:
-    import gpx_parser as gpx
     import graph_handler as gh
     import sporting as sport
-
-track_1 = gpx.Track("../example_data/Race-take-1.gpx")
-
-mpl_graph = gh.MapClass()
-mpl_graph.add_track(track_1)
-mpl_graph.plot_images()
-
-mpl_graph.draw_track(0, color='red')
-mpl_graph.get_figure().set_dpi(100)
-
-
-pos_1 = sport.get_position_at_time(track_1, 100)
-mpl_graph.center_viewpoint([pos_1])
 
 
 class AppGUI:
@@ -61,7 +48,7 @@ class AppGUI:
 
         # Set the map widget in the TOP RIGHT corner
         self.__map_widget = None
-        self.__set_map_widget()
+        self.update_map()
 
         # Create the menus and submenus down the side
         # First initialise the main menus as None
@@ -80,6 +67,24 @@ class AppGUI:
         # Create the stats menu
         self.__stats_menu = StatsMenuFrame(self)
 
+        # create callback function references
+        self.__open_file_callback = None
+        self.__change_name_callback = None
+
+        # Athlete list
+        self.__athletes = {}
+
+    def update_athletes(self, new_athletes: dict[dict]) -> None:
+        """
+        Updates the GUI's list of athletes
+
+        :param new_athletes: the new list
+        :return: None
+        """
+        self.__athletes = new_athletes
+
+        self.__control_menu.update_athlete_data(new_athletes)
+
     def __remove_entry_focus(self, event) -> None:
         """
         This function removes focuses from widgets when they are clicked off
@@ -89,9 +94,9 @@ class AppGUI:
         if not isinstance(event.widget, ttk.Entry):
             self.__window.focus()
 
-    def __set_map_widget(self) -> None:
+    def update_map(self) -> None:
         """
-        This displays the mpl figure map on the GUI
+        This sets/ updates the mpl figure map on the GUI
 
         :return: None
         """
@@ -150,6 +155,33 @@ class AppGUI:
         """
         return self.__frm_stats_menu
 
+    # Lots setter for callback functions!
+    def set_open_callback(self, func) -> None:  # Open file callbacks
+        """
+        Set the callback function to be used when a file is opened
+
+        :param func: The function to be called when a file is opened in control window
+        :return: None
+        """
+        self.__control_menu.set_open_callback(func)
+
+    def set_delete_callback(self, func) -> None:  # Open file callbacks
+        """
+        Set the callback function to be used when a file is opened
+
+        :param func: The function to be called when an athlete is deleted
+        :return: None
+        """
+        self.__control_menu.set_delete_callback(func)
+
+    def set_changename_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when an athlete changes display name
+        :param func: The function to be called
+        :return: None
+        """
+        self.__control_menu.set_changename_callback(func)
+
 
 class ControlMenuFrame:
     """
@@ -181,21 +213,45 @@ class ControlMenuFrame:
 
         # Create the name selector / deletion menu and initialise its variables here
         self.__last_selected = None  # Holds the last athlete selected so we know what swapped
-        self.__athlete_names = ['BoatA', 'BoatB', 'BoatC']
+        self.__athlete_names = ['None']
         self.__frm_map_control_dropdown = None
         self.__dropdown_map_control = None
         self.__value_map_dropdown = None
         self.__create_name_selector()
 
         # Athlete and file name labels
-        self.label_control_menu_file = None
-        self.label_control_menu_display = None
-        self.set_athlete_data('test.gpx', 'boatA')
+        self.__label_control_menu_file = None
+        self.__label_control_menu_display = None
+        self.__set_athlete_data()
 
         # Encapsulate change name entry field and button in a frame
-        self.frm_map_control_changename = None
-        self.text_map_control_changename = None  # The value of the entry field
+        self.__frm_map_control_changename = None
+        self.__text_map_control_changename = None  # The value of the entry field
         self.__setup_namechange()
+
+        # Callbacks
+        self.__open_file_callback = None
+        self.__changename_callback = None
+        self.__delete_callback = None
+
+        # Athlete Data
+        self.__athlete_data = {}
+
+    def update_athlete_data(self, athlete_data: dict) -> None:
+        """
+        Set the athlete data in this class (setter method)
+
+        :param athlete_data: Data to set
+        :return: None
+        """
+        self.__athlete_data = athlete_data
+        if len(athlete_data):
+            self.__athlete_names = [v['display_name'] for v in athlete_data.values()]
+        else:
+            self.__athlete_names = ['None']
+
+        self.__create_name_selector()  # recreate name selector with new fields
+        self.__set_athlete_data()
 
     def __setup_namechange(self) -> None:
         """
@@ -205,36 +261,57 @@ class ControlMenuFrame:
         # Encapsulate change name entry field and button in a frame
 
         # Create the frame
-        self.frm_map_control_changename = ttk.Frame(self.__frm_map_control_menu, relief=tk.FLAT,
+        self.__frm_map_control_changename = ttk.Frame(self.__frm_map_control_menu, relief=tk.FLAT,
                                                     borderwidth=0)
-        self.frm_map_control_changename.grid(row=8, column=0, sticky='nsew')
+        self.__frm_map_control_changename.grid(row=8, column=0, sticky='nsew')
 
-        self.text_map_control_changename = tk.StringVar()
+        self.__text_map_control_changename = tk.StringVar()
 
         # The entry widget doesn't need to be an instance var as we won't modify it again
-        entry_map_control_changename = ttk.Entry(self.frm_map_control_changename,
-                                                 textvariable=self.text_map_control_changename)
+        entry_map_control_changename = ttk.Entry(self.__frm_map_control_changename,
+                                                 textvariable=self.__text_map_control_changename)
         entry_map_control_changename.grid(row=0, column=1, sticky='nswe')
 
         # Create a confirm button doesn't need to be instance as we won't modify it
-        btn_control_changename = ttk.Button(self.frm_map_control_changename, text='\U00002713',
+        btn_control_changename = ttk.Button(self.__frm_map_control_changename, text='\U00002713',
                                             width=2, command=self.__on_name_change)
         btn_control_changename.grid(row=0, column=2, sticky='')
 
-    def set_athlete_data(self, filename: str, display_name: str) -> None:
+    def __set_athlete_data(self) -> None:
         """
         This sets the text fields for the athlete
 
-        :param filename: The filename to display
-        :param display_name: The display name
         :return: None
         """
-        self.label_control_menu_file = ttk.Label(master=self.__frm_map_control_menu,
+
+        current_option = self.__last_selected
+        if current_option == 'None':
+            filename, display_name = 'None', 'None'
+        else:
+            # initialise here in case we cant find right values
+            filename, display_name = current_option, current_option
+
+            # find the athlete with the same display name and get its filename
+            for key, value in self.__athlete_data.items():
+                if value['display_name'] == current_option:
+                    filename = key
+                    break
+
+        # If we have made it before destroy the old copy
+        if isinstance(self.__label_control_menu_file,ttk.Label):
+            self.__label_control_menu_file.destroy()
+
+        self.__label_control_menu_file = ttk.Label(master=self.__frm_map_control_menu,
                                                  text=f"Filename: {filename}")
-        self.label_control_menu_file.grid(row=5, column=0, sticky='s')
-        self.label_control_menu_display = ttk.Label(master=self.__frm_map_control_menu,
+        self.__label_control_menu_file.grid(row=5, column=0, sticky='s')
+
+        # If we have made it before destroy the old copy
+        if isinstance(self.__label_control_menu_display, ttk.Label):
+            self.__label_control_menu_display.destroy()
+        self.__label_control_menu_display = ttk.Label(master=self.__frm_map_control_menu,
                                                     text=f"Display Name: {display_name}")
-        self.label_control_menu_display.grid(row=6, column=0, sticky='s')
+        self.__label_control_menu_display.grid(row=6, column=0, sticky='s')
+
 
     def __create_name_selector(self) -> None:
         """
@@ -269,6 +346,10 @@ class ControlMenuFrame:
         self.__value_map_dropdown.trace('w', self.__on_athlete_swap)
         self.__last_selected = self.__athlete_names[0]
 
+        # If we have made it before destroy the old copy
+        if isinstance(self.__dropdown_map_control, ttk.Label):
+            self.__dropdown_map_control.destroy()
+
         self.__dropdown_map_control = tk.OptionMenu(self.__frm_map_control_dropdown,
                                                     self.__value_map_dropdown,
                                                     *self.__athlete_names)
@@ -302,7 +383,7 @@ class ControlMenuFrame:
 
         # This won't be modified either
         label_control_menu_changename = ttk.Label(master=self.__frm_map_control_menu,
-                                                  text="Change name:")
+                                                  text="Change display name:")
         label_control_menu_changename.grid(row=7, column=0, sticky='w', )
 
     def __on_open_press(self) -> None:
@@ -312,7 +393,8 @@ class ControlMenuFrame:
         :return: None
         """
 
-        print('opening')
+        file_path = filedialog.askopenfilename()  # get the file path
+        self.__open_file_callback(file_path)
 
     def __on_remove_press(self) -> None:
         """
@@ -321,7 +403,17 @@ class ControlMenuFrame:
         :return: None
         """
 
-        print('removing')
+        # Get the athlete being removed
+        athlete_key = None
+
+        # Also need to find the current filename.
+        for key, value in self.__athlete_data.items():
+
+            if value['display_name'] == self.__last_selected:
+                athlete_key = key
+
+        if athlete_key:
+            self.__delete_callback(athlete_key)
 
     def __on_athlete_swap(self, *args) -> None:
         """
@@ -338,6 +430,7 @@ class ControlMenuFrame:
         self.__last_selected = self.__value_map_dropdown.get()
         swapped_to = self.__last_selected
         print(f'athlete swapped: {swapped_from} swapped to {swapped_to}')
+        self.__set_athlete_data()
 
     def __on_name_change(self) -> None:
         """
@@ -345,8 +438,60 @@ class ControlMenuFrame:
 
         :return: None
         """
-        changed_to = self.text_map_control_changename.get()
-        print(f'name change: changed to {changed_to}')
+        changed_to = self.__text_map_control_changename.get()
+
+        athlete_key = None
+        valid_key = True
+
+        # Also need to find the current filename.
+        for key, value in self.__athlete_data.items():
+
+            if value['display_name'] == self.__last_selected:
+                athlete_key = key
+
+            # If the name we want to change to is already taken then its invalid
+            if value['display_name'] == changed_to:
+                valid_key = False
+
+        # Make sure an athlete is selected and the new name isn't blank
+        valid_key = False if (changed_to == '') or (athlete_key is None) else valid_key
+
+        if valid_key:
+            self.__changename_callback(athlete_key, changed_to)  # execute callback
+        else:
+            msgbox.showerror("Invalid input",
+                             "This was an invalid input,"
+                             " must be unique and athlete must be selected")
+
+        self.__text_map_control_changename.set('')  # clear the entry field
+
+    def set_open_callback(self, func) -> None:  # Open file callbacks
+        """
+        Set the callback function to be used
+
+        :param func: The function to be called when a file is opened in control window
+        :return: None
+        """
+        self.__open_file_callback = func
+
+    def set_changename_callback(self, func) -> None:
+        """
+        Set the callback function to be used
+
+        :param func: The function to be called when a display name is changed
+        :return: None
+        """
+        self.__changename_callback = func
+
+    def set_delete_callback(self, func) -> None:
+        """
+        Set the callback function to be used
+
+        :param func: The function to be called when an athlete is deleted
+        :return: None
+        """
+        self.__delete_callback = func
+
 
 
 class FinishlineMenuFrame:
@@ -764,7 +909,7 @@ class StatsMenuFrame:
         # Space in the grid
         self.__frm_stats_menu.rowconfigure(4, minsize=20)
 
-        # Big label below to show all of the stats
+        # Big label below to show all the stats
         test_data = {'Canford': {'dist': 1000, 'spd': '1:53.2 s/500m', 'cad': 38},
                      'Winchester': {'dist': 900, 'spd': '1:55.6 s/500m', 'cad': 40},
                      'Bryanston': {'dist': 800, 'spd': '1:59.8 s/500m', 'cad': 28}}
@@ -792,7 +937,6 @@ class StatsMenuFrame:
                     max_key = key
 
             # Make sure athlete distance renders correctly
-            new_dist = ''
             if max_dist > 100000:
                 # if its over 100,000m (unrealistic number) say its finished
                 new_dist = 'FIN'
@@ -839,7 +983,7 @@ class StatsMenuFrame:
         self.__menubutton.configure(menu=self.__menu)
         self.__menubutton.grid(row=3, column=0, sticky='w')
         self.__menu_choices = {}
-        options = ['BoatA', 'BoatB', 'BoatC']
+
         for choice in options:
             self.__menu_choices[choice] = tk.IntVar(value=0)
             self.__menu.add_checkbutton(label=choice, variable=self.__menu_choices[choice],
@@ -921,10 +1065,3 @@ def validate_float_input(number: str) -> bool:
         # display a warning popup
         msgbox.showerror("Invalid input", "This was an invalid input, must be a decimal number")
         return False
-
-
-# Test it
-root = tk.Tk()
-app = AppGUI(root, mpl_graph)
-
-root.mainloop()

@@ -10,7 +10,7 @@ opportunity to build a better/ more robust one.
 - Python 3.10 (or later)
 - Numpy ```pip install numpy```
 - Matplotlib ```pip install matplotlib```
-- Pillow (may already be installed with mpl) ```pip install pillow```
+- Pillow (should already be installed with mpl) ```pip install pillow```
 
 _Given it downloads map images from online it requires an internet connection to run._
 ## Installation & Getting Started
