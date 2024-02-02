@@ -4,24 +4,16 @@ Controls the GUI, MapHandler and more.
 """
 
 # Import external libs
-import time
 import tkinter as tk
 import pathlib
 import random
 
-# Import our own libraries using this try except block as sometimes in terminal,
-# or pytest it had issues with either type, so make sure it's always good here.
-try:
-    from gpx_analysis import gpx_parser as gpx
-    from gpx_analysis import graph_handler as gh
-    from gpx_analysis import sporting as sport
-    from gpx_analysis import gui
 
-except ImportError:
-    import gpx_parser as gpx
-    import graph_handler as gh
-    import sporting as sport
-    import gui
+from gpx_analysis import gpx_parser as gpx
+from gpx_analysis import graph_handler as gh
+from gpx_analysis import sporting as sport
+from gpx_analysis.GUIs.gui import AppGUI
+
 
 
 class GpxAnalysisApp:
@@ -37,9 +29,9 @@ class GpxAnalysisApp:
         # Instantiate the important 2 mpl helper classes, MapClass and TODO statsGraph
         self.__mpl_map = gh.MapClass()
 
-        # Now instantiate the gui
+        # Now instantiate the GUIs
         self.__root = tk.Tk()  # Create the tk window
-        self.__gui = gui.AppGUI(window=self.__root, map_class=self.__mpl_map)
+        self.__gui = AppGUI(window=self.__root, map_class=self.__mpl_map)
 
         # Athletes are a dict: key = simple filename, value = dict of other properties
         self.__athletes = {}
@@ -117,7 +109,7 @@ class GpxAnalysisApp:
 
         self.__mpl_map.add_athlete(clean_path, athlete_data)  # add it to the map
 
-        # update the gui's list of athletes
+        # update the GUIs's list of athletes
         self.__gui.update_athletes(self.__athletes)
 
         # update the GUI's map as a new track is there
@@ -137,7 +129,7 @@ class GpxAnalysisApp:
         # modify athlete data in this class
         self.__athletes[athlete_key]['display_name'] = changed_to
 
-        # update the gui's list of athletes
+        # update the GUIs's list of athletes
         self.__gui.update_athletes(self.__athletes)
 
         # update the map's list of athletes and then update the map image on the GUI
@@ -157,7 +149,7 @@ class GpxAnalysisApp:
         self.__mpl_map.remove_athlete(athlete_key)
         self.__gui.update_map()
 
-        # next remove from our list of athletes and update the gui's list
+        # next remove from our list of athletes and update the GUIs's list
         del self.__athletes[athlete_key]
         self.__gui.update_athletes(self.__athletes)
 
