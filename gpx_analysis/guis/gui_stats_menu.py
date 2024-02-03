@@ -69,6 +69,10 @@ class StatsMenuFrame:
         
         :return: None
         """
+
+        if self.__parent_class.ready is False:  # if everything isn't set up don't run
+            return
+
         # get current time
         time = self.__parent_class.get_playback_time()
 
@@ -77,18 +81,30 @@ class StatsMenuFrame:
         for athlete in self.__athlete_data.values():
 
             # ignore this athlete if they're not in the selector options
-            if athlete['filename'] not in self.__menu_choices.keys():
+            if athlete['filename'] not in self.__menu_choices:
                 continue
 
             # ignore this athlete if they aren't selected
-            if (isinstance(self.__menu_choices[athlete['filename']],tk.IntVar)
+            if (isinstance(self.__menu_choices[athlete['filename']], tk.IntVar)
                     and self.__menu_choices[athlete['filename']].get() == 0):
                 continue
 
             # Fetch all the data needed for this entry
             athlete_time = time + athlete['start_time']
             name = athlete['display_name']
-            dist = sport.get_cumulative_dist_at_time(athlete['track'], athlete_time)
+
+            # this makes sure no matter the modified start line it starts at a dist of 0m
+            start_dist = sport.get_cumulative_dist_at_time(athlete['track'],
+                                                           athlete['start_time'])
+            current_dist = sport.get_cumulative_dist_at_time(athlete['track'], athlete_time)
+            dist = round(current_dist - start_dist)
+
+            # determine if the athlete has finished or not
+            athlete_track_time = athlete['finish_time'] - athlete['start_time']
+            if time >= athlete_track_time:  # finished
+                # so its high enough to trigger finished and its in order of finish time
+                dist = 10000000 - athlete_track_time
+
             speed = sport.get_speed_at_time(athlete['track'], athlete_time)
             cad = sport.get_cadence_at_time(athlete['track'], athlete_time)
 
@@ -113,7 +129,6 @@ class StatsMenuFrame:
 
         # remake athlete list
         self.__create_athlete_selection_menu()
-        # print('setting')
 
     def __display_text(self, data_in: dict) -> None:
         """
@@ -123,49 +138,47 @@ class StatsMenuFrame:
         :return: None
         """
 
-        # if nothing in the dictionary then exit here
-        if data_in == {}:
-            return
-
-        # Sort the athletes by highest dist, dodgy insertion sort
-        modified_data = []
-        while len(data_in):
-            max_dist = -1  # no distance will not be greater than this
-            max_key = None
-            for key, value in data_in.items():
-                test_val = value['dist']
-                if test_val > max_dist:
-                    max_dist = test_val
-                    max_key = key
-
-
-            # Make sure athlete distance renders correctly
-            if max_dist > 100000:
-                # if its over 100,000m (unrealistic number) say its finished
-                new_dist = 'FIN'
-            else:
-                new_dist = f'{max_dist}m'
-            modified_data.append({'name': max_key, 'dist': new_dist,
-                                  'spd': data_in[max_key]['spd'],
-                                  'cad': data_in[max_key]['cad']})
-            del data_in[max_key]
-
+        # if nothing in the dictionary then set the text blank
         disp_text = ''
+        if data_in:
+            # Sort the athletes by highest dist, dodgy insertion sort
+            modified_data = []
+            while len(data_in):
+                max_dist = -1  # no distance will not be greater than this
+                max_key = None
+                for key, value in data_in.items():
+                    test_val = value['dist']
+                    if test_val > max_dist:
+                        max_dist = test_val
+                        max_key = key
 
-        max_athlete_dist_len = max(len(i['dist']) for i in modified_data) + 2
+                # Make sure athlete distance renders correctly
+                if max_dist > 100000:
+                    # if its over 100,000m (unrealistic number) say its finished
+                    new_dist = 'FIN'
+                else:
+                    new_dist = f'{max_dist}m'
+                modified_data.append({'name': max_key, 'dist': new_dist,
+                                      'spd': data_in[max_key]['spd'],
+                                      'cad': data_in[max_key]['cad']})
+                del data_in[max_key]
 
-        for position, athlete_data in enumerate(modified_data):
-            # make it so all the data starts lining up after names
-            athlete_name = athlete_data['name']
-            athlete_dist = athlete_data['dist']
-            athlete_spd = athlete_data['spd']
-            athlete_cad = athlete_data['cad']
+            disp_text = ''
 
-            disp_text += (f'{position + 1}. ' + athlete_name + '\n' + '   ' +
-                          athlete_dist + ' ' * (max_athlete_dist_len - len(
-                        athlete_dist)) + athlete_spd + '   ' + f'{athlete_cad}s/m')
+            max_athlete_dist_len = max(len(i['dist']) for i in modified_data) + 2
 
-            disp_text += '\n'  # so it starts on a new line
+            for position, athlete_data in enumerate(modified_data):
+                # make it so all the data starts lining up after names
+                athlete_name = athlete_data['name']
+                athlete_dist = athlete_data['dist']
+                athlete_spd = athlete_data['spd']
+                athlete_cad = athlete_data['cad']
+
+                disp_text += (f'{position + 1}. ' + athlete_name + '\n' + '   ' +
+                              athlete_dist + ' ' * (max_athlete_dist_len - len(
+                            athlete_dist)) + athlete_spd + '   ' + f'{athlete_cad} s/m')
+
+                disp_text += '\n'  # so it starts on a new line
 
         # If its been made before just modify text
         if isinstance(self.__label_stats_text, ttk.Label):
@@ -240,9 +253,8 @@ class StatsMenuFrame:
         if args == 1:
             pass
 
-        print('change')
-        for key, value in self.__menu_choices.items():
-            print(key, value.get())
+        # update the stats with the new selection
+        self.update_stats()
 
     def __on_speed_option_change(self, *args) -> None:
         """
@@ -256,5 +268,5 @@ class StatsMenuFrame:
         if args == 1:
             pass
 
-        value = self.__value_speed_selected_option.get()
-        print(value)
+        # update the stats with the new units
+        self.update_stats()

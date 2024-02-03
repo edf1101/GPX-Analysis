@@ -14,9 +14,10 @@ import random
 
 from gpx_analysis import gpx_parser as gpx
 from gpx_analysis import graph_handler as gh
-from gpx_analysis.GUIs.gui import AppGUI
+from gpx_analysis.guis.gui import AppGUI
 from gpx_analysis import sporting as sport
 from gpx_analysis import components as geo
+
 
 class GpxAnalysisApp:
     """
@@ -31,7 +32,7 @@ class GpxAnalysisApp:
         # Instantiate the important 2 mpl helper classes, MapClass and TODO statsGraph
         self.__mpl_map = gh.MapClass()
 
-        # Now instantiate the GUIs
+        # Now instantiate the guis
         self.__root = tk.Tk()  # Create the tk window
         self.__gui = AppGUI(window=self.__root, map_class=self.__mpl_map)
 
@@ -70,6 +71,8 @@ class GpxAnalysisApp:
         self.__gui.set_set_playback_time_callback(self.set_playback_time)
         self.__gui.set_get_playback_time_callback(self.get_playback_time)
         self.__gui.set_zoom_level_callback(self.__set_zoom_level)
+        self.__gui.set_set_start_finish_time_callback(self.__set_start_finish_times)
+        self.__gui.set_get_start_finish_time_callback(self.__get_start_finish_times)
 
     def __get_playing(self) -> bool:
         """
@@ -159,6 +162,60 @@ class GpxAnalysisApp:
         # If they have all been used return a random colour
         return random.random(), random.random(), random.random()
 
+    def __set_start_finish_times(self, athlete_key: str,
+                                 start_time: float | None,
+                                 finish_time: float | None) -> None:
+        """
+        Sets the start and finish times for an athlete
+
+        :param athlete_key: The key of the athlete we are modifying
+        :param start_time: The new start time or none if not setting one
+        :param finish_time: The new end time or none if not setting one
+        :return: None
+        """
+
+        # fill in the missing info for the data checks
+        if start_time is None:
+            start_time = self.__athletes[athlete_key]['start_time']
+
+        if finish_time is None:
+            finish_time = self.__athletes[athlete_key]['finish_time']
+
+        # check if data is invalid
+        if start_time >= finish_time:
+            return
+
+        max_time = self.__athletes[athlete_key]['track'].get_total_time()
+        if (start_time >= max_time or finish_time > max_time or
+                start_time < -0.1 or finish_time < -0.1):
+            return
+
+        # set the new times
+        self.__athletes[athlete_key]['start_time'] = start_time
+
+        self.__athletes[athlete_key]['finish_time'] = finish_time
+
+        # update the athlete lists with the new times
+        self.__gui.update_athletes(self.__athletes, remake_widgets=False)
+
+        # update the max time
+        self.__max_time = self.__calculate_longest_time()
+        self.__gui.set_gui_playback_time(self.__playback_time, self.__max_time)
+
+        # change the map's start finish times
+        self.__mpl_map.modify_start_finish_times(athlete_key, start_time, finish_time)
+        self.__gui.update_map()
+
+    def __get_start_finish_times(self, athlete_key: str) -> tuple[float, float]:
+        """
+        get the athlete's start and finish times
+
+        :param athlete_key: the athlete to check
+        :return: a tuple (start_time, finish_time)
+        """
+        athlete = self.__athletes[athlete_key]
+        return athlete['start_time'], athlete['finish_time']
+
     def __on_open_file(self, filename: str) -> None:
         """
         Gets called when a file is opened to make a new GPX track
@@ -204,6 +261,9 @@ class GpxAnalysisApp:
         # update the GUI's map as a new track is there
         self.__gui.update_map()
 
+        # update the gui stats
+        self.__gui.update_stats()
+
         # check if this is a new longest_time
         self.__max_time = self.__calculate_longest_time()
 
@@ -241,12 +301,15 @@ class GpxAnalysisApp:
         # modify athlete data in this class
         self.__athletes[athlete_key]['display_name'] = changed_to
 
-        # update the GUIs's list of athletes
+        # update the guis's list of athletes
         self.__gui.update_athletes(self.__athletes)
 
         # update the map's list of athletes and then update the map image on the GUI
         self.__mpl_map.modify_athlete(athlete_key, self.__athletes[athlete_key])
         self.__gui.update_map()
+
+        # update the gui's stats display with the new name
+        self.__gui.update_stats()
 
     def __on_athlete_deleted(self, athlete_key: str) -> None:
         """
@@ -261,10 +324,11 @@ class GpxAnalysisApp:
         self.__mpl_map.remove_athlete(athlete_key)
         self.__gui.update_map()
 
-        # next remove from our list of athletes and update the GUIs's list
+        # next remove from our list of athletes and update the guis's list
         del self.__athletes[athlete_key]
         self.__gui.update_athletes(self.__athletes)
         self.__max_time = self.__calculate_longest_time()
+        self.__gui.update_stats()
 
     def __set_athlete_positions(self, set_time: float) -> list[tuple[float, float]]:
         """
@@ -278,7 +342,7 @@ class GpxAnalysisApp:
         for athlete in self.__athletes.values():
             # set time is relative to the athlete
             # as diff athletes start at diff times on their track, change this
-            athlete_time = athlete['start_time'] + set_time
+            athlete_time = min(athlete['start_time'] + set_time, athlete['finish_time'])
             pos = sport.get_position_at_time(athlete['track'], athlete_time)
             athlete_positions.append(pos)
 

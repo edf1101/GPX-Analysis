@@ -88,7 +88,7 @@ class PlaybackMenuFrame:
         self.__slider_playback_zoom = ttk.Scale(master=self.__frm_zoom,
                                                 from_=0.0, to=1.0, length=100,
                                                 command=self.__on_zoom_slider_changed,
-                                                value=0.1)
+                                                value=0.9)
         self.__slider_playback_zoom.grid(row=0, column=1, sticky='w')
 
     def __create_playback_button(self) -> None:
@@ -234,5 +234,5 @@ class PlaybackMenuFrame:
         if args == 1:
             pass
 
-        value = self.__slider_playback_zoom.get()
+        value = 1.0 - self.__slider_playback_zoom.get()
         self.__parent_class.set_zoom_level(value)

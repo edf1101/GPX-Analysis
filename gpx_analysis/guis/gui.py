@@ -5,19 +5,20 @@ The AppGUI class is the only one to use outside of this class
 # Pylint ignores
 # pylint: disable=R0902
 # pylint: disable=R0914
+# pylint: disable=R0904
 
 import tkinter as tk
 from tkinter import ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 import time
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
 from gpx_analysis import graph_handler as gh
 
 # import the individual separate classes
-from gpx_analysis.GUIs.gui_control_menu import ControlMenuFrame
-from gpx_analysis.GUIs.gui_finishline_menu import FinishlineMenuFrame
-from gpx_analysis.GUIs.gui_playback_menu import PlaybackMenuFrame
-from gpx_analysis.GUIs.gui_stats_menu import StatsMenuFrame
+from gpx_analysis.guis.gui_control_menu import ControlMenuFrame
+from gpx_analysis.guis.gui_finishline_menu import FinishlineMenuFrame
+from gpx_analysis.guis.gui_playback_menu import PlaybackMenuFrame
+from gpx_analysis.guis.gui_stats_menu import StatsMenuFrame
 
 
 class AppGUI:
@@ -34,6 +35,7 @@ class AppGUI:
         :param map_class: Reference to the graph_handler.MapClass handler for the mpl map
         """
 
+        self.ready = False
         self.__mpl_graph = map_class
         self.__window = window
         self.__window.title("GPX Analysis")  # Set the window title
@@ -70,6 +72,9 @@ class AppGUI:
         # create callback function references
         self.__open_file_callback = None
         self.__change_name_callback = None
+        # reference these quickly to make pylint happy
+        if self.__open_file_callback == self.__change_name_callback:
+            pass
 
         # These are public as they'll turn into public methods for the sub frames to use
         self.get_playing = None
@@ -82,11 +87,17 @@ class AppGUI:
 
         self.set_zoom_level = None
 
+        self.set_start_finish_time = None
+        self.get_start_finish_time = None
+
         # Athlete list
         self.__athletes = {}
 
         # Set the submenus here after the other variables have been set
         self.__set_submenus()
+
+        # Is it set up: this gets set to true when init is finished
+        self.ready = True
 
     def gui_loop(self) -> None:
         """
@@ -96,10 +107,18 @@ class AppGUI:
         """
 
         # if its playing then update stats every 1s
-        if (time.time() - self.__last_stats_update >= 1.0 and
-                self.get_playing and self.get_playing()):
+        if time.time() - self.__last_stats_update >= 1.0:
             self.__last_stats_update = time.time()
-            self.__stats_menu.update_stats()
+            self.update_stats()
+
+    def update_stats(self) -> None:
+        """
+        update the statistics menu display
+
+        :return: None
+        """
+
+        self.__stats_menu.update_stats()
 
     def stop_finish_start_editing(self) -> None:
         """
@@ -123,16 +142,18 @@ class AppGUI:
         else:
             self.__finishline_menu.set_currently_selected(None)
 
-    def update_athletes(self, new_athletes: dict[dict]) -> None:
+    def update_athletes(self, new_athletes: dict[dict],
+                        remake_widgets: bool = True) -> None:
         """
         Updates the GUI's list of athletes
 
         :param new_athletes: the new list
+        :param remake_widgets: Whether or not to rebuild the widgets
         :return: None
         """
         self.__athletes = new_athletes
 
-        self.__control_menu.update_athlete_data(new_athletes)
+        self.__control_menu.update_athlete_data(new_athletes, remake_widgets)
         self.__stats_menu.set_athlete_list(new_athletes)
 
     def __remove_entry_focus(self, event) -> None:
@@ -282,15 +303,15 @@ class AppGUI:
         """
         self.set_playback_time = func
 
-    def set_gui_playback_time(self, time: float, max_time: float) -> None:
+    def set_gui_playback_time(self, time_val: float, max_time: float) -> None:
         """
         Set the time passed on the GUI
 
-        :param time: the time passed
+        :param time_val: the time passed
         :param max_time: how much total time
         :return: None
         """
-        self.__playback_menu.set_playback_time(time, max_time)
+        self.__playback_menu.set_playback_time(time_val, max_time)
 
     def set_zoom_level_callback(self, func) -> None:
         """
@@ -300,3 +321,21 @@ class AppGUI:
         :return: None
         """
         self.set_zoom_level = func
+
+    def set_set_start_finish_time_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a start or finish time is set
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.set_start_finish_time = func
+
+    def set_get_start_finish_time_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a start or finish time is requested
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.get_start_finish_time = func

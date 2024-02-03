@@ -181,6 +181,22 @@ class MapClass:
         self.draw_track(athlete_key, new_value['colour'])
         self.__draw_legend()
 
+    def modify_start_finish_times(self, athlete_key: str, start: float, finish: float) -> None:
+        """
+        Modifies the start and finish times for an athlete
+
+        :param athlete_key: The key to modify in the dictionary
+        :param start: The new start time
+        :param finish: The new finish time
+        :return: None
+        """
+
+        self.__athletes[athlete_key]['start_time'] = start
+        self.__athletes[athlete_key]['finish_time'] = finish
+
+        # redraw the track with new size
+        self.draw_track(athlete_key, self.__athletes[athlete_key]['colour'])
+
     def remove_athlete(self, athlete_key: str) -> None:
         """
         Remove an athlete + track and points from the graph
@@ -326,7 +342,7 @@ class MapClass:
         exp_value_at_0 = pow(6.0, -2.3 + 3.7 * 0)
 
         max_map_size = max(self.tile_bounds_plt) - smallest_zoom_level + exp_value_at_0
-        return ((exp_value-exp_value_at_0) * max_map_size) + smallest_zoom_level
+        return ((exp_value - exp_value_at_0) * max_map_size) + smallest_zoom_level
 
     def center_viewpoint(self, positions: list[tuple[float, float]], offset: float = 0.1) -> None:
         """
@@ -381,9 +397,19 @@ class MapClass:
 
         track = self.__athletes[athlete_key]['track']
         line_data = []
+
         for i in range(len(track.get_track_points()) - 1):
-            single_line = self.draw_line(track.get_track_points()[i].get_position_degrees(),
-                                         track.get_track_points()[i + 1].get_position_degrees(),
+            start_point = track.get_track_points()[i]  # get start and end points of line
+            end_point = track.get_track_points()[i + 1]
+
+            # don't plot this line if it's outside the start finish zone
+            if (end_point.get_relative_time() < self.__athletes[athlete_key]['start_time'] or
+                    start_point.get_relative_time() > self.__athletes[athlete_key]['finish_time']):
+                continue
+
+
+            single_line = self.draw_line(start_point.get_position_degrees(),
+                                         end_point.get_position_degrees(),
                                          color=color)
             line_data.append(single_line)
 

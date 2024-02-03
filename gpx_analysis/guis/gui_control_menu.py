@@ -64,11 +64,13 @@ class ControlMenuFrame:
         self.__changename_callback = None
         self.__delete_callback = None
 
-    def update_athlete_data(self, athlete_data: dict) -> None:
+    def update_athlete_data(self, athlete_data: dict,
+                            remake_widgets:bool = True) -> None:
         """
         Set the athlete data in this class (setter method)
 
         :param athlete_data: Data to set
+        :param remake_widgets: whether or not to remake the widgets
         :return: None
         """
         self.__athlete_data = athlete_data
@@ -77,8 +79,9 @@ class ControlMenuFrame:
         else:
             self.__athlete_names = ['None']
 
-        self.__create_name_selector()  # recreate name selector with new fields
-        self.__set_athlete_data()
+        if remake_widgets:
+            self.__create_name_selector()  # recreate name selector with new fields
+            self.__set_athlete_data()
 
     def __setup_namechange(self) -> None:
         """

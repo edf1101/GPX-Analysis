@@ -61,7 +61,6 @@ class FinishlineMenuFrame:
         self.__slider_finishline_menu_end = None
         self.__text_finishline_end_precise = None
         self.__enable_widgets()
-        self.__disable_widgets()
 
     def stop_editing(self) -> None:
         """
@@ -71,7 +70,6 @@ class FinishlineMenuFrame:
         :return: None
         """
         self.__checkbox_value.set(False)
-        self.__disable_widgets()
 
     def __enable_widgets(self) -> None:
         """
@@ -82,18 +80,8 @@ class FinishlineMenuFrame:
         self.__setup_start_frame()
         self.__setup_end_frame()
 
-    def __disable_widgets(self) -> None:
-        """
-        Disables all the GUI items that are required for editing start/finish locations
-
-        :return: None
-        """
-        # Destroy the unwanted widgets
-        items_to_destroy = [self.__frm_map_finishline_start, self.__frm_map_finishline_end]
-
-        for item in items_to_destroy:
-            if item:
-                item.grid_forget()
+        if self.__currently_selected:
+            self.__update_start_finish_times_text()
 
     def __create_checkbox(self) -> None:
         """
@@ -121,12 +109,37 @@ class FinishlineMenuFrame:
         if athlete_data:  # if its a real athlete not None then modify the fields
             self.__total_time = athlete_data['track'].get_total_time()
 
+    def __update_start_finish_times_text(self) -> None:
+        """
+        update the text for what the real start finish time is
+
+        :return: None
+        """
+
+        if not self.__parent_class.ready:  # don't execute if not fully set up
+            return
+
+        athlete_key = self.__currently_selected['filename']
+        start_time, finish_time = self.__parent_class.get_start_finish_time(athlete_key)
+
+        # update the text labels
+        self.__label_finishline_menu_start.configure(text=f"Start Line: {start_time}s"
+                                                          f"  Total: {self.__total_time}s")
+
+        self.__label_finishline_menu_end.configure(text=f"Finish Line: {finish_time}s"
+                                                        f"  Total: {self.__total_time}s")
+
     def __setup_start_frame(self) -> None:
         """
         Set up the start frame widgets
 
         :return: None
         """
+        if self.__parent_class.ready:
+            personal_total = self.__currently_selected['track'].get_total_time()
+        else:
+            personal_total = 100
+
         # Encapsulate slider precise entry and label in a frame
         self.__frm_map_finishline_start = ttk.Frame(self.__frm_map_finishline_menu)
         self.__frm_map_finishline_start.grid(row=4, column=0, sticky='w')
@@ -134,7 +147,7 @@ class FinishlineMenuFrame:
         # Set up the start line info text
         self.__label_finishline_menu_start = ttk.Label(master=self.__frm_map_finishline_start,
                                                        text=f"Start Line: {0}s"
-                                                            f"  Total: {self.__total_time}s")
+                                                            f"  Total: {personal_total}s")
         self.__label_finishline_menu_start.grid(row=0, column=0, columnspan=3)
 
         # Set up the slider
@@ -165,6 +178,12 @@ class FinishlineMenuFrame:
 
         :return: None
         """
+
+        if self.__parent_class.ready:
+            personal_total = self.__currently_selected['track'].get_total_time()
+        else:
+            personal_total = 100
+
         # Set up the bounding frame
         self.__frm_map_finishline_end = ttk.Frame(self.__frm_map_finishline_menu)
         self.__frm_map_finishline_end.grid(row=5, column=0, sticky='w')
@@ -172,7 +191,7 @@ class FinishlineMenuFrame:
         # set up the text saying where the finish line is
         self.__label_finishline_menu_end = ttk.Label(master=self.__frm_map_finishline_end,
                                                      text=f"Finish Line: {0}s "
-                                                          f" Total: {self.__total_time}s")
+                                                          f" Total: {personal_total}s")
         self.__label_finishline_menu_end.grid(row=0, column=0, columnspan=3)
 
         # set up the slider
@@ -201,11 +220,19 @@ class FinishlineMenuFrame:
 
         :return: None
         """
+        if self.__checkbox_value.get() is False:
+            return
+
         print("precise start pressed")
         value = self.__text_finishline_start_precise.get()
         valid = validate_float_input(value)
         if valid:
-            print(f"precise start pressed value: {value}")
+            if valid:
+                # print(f"precise end pressed value: {value}")
+                athlete_key = self.__currently_selected['filename']
+                self.__parent_class.set_start_finish_time(athlete_key,
+                                                          round(float(value), 1), None)
+                self.__update_start_finish_times_text()
 
     def __on_start_slider_changed(self, event) -> None:
         """
@@ -218,8 +245,16 @@ class FinishlineMenuFrame:
         if event == 1:  # test to keep pylint happy
             pass
 
-        value = self.__slider_finishline_menu_start.get()
-        print(f'start slider changed to {value}')
+        # Not allowed to change when not editing, ignore it
+        if self.__checkbox_value.get() is False:
+            return
+
+        value = round(self.__slider_finishline_menu_start.get() * self.__total_time / 100.0, 1)
+        # print(f'start slider changed to {value}')
+
+        athlete_key = self.__currently_selected['filename']
+        self.__parent_class.set_start_finish_time(athlete_key, value, None)
+        self.__update_start_finish_times_text()
 
     def __on_precise_button_end_pressed(self) -> None:
         """
@@ -227,10 +262,17 @@ class FinishlineMenuFrame:
 
         :return: None
         """
+        if self.__checkbox_value.get() is False:
+            return
+
         value = self.__text_finishline_end_precise.get()
         valid = validate_float_input(value)
         if valid:
-            print(f"precise end pressed value: {value}")
+            # print(f"precise end pressed value: {value}")
+            athlete_key = self.__currently_selected['filename']
+            self.__parent_class.set_start_finish_time(athlete_key,
+                                                      None, round(float(value), 1))
+            self.__update_start_finish_times_text()
 
     def __on_end_slider_changed(self, event) -> None:
         """
@@ -239,12 +281,18 @@ class FinishlineMenuFrame:
         :param event: doesn't get used
         :return: None
         """
+        if self.__checkbox_value.get() is False:
+            return
 
         if event == 1:  # test to keep pylint happy
             pass
 
-        value = self.__slider_finishline_menu_end.get()
-        print(f'end slider changed to {value}')
+        value = round(self.__slider_finishline_menu_end.get() * self.__total_time / 100.0, 1)
+        # print(f'end slider changed to {value}')
+
+        athlete_key = self.__currently_selected['filename']
+        self.__parent_class.set_start_finish_time(athlete_key, None, value)
+        self.__update_start_finish_times_text()
 
     def __on_checkbox_changed(self) -> None:
         """
@@ -265,8 +313,6 @@ class FinishlineMenuFrame:
 
         if state:
             self.__enable_widgets()
-        else:
-            self.__disable_widgets()
 
 
 def validate_float_input(number: str) -> bool:

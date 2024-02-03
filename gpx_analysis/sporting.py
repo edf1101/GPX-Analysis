@@ -96,13 +96,16 @@ def get_speed_at_time(track: gpx.Track, time: float) -> float:
     last_point = track_points[-1]
     if time > last_point.get_relative_time():
         # WARNING this time is after the end time it is technically invalid
-        return 0
+        return 0.1
 
     # Get the points above and below
     point_below, point_above = get_surrounding_points_at_time(track, time)
 
-    position_below = point_below.get_position_degrees()
-    position_above = point_above.get_position_degrees()
+    try:
+        position_below = point_below.get_position_degrees()
+        position_above = point_above.get_position_degrees()
+    except AttributeError:  # when out of range this happens
+        return 0.1
 
     time_below = point_below.get_relative_time()
     time_above = point_above.get_relative_time()
@@ -114,7 +117,7 @@ def get_speed_at_time(track: gpx.Track, time: float) -> float:
 
     speed = distance / time_delta  # Speeds are always in m/s
 
-    return round(speed,2)
+    return round(speed, 2)
 
 
 def get_cadence_at_time(track: gpx.Track, time: float) -> float:
@@ -131,13 +134,16 @@ def get_cadence_at_time(track: gpx.Track, time: float) -> float:
     last_point = track_points[-1]
     if time > last_point.get_relative_time():
         # WARNING this time is after the end time it is technically invalid
-        return 0
+        return 0.0
 
     # Get the points above and below
     point_below, point_above = get_surrounding_points_at_time(track, time)
 
-    cadence_below = point_below.get_cadence()
-    cadence_above = point_above.get_cadence()
+    try:
+        cadence_below = point_below.get_cadence()
+        cadence_above = point_above.get_cadence()
+    except AttributeError:  # When out of range
+        return 0.0
 
     time_below = point_below.get_relative_time()
     time_above = point_above.get_relative_time()
@@ -216,20 +222,22 @@ def convert_speed_units(speed: float, unit: str) -> str:
         raise TypeError("Unit must be a string")
 
     if unit == "m/s":
-        return f'{round(speed,1)} m/s'
+        return f'{round(speed, 1)} m/s'
     if unit == "km/h":
-        return f'{round(speed * 3.6,1)} km/h'
+        return f'{round(speed * 3.6, 1)} km/h'
     if unit == "mph":
-        return f'{round(speed * 2.237,1)} mph'
+        return f'{round(speed * 2.237, 1)} mph'
     if unit == "s/500m":
         total = round(500 / speed, 1)
         mins = int(total // 60)
-        secs = total % 60
-        return f'{mins}:{round(secs,1)} /500m'
+        secs = round(total % 60, 1)
+        secs = ('0' if secs < 10 else '') + str(secs)
+        return f'{mins}:{secs} /500m'
     if unit == "s/km":
         total = round(1000 / speed, 1)
         mins = int(total // 60)
-        secs = total % 60
-        return f'{mins}:{round(secs)} /km'
+        secs = round(total % 60)
+        secs = ('0' if secs < 10 else '') + str(secs)
+        return f'{mins}:{secs} /km'
 
     raise ValueError("Unit must be one of: m/s, km/h, mph, s/500m or s/km")
