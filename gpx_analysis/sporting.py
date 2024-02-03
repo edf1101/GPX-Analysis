@@ -114,7 +114,7 @@ def get_speed_at_time(track: gpx.Track, time: float) -> float:
 
     speed = distance / time_delta  # Speeds are always in m/s
 
-    return speed
+    return round(speed,2)
 
 
 def get_cadence_at_time(track: gpx.Track, time: float) -> float:
@@ -163,7 +163,7 @@ def get_cumulative_dist_at_time(track: gpx.Track, time: float) -> float:
 
     for point_id, point in enumerate(track_points[1:]):  # Ignore the first item as we use it
         # Is this the set of points I'm currently between at this time
-        point_id = point_id + 1 # So enumerate id starts at 1
+        point_id = point_id + 1  # So enumerate id starts at 1
 
         if point.get_relative_time() > time:
             # Yes get the distance I am from the point before and add it on then return
@@ -190,7 +190,7 @@ def get_cumulative_dist_at_time(track: gpx.Track, time: float) -> float:
     return round(total_dist, 2)
 
 
-def get_total_distance(track:gpx.Track) -> float:
+def get_total_distance(track: gpx.Track) -> float:
     """
     Returns the total distance of a track
 
@@ -200,12 +200,13 @@ def get_total_distance(track:gpx.Track) -> float:
 
     return get_cumulative_dist_at_time(track, track.get_track_points()[-1].get_relative_time())
 
+
 def convert_speed_units(speed: float, unit: str) -> str:
     """
     Converts the speed from m/s to another unit
 
     :param speed: The speed in m/s
-    :param unit: The unit to convert to either: m/s, km/h, mph, s/500m
+    :param unit: The unit to convert to either: m/s, km/h, mph, s/500m or s/km
     :return: The speed in the new unit
     """
 
@@ -215,15 +216,20 @@ def convert_speed_units(speed: float, unit: str) -> str:
         raise TypeError("Unit must be a string")
 
     if unit == "m/s":
-        return f'{speed} m/s'
+        return f'{round(speed,1)} m/s'
     if unit == "km/h":
-        return f'{speed * 3.6} km/h'
+        return f'{round(speed * 3.6,1)} km/h'
     if unit == "mph":
-        return f'{speed * 2.237} mph'
+        return f'{round(speed * 2.237,1)} mph'
     if unit == "s/500m":
         total = round(500 / speed, 1)
         mins = int(total // 60)
         secs = total % 60
-        return f'{mins}:{secs} /500m'
+        return f'{mins}:{round(secs,1)} /500m'
+    if unit == "s/km":
+        total = round(1000 / speed, 1)
+        mins = int(total // 60)
+        secs = total % 60
+        return f'{mins}:{round(secs)} /km'
 
-    raise ValueError("Unit must be one of: m/s, km/h, mph, s/500m")
+    raise ValueError("Unit must be one of: m/s, km/h, mph, s/500m or s/km")

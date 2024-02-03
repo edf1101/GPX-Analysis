@@ -9,6 +9,8 @@ The AppGUI class is the only one to use outside of this class
 import tkinter as tk
 from tkinter import ttk
 
+from gpx_analysis import sporting as sport
+
 
 class StatsMenuFrame:
     """
@@ -24,6 +26,9 @@ class StatsMenuFrame:
         """
         self.__parent_class = parent_class
         self.__window = self.__parent_class.get_tk_window()
+
+        # Athlete data
+        self.__athlete_data = {}
 
         # Create the surrounding frame
         self.__frm_stats_menu = None
@@ -45,32 +50,82 @@ class StatsMenuFrame:
         self.__create_units_menu()
 
         # Create the checklist
-        options = ['BoatA', 'BoatB', 'BoatC']
         self.__menu_choices = None
         self.__menubutton = None
         self.__menu = None
-        self.__create_athlete_selection_menu(options)
+        self.__create_athlete_selection_menu()  # make it empty at the start
 
         # Space in the grid
         self.__frm_stats_menu.rowconfigure(4, minsize=20)
 
         # Big label below to show all the stats
-        test_data = {'Canford': {'dist': 1000000, 'spd': '1:53.2 s/500m', 'cad': 38},
-                     'Winchester': {'dist': 900, 'spd': '1:55.6 s/500m', 'cad': 40},
-                     'Emmanuel': {'dist': 1001, 'spd': '1:53.2 s/500m', 'cad': 38},
-                     'Kew House': {'dist': 901, 'spd': '1:55.6 s/500m', 'cad': 40},
-                     'Bryanston': {'dist': 800, 'spd': '1:59.8 s/500m', 'cad': 28}}
+        test_data = {}
         self.__label_stats_text = None
-        self.display_text(test_data)
+        self.__display_text(test_data)
 
-    def display_text(self, data_in: dict) -> None:
+    def update_stats(self) -> None:
+        """
+        Updates the text statistics based on the time and who's selected
+        
+        :return: None
+        """
+        # get current time
+        time = self.__parent_class.get_playback_time()
+
+        # put the data into a dict
+        stats_data = {}
+        for athlete in self.__athlete_data.values():
+
+            # ignore this athlete if they're not in the selector options
+            if athlete['filename'] not in self.__menu_choices.keys():
+                continue
+
+            # ignore this athlete if they aren't selected
+            if (isinstance(self.__menu_choices[athlete['filename']],tk.IntVar)
+                    and self.__menu_choices[athlete['filename']].get() == 0):
+                continue
+
+            # Fetch all the data needed for this entry
+            athlete_time = time + athlete['start_time']
+            name = athlete['display_name']
+            dist = sport.get_cumulative_dist_at_time(athlete['track'], athlete_time)
+            speed = sport.get_speed_at_time(athlete['track'], athlete_time)
+            cad = sport.get_cadence_at_time(athlete['track'], athlete_time)
+
+            # change speed so its in correct units
+            units = self.__value_speed_selected_option.get()
+            speed = sport.convert_speed_units(speed, units)
+
+            stats_data[name] = {'dist': dist, 'spd': speed, 'cad': cad}  # add to the dict
+
+        self.__display_text(stats_data)
+
+    def set_athlete_list(self, athletes: dict) -> None:
+        """
+        Setter for the athlete list
+
+        :param athletes: The athletes to set
+        :return: None
+        """
+        self.__athlete_data = athletes
+
+        # Get the athlete display names
+
+        # remake athlete list
+        self.__create_athlete_selection_menu()
+        # print('setting')
+
+    def __display_text(self, data_in: dict) -> None:
         """
         Displays the stats text
 
         :param data_in: A dictionary where boat display name is key and data is the value
         :return: None
         """
-        # Get the length of the longest name
+
+        # if nothing in the dictionary then exit here
+        if data_in == {}:
+            return
 
         # Sort the athletes by highest dist, dodgy insertion sort
         modified_data = []
@@ -82,6 +137,7 @@ class StatsMenuFrame:
                 if test_val > max_dist:
                     max_dist = test_val
                     max_key = key
+
 
             # Make sure athlete distance renders correctly
             if max_dist > 100000:
@@ -111,15 +167,19 @@ class StatsMenuFrame:
 
             disp_text += '\n'  # so it starts on a new line
 
-        self.__label_stats_text = ttk.Label(master=self.__frm_stats_menu, text=disp_text,
-                                            font='Courier')
-        self.__label_stats_text.grid(row=5, column=0, sticky='w')
+        # If its been made before just modify text
+        if isinstance(self.__label_stats_text, ttk.Label):
+            self.__label_stats_text.configure(text=disp_text)
 
-    def __create_athlete_selection_menu(self, options) -> None:
+        else:
+            self.__label_stats_text = ttk.Label(master=self.__frm_stats_menu, text=disp_text,
+                                                font='Courier')
+            self.__label_stats_text.grid(row=5, column=0, sticky='w')
+
+    def __create_athlete_selection_menu(self) -> None:
         """
-        Creates the athlete selection menu
+        Creates the athlete selection menu from the athlete variable
 
-        :param options: The options for the list
         :return: None
         """
         self.__menubutton = tk.Menubutton(self.__frm_stats_menu,
@@ -130,10 +190,13 @@ class StatsMenuFrame:
         self.__menubutton.grid(row=3, column=0, sticky='w')
         self.__menu_choices = {}
 
-        for choice in options:
-            self.__menu_choices[choice] = tk.IntVar(value=0)
-            self.__menu.add_checkbutton(label=choice, variable=self.__menu_choices[choice],
+        for athlete in self.__athlete_data.values():
+            display_name = athlete['display_name']
+            filename = athlete['filename']
+            self.__menu_choices[filename] = tk.IntVar(value=1)
+            self.__menu.add_checkbutton(label=display_name, variable=self.__menu_choices[filename],
                                         onvalue=1, offvalue=0, command=self.__on_athlete_change)
+        self.__on_athlete_change()
 
     def __create_units_menu(self) -> None:
         """
@@ -146,7 +209,7 @@ class StatsMenuFrame:
         self.__frm_stats_dropdown.grid(row=2, column=0, sticky='nsew')
 
         # Create the dropdown menu
-        speed_options = ['s/500m', 'm/s', 'kmh', 'mph']  # options for it
+        speed_options = ['s/500m', 's/km', 'm/s', 'km/h', 'mph']  # options for it
 
         self.__value_speed_selected_option = tk.StringVar()
         self.__value_speed_selected_option.set(speed_options[0])  # s/500m is default unit

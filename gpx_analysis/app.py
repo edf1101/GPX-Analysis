@@ -317,7 +317,9 @@ class GpxAnalysisApp:
         delta_time = current_time - self.__last_update
         self.__last_update = current_time
 
-        # Code here
+        self.__gui.gui_loop()  # call the gui loop
+
+        # Update the positions on the map
         if self.__playing:
             self.__draw_athletes_on_map()
 

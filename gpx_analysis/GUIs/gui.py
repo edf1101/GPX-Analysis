@@ -9,6 +9,7 @@ The AppGUI class is the only one to use outside of this class
 import tkinter as tk
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
+import time
 
 from gpx_analysis import graph_handler as gh
 
@@ -42,6 +43,10 @@ class AppGUI:
         self.__window.rowconfigure(1, minsize=250, weight=1)
         self.__window.columnconfigure(1, minsize=500, weight=8)
         self.__window.columnconfigure(0, minsize=260, weight=1)
+
+        # Holds the last stats update time so we can do it only every .5s
+        self.__last_stats_update = time.time()
+        self.__last_map_update = time.time()
 
         # Set the map widget in the TOP RIGHT corner
         self.__map_widget = None
@@ -83,6 +88,19 @@ class AppGUI:
         # Set the submenus here after the other variables have been set
         self.__set_submenus()
 
+    def gui_loop(self) -> None:
+        """
+        The GUI code to loop through each frame in the simulation
+
+        :return: None
+        """
+
+        # if its playing then update stats every 1s
+        if (time.time() - self.__last_stats_update >= 1.0 and
+                self.get_playing and self.get_playing()):
+            self.__last_stats_update = time.time()
+            self.__stats_menu.update_stats()
+
     def stop_finish_start_editing(self) -> None:
         """
         disables the start/finish editing menu
@@ -115,6 +133,7 @@ class AppGUI:
         self.__athletes = new_athletes
 
         self.__control_menu.update_athlete_data(new_athletes)
+        self.__stats_menu.set_athlete_list(new_athletes)
 
     def __remove_entry_focus(self, event) -> None:
         """
@@ -131,6 +150,10 @@ class AppGUI:
 
         :return: None
         """
+
+        if time.time() - self.__last_map_update < 0.1:
+            return
+        self.__last_map_update = time.time()
 
         canvas = FigureCanvasTkAgg(self.__mpl_graph.get_figure(), master=self.__window)
         self.__map_widget = canvas.get_tk_widget()
@@ -269,7 +292,7 @@ class AppGUI:
         """
         self.__playback_menu.set_playback_time(time, max_time)
 
-    def set_zoom_level_callback(self,func) -> None:
+    def set_zoom_level_callback(self, func) -> None:
         """
         Sets the callback function to be used when the zoom level changes
 
