@@ -55,8 +55,6 @@ class AppGUI:
         self.__control_menu = None
         self.__finishline_menu = None
         self.__playback_menu = None
-        # Then set their values here
-        self.__set_submenus()
 
         # Function for removing focus from widgets once they have been clicked off
         self.__window.bind_all("<Button-1>", self.__remove_entry_focus)
@@ -68,8 +66,22 @@ class AppGUI:
         self.__open_file_callback = None
         self.__change_name_callback = None
 
+        # These are public as they'll turn into public methods for the sub frames to use
+        self.get_playing = None
+        self.set_playing = None
+
+        self.set_playback_speed = None
+
+        self.set_playback_time = None
+        self.get_playback_time = None
+
+        self.set_zoom_level = None
+
         # Athlete list
         self.__athletes = {}
+
+        # Set the submenus here after the other variables have been set
+        self.__set_submenus()
 
     def stop_finish_start_editing(self) -> None:
         """
@@ -196,7 +208,72 @@ class AppGUI:
     def set_changename_callback(self, func) -> None:
         """
         Sets the callback function to be used when an athlete changes display name
+
         :param func: The function to be called
         :return: None
         """
         self.__control_menu.set_changename_callback(func)
+
+    def set_get_playback_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a class requests playback state
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.get_playing = func
+
+    def set_set_playback_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a class sets playback state
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.set_playing = func
+
+    def set_set_plaback_speed_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a class sets playback speed
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.set_playback_speed = func
+
+    def set_get_playback_time_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a class requests playback state
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.get_playback_time = func
+
+    def set_set_playback_time_callback(self, func) -> None:
+        """
+        Sets the callback function to be used when a class sets playback state
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.set_playback_time = func
+
+    def set_gui_playback_time(self, time: float, max_time: float) -> None:
+        """
+        Set the time passed on the GUI
+
+        :param time: the time passed
+        :param max_time: how much total time
+        :return: None
+        """
+        self.__playback_menu.set_playback_time(time, max_time)
+
+    def set_zoom_level_callback(self,func) -> None:
+        """
+        Sets the callback function to be used when the zoom level changes
+
+        :param func: The function to be called
+        :return: None
+        """
+        self.set_zoom_level = func

@@ -25,7 +25,6 @@ class ControlMenuFrame:
          other frames etc
         """
         self.__parent_class = parent_class
-        self.__window = parent_class.get_tk_window()
         # First the open / master menu (open file, name boats etc)
 
         self.__frm_map_control_menu = ttk.Frame(self.__parent_class.get_frm_map_menu(),
@@ -174,7 +173,7 @@ class ControlMenuFrame:
         self.__last_selected = self.__athlete_names[0]
 
         # If we have made it before destroy the old copy
-        if isinstance(self.__dropdown_map_control, ttk.Label):
+        if isinstance(self.__dropdown_map_control, ttk.OptionMenu):
             self.__dropdown_map_control.destroy()
 
         self.__dropdown_map_control = tk.OptionMenu(self.__frm_map_control_dropdown,
@@ -235,7 +234,8 @@ class ControlMenuFrame:
         """
 
         file_path = filedialog.askopenfilename()  # get the file path
-        self.__open_file_callback(file_path)
+        if file_path != '':  # check it's not blank
+            self.__open_file_callback(file_path)
 
     def __on_remove_press(self) -> None:
         """
@@ -267,9 +267,7 @@ class ControlMenuFrame:
             if arg == 1:
                 pass
 
-        swapped_from = self.__last_selected
         self.__last_selected = self.__value_map_dropdown.get()
-        swapped_to = self.__last_selected
 
         # update the info labels
         self.__set_athlete_data()

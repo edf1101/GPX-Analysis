@@ -3,6 +3,9 @@ This file contains functions used for doing geographic calculations
 """
 import math
 from copy import deepcopy
+import colorsys
+import matplotlib.colors
+
 try:
     from gpx_analysis import gpx_parser as gpx
 except ImportError:
@@ -90,3 +93,16 @@ def union_bounds(bounds1: tuple, bounds2: tuple) -> tuple:
             max(bounds1[1], bounds2[1]),
             min(bounds1[2], bounds2[2]),
             min(bounds1[3], bounds2[3]))
+
+
+def lighten_color(colour, amount=0.5):
+    """
+    lightens a given rgb colour
+
+    :param colour: RGB tuple colour
+    :param amount: the lower the number below 0 the lighter
+    :return: An rgb colour lightened
+    """
+
+    colour = colorsys.rgb_to_hls(*matplotlib.colors.to_rgb(colour))
+    return colorsys.hls_to_rgb(colour[0], 1 - amount * (1 - colour[1]), colour[2])

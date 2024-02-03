@@ -2,19 +2,21 @@
 This script contains the app class for the GPX analysis tool.
 Controls the GUI, MapHandler and more.
 """
+# Pylint ignores
+# pylint: disable=R0902
+# pylint: disable=R0914
 
+import time
 # Import external libs
 import tkinter as tk
 import pathlib
 import random
 
-
 from gpx_analysis import gpx_parser as gpx
 from gpx_analysis import graph_handler as gh
-from gpx_analysis import sporting as sport
 from gpx_analysis.GUIs.gui import AppGUI
-
-
+from gpx_analysis import sporting as sport
+from gpx_analysis import components as geo
 
 class GpxAnalysisApp:
     """
@@ -36,10 +38,95 @@ class GpxAnalysisApp:
         # Athletes are a dict: key = simple filename, value = dict of other properties
         self.__athletes = {}
 
+        # playback attributes
+        self.__playing = False
+        self.__playback_time = 0
+        self.__playback_speed = 1
+        self.__max_time = 100  # The longest time on any of the athletes
+        self.__zoom_level = 0.1  # the border zoom
+
+        # Link the callback functions
+        self.__link_callback_functions()
+
+        # Things for the update function
+        self.update_speed = 50  # how many ms between each update call
+        self.__last_update = time.time() + (self.update_speed / 1000)
+        # MUST be last otherwise things may not be initialised
+        self.__root.after(ms=self.update_speed, func=self.__update)
+
+    def __link_callback_functions(self) -> None:
+        """
+        Link the callback attributes from this app class to the child gui class
+
+        :return: None
+        """
         # Link the callback functions
         self.__gui.set_open_callback(self.__on_open_file)
         self.__gui.set_changename_callback(self.__on_display_name_change)
         self.__gui.set_delete_callback(self.__on_athlete_deleted)
+        self.__gui.set_get_playback_callback(self.__get_playing)
+        self.__gui.set_set_playback_callback(self.__set_playing)
+        self.__gui.set_set_plaback_speed_callback(self.__set_playback_speed)
+        self.__gui.set_set_playback_time_callback(self.set_playback_time)
+        self.__gui.set_get_playback_time_callback(self.get_playback_time)
+        self.__gui.set_zoom_level_callback(self.__set_zoom_level)
+
+    def __get_playing(self) -> bool:
+        """
+        A getter for the playing variable
+
+        :return: is the simulation playing or not
+        """
+        return self.__playing
+
+    def __set_playing(self, value: bool) -> None:
+        """
+        A setter for the playing variable
+
+        :return: None
+        """
+        self.__playing = value
+
+    def get_playback_time(self) -> float:
+        """
+        A getter for the playback_time variable
+
+        :return: the playback_time
+        """
+        return self.__playback_time
+
+    def set_playback_time(self, value: float) -> None:
+        """
+        A setter for the playback_time variable
+
+        :param value: the time to set
+        :return: None
+        """
+        self.__playback_time = value
+
+        # update the map too
+        self.__draw_athletes_on_map()
+
+    def __set_playback_speed(self, value: float) -> None:
+        """
+        A setter for the playback_speed variable
+
+        :param value: the speed to set
+        :return: None
+        """
+        self.__playback_speed = value
+
+    def __set_zoom_level(self, value: float) -> None:
+        """
+        A setter for the zoom variable
+
+        :param value: float between 0 and 1
+        :return: None
+        """
+        value = max(min(1.0, value), 0.0)  # clamp it between 0 and 1
+        self.__zoom_level = value
+        # update the map to show new zoom
+        self.__draw_athletes_on_map()
 
     def __assign_colour(self) -> tuple[float, float, float]:
         """
@@ -103,17 +190,42 @@ class GpxAnalysisApp:
         athlete_data = {'track': new_track,
                         "filename": clean_path,
                         'display_name': clean_path,
-                        'colour': self.__assign_colour()}
+                        'colour': self.__assign_colour(),
+                        'start_time': 0,
+                        'finish_time': new_track.get_total_time()}
 
         self.__athletes[clean_path] = athlete_data
 
         self.__mpl_map.add_athlete(clean_path, athlete_data)  # add it to the map
 
-        # update the GUIs's list of athletes
+        # update the GUI's list of athletes
         self.__gui.update_athletes(self.__athletes)
 
         # update the GUI's map as a new track is there
         self.__gui.update_map()
+
+        # check if this is a new longest_time
+        self.__max_time = self.__calculate_longest_time()
+
+        # center view around all the athletes
+        self.__draw_athletes_on_map()
+
+    def __calculate_longest_time(self) -> float:
+        """
+        Get the longest time amongst the athletes
+
+        :return: the longest time
+        """
+
+        if self.__athletes:
+            max_time = max((v['finish_time'] - v['start_time']) for v in self.__athletes.values())
+        else:
+            max_time = 100  # default max value
+
+        self.__playback_time = min(self.__playback_time, max_time)
+        self.__gui.set_gui_playback_time(self.__playback_time, max_time)
+
+        return max_time
 
     def __on_display_name_change(self, athlete_key: str, changed_to: str) -> None:
         """
@@ -152,6 +264,71 @@ class GpxAnalysisApp:
         # next remove from our list of athletes and update the GUIs's list
         del self.__athletes[athlete_key]
         self.__gui.update_athletes(self.__athletes)
+        self.__max_time = self.__calculate_longest_time()
+
+    def __set_athlete_positions(self, set_time: float) -> list[tuple[float, float]]:
+        """
+        Gets called to change the athletes' markers to a point in time
+
+        :param set_time: the time which we'll draw the point at on the athlete's track
+        :return: a list of the athlete positions
+        """
+        athlete_positions = []
+
+        for athlete in self.__athletes.values():
+            # set time is relative to the athlete
+            # as diff athletes start at diff times on their track, change this
+            athlete_time = athlete['start_time'] + set_time
+            pos = sport.get_position_at_time(athlete['track'], athlete_time)
+            athlete_positions.append(pos)
+
+            # create a new lighter colour for the athlete to make
+            # the point stand out from the track
+            rgb_light = geo.lighten_color(athlete['colour'], 0.65)
+            self.__mpl_map.draw_point(athlete_key=athlete['filename'],
+                                      pos=pos,
+                                      color=rgb_light,
+                                      size=8)
+
+        return athlete_positions
+
+    def __draw_athletes_on_map(self) -> None:
+        """
+        Draws athletes markers on the map
+
+        :return: None
+        """
+        # check we have something to draw
+        if self.__athletes:
+            # update the athletes positions
+            positions = self.__set_athlete_positions(self.__playback_time)
+            # center the map around them
+            self.__mpl_map.center_viewpoint(positions, offset=self.__zoom_level)
+            self.__gui.update_map()
+
+    def __update(self) -> None:
+        """
+        Loop function, called every simulation frame
+
+        :return: None
+        """
+        # calculate the deltaTime
+        current_time = time.time()
+        delta_time = current_time - self.__last_update
+        self.__last_update = current_time
+
+        # Code here
+        if self.__playing:
+            self.__draw_athletes_on_map()
+
+        # Increase the time if playing
+        if self.__playing:
+            self.__playback_time = min(self.__playback_time + (delta_time * self.__playback_speed),
+                                       self.__max_time)
+            self.__gui.set_gui_playback_time(self.__playback_time, self.__max_time)
+
+        # Call the update function again in
+        self.__root.after(ms=self.update_speed, func=self.__update)
 
     def run_app(self) -> None:
         """
@@ -160,8 +337,3 @@ class GpxAnalysisApp:
         :return: None
         """
         self.__root.mainloop()
-
-# # Run the app if this script is being run as itself
-# if __name__ == '__main__':
-#     app = GpxAnalysisApp()
-#     app.run_app()

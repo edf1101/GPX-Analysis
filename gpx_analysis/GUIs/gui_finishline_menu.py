@@ -24,6 +24,10 @@ class FinishlineMenuFrame:
         """
         self.__parent_class = parent_class
 
+        # The data for the athlete currently selected by the athlete menu
+        self.__currently_selected = None
+        self.__total_time = 100
+
         # Set up the frame to contain the widgets
         self.__frm_map_finishline_menu = ttk.Frame(self.__parent_class.get_frm_map_menu(),
                                                    relief=tk.RIDGE, borderwidth=2)
@@ -50,17 +54,14 @@ class FinishlineMenuFrame:
         self.__label_finishline_menu_start = None
         self.__slider_finishline_menu_start = None
         self.__text_finishline_start_precise = None  # holds the precise data for start line time
-        self.__setup_start_frame()
 
         # Encapsulate finish slider precise entry and label in a frame
         self.__frm_map_finishline_end = None
         self.__label_finishline_menu_end = None
         self.__slider_finishline_menu_end = None
         self.__text_finishline_end_precise = None
-        self.__setup_end_frame()
-
-        # The data for the athlete currently selected by the athlete menu
-        self.__currently_selected = None
+        self.__enable_widgets()
+        self.__disable_widgets()
 
     def stop_editing(self) -> None:
         """
@@ -70,14 +71,29 @@ class FinishlineMenuFrame:
         :return: None
         """
         self.__checkbox_value.set(False)
+        self.__disable_widgets()
 
-    def disable_widgets(self) -> None:
+    def __enable_widgets(self) -> None:
         """
-        Disables all the GUI items that are required for editing
+        enables widgets for the GUI that are required for editing start/finish locations
 
         :return: None
         """
-        pass
+        self.__setup_start_frame()
+        self.__setup_end_frame()
+
+    def __disable_widgets(self) -> None:
+        """
+        Disables all the GUI items that are required for editing start/finish locations
+
+        :return: None
+        """
+        # Destroy the unwanted widgets
+        items_to_destroy = [self.__frm_map_finishline_start, self.__frm_map_finishline_end]
+
+        for item in items_to_destroy:
+            if item:
+                item.grid_forget()
 
     def __create_checkbox(self) -> None:
         """
@@ -101,7 +117,9 @@ class FinishlineMenuFrame:
         :return: None
         """
         self.__currently_selected = athlete_data
-        print(athlete_data)
+
+        if athlete_data:  # if its a real athlete not None then modify the fields
+            self.__total_time = athlete_data['track'].get_total_time()
 
     def __setup_start_frame(self) -> None:
         """
@@ -109,14 +127,14 @@ class FinishlineMenuFrame:
 
         :return: None
         """
-
         # Encapsulate slider precise entry and label in a frame
         self.__frm_map_finishline_start = ttk.Frame(self.__frm_map_finishline_menu)
         self.__frm_map_finishline_start.grid(row=4, column=0, sticky='w')
 
         # Set up the start line info text
         self.__label_finishline_menu_start = ttk.Label(master=self.__frm_map_finishline_start,
-                                                       text=f"Start Line: {0}s  Total: {0}s")
+                                                       text=f"Start Line: {0}s"
+                                                            f"  Total: {self.__total_time}s")
         self.__label_finishline_menu_start.grid(row=0, column=0, columnspan=3)
 
         # Set up the slider
@@ -153,7 +171,8 @@ class FinishlineMenuFrame:
 
         # set up the text saying where the finish line is
         self.__label_finishline_menu_end = ttk.Label(master=self.__frm_map_finishline_end,
-                                                     text=f"Finish Line: {0}s  Total: {0}s")
+                                                     text=f"Finish Line: {0}s "
+                                                          f" Total: {self.__total_time}s")
         self.__label_finishline_menu_end.grid(row=0, column=0, columnspan=3)
 
         # set up the slider
@@ -233,8 +252,21 @@ class FinishlineMenuFrame:
 
         :return: None
         """
+        # Get the state It's trying to switch to
         state = self.__checkbox_value.get()
         print(f'changed state {state}')
+
+        # Find out if it's allowed to switch
+        # (ie if playing then cant switch on or if nothing selected it cant modify)
+        if self.__currently_selected is None or self.__parent_class.get_playing():
+            state = False
+            self.__checkbox_value.set(False)
+            return
+
+        if state:
+            self.__enable_widgets()
+        else:
+            self.__disable_widgets()
 
 
 def validate_float_input(number: str) -> bool:

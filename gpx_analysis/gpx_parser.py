@@ -190,3 +190,11 @@ class Track:
         :return: Whether the track has cadence
         """
         return self.__has_cadence
+
+    def get_total_time(self) -> float:
+        """
+        The total time willl just be the last one, return that
+
+        :return: The total time on the track
+        """
+        return self.__track_points[-1].get_relative_time()

@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 try:
-    from gpx_analysis import geo_components as geo
+    from gpx_analysis import components as geo
 
 except ImportError:
-    import geo_components as geo
+    import components as geo
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -164,7 +164,7 @@ class MapClass:
         self.draw_track(athlete_key, athlete_value['colour'])
         self.__draw_legend()
 
-    def modify_athlete(self,athlete_key:str, new_value:dict) -> None:
+    def modify_athlete(self, athlete_key: str, new_value: dict) -> None:
         """
         gets called when an athlete changes something (either a colour or display name)
 
@@ -181,7 +181,7 @@ class MapClass:
         self.draw_track(athlete_key, new_value['colour'])
         self.__draw_legend()
 
-    def remove_athlete(self, athlete_key:str) -> None:
+    def remove_athlete(self, athlete_key: str) -> None:
         """
         Remove an athlete + track and points from the graph
 
@@ -309,19 +309,40 @@ class MapClass:
         plt.gcf().set_dpi(100)
         return plt.gcf()
 
-    def center_viewpoint(self, positions: list[tuple[float, float]]) -> None:
+    def scale_zoom(self, input_value: float) -> float:
+        """
+        This takes an input zoom level and scales it exponentially to be max
+        the max size of the image
+
+        :param input_value: input value between 0 and 1
+        :return: the scaled zoom value
+        """
+
+        smallest_zoom_level = 5  # the most zoomed in we want is an offset of 5
+
+        exp_value = pow(6.0, -2.3 + 3.7 * input_value)
+        # So we can get the smallest zoom better
+        # could probs precompute for speed but this makes sense
+        exp_value_at_0 = pow(6.0, -2.3 + 3.7 * 0)
+
+        max_map_size = max(self.tile_bounds_plt) - smallest_zoom_level + exp_value_at_0
+        return ((exp_value-exp_value_at_0) * max_map_size) + smallest_zoom_level
+
+    def center_viewpoint(self, positions: list[tuple[float, float]], offset: float = 0.1) -> None:
         """
         This rebounds the viewpoint of the mpl figure so it includes all the boats
-        and its roughly centered around them
+        and it's roughly centered around them
 
         :param positions: A list of the tuple (lat,lon) coordinates of the boats
+        :param offset: The border around the points (how zoomed it is) between 0 and 1
         :return: None
         """
 
+        # convert the relative offset to the actual border value
+        offset = self.scale_zoom(offset)
+
         # convert all lat lon positions to x,y graph coords
         positions = [self.degrees_to_graph(pos) for pos in positions]
-
-        offset = 20  # offset of 50px around the bounds
 
         # Get the highest and lowest position for the boats
         max_x, max_y = max(pos[0] for pos in positions), max(pos[1] for pos in positions)
@@ -338,8 +359,12 @@ class MapClass:
 
         # get the center of the boats
         center_x, center_y = (max_x + min_x) / 2, (max_y + min_y) / 2
-        plt.axis((center_x - graph_size / 2 - offset, center_x + graph_size / 2 + offset,
-                  center_y - graph_size / 2 - offset, center_y + graph_size / 2 + offset))
+
+        left = max(0.0, center_x - graph_size / 2 - offset)
+        right = min(center_x + graph_size / 2 + offset, self.tile_bounds_plt[1])
+        down = max(0.0, center_y - graph_size / 2 - offset)
+        above = min(center_y + graph_size / 2 + offset, self.tile_bounds_plt[0])
+        plt.axis((left, right, down, above))
 
     def draw_track(self, athlete_key: str, color: str | tuple = 'green') -> None:
         """
@@ -406,7 +431,7 @@ class MapClass:
 
     def draw_point(self, athlete_key: str,
                    pos: tuple[float, float],
-                   color: str = 'green',
+                   color: str | tuple = 'green',
                    size: float = 1) -> None:
         """
         Draw a point on the graph
@@ -437,7 +462,7 @@ class MapClass:
         :return:  None
         """
 
-        if ('point' in self.__athletes[athlete_key] and
+        if ('draw_point' in self.__athletes[athlete_key] and
                 self.__athletes[athlete_key]['draw_point'] is not None):
             self.__athletes[athlete_key]['draw_point'].remove()
             self.__athletes[athlete_key]['draw_point'] = None
@@ -475,4 +500,4 @@ class MapClass:
             athlete_name = single_athlete_data['display_name']
             all_patches.append(mpatches.Patch(color=athlete_col, label=athlete_name))
 
-        plt.legend(handles=all_patches, fontsize="9")
+        plt.legend(handles=all_patches, fontsize="9", loc='upper right')

@@ -5,10 +5,10 @@ eg. getting position,velocity etc. at a given time
 
 try:
     from gpx_analysis import gpx_parser as gpx
-    from gpx_analysis import geo_components as geo
+    from gpx_analysis import components as geo
 except ImportError:
     import gpx_parser as gpx
-    import geo_components as geo
+    import components as geo
 
 
 def map_ranges(value: float, in_min: float, in_max: float, out_min: float, out_max: float) -> float:
@@ -62,7 +62,7 @@ def get_position_at_time(track: gpx.Track, time: float) -> tuple[float, float]:
     track_points = track.get_track_points()
 
     last_point = track_points[-1]
-    if time > last_point.get_relative_time():
+    if time >= last_point.get_relative_time():
         # WARNING this time is after the end time it is technically invalid
         return last_point.get_position_degrees()
 
