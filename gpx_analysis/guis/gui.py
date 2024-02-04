@@ -159,6 +159,7 @@ class AppGUI:
     def __remove_entry_focus(self, event) -> None:
         """
         This function removes focuses from widgets when they are clicked off
+
         :param event:
         :return:
         """
@@ -172,7 +173,7 @@ class AppGUI:
         :return: None
         """
 
-        if time.time() - self.__last_map_update < 0.1:
+        if time.time() - self.__last_map_update < 0.2:
             return
         self.__last_map_update = time.time()
 
@@ -210,6 +211,7 @@ class AppGUI:
     def get_tk_window(self) -> tk.Tk:
         """
         Getter for the private tk window variable
+
         :return: the tk window
         """
         return self.__window

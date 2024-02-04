@@ -86,6 +86,7 @@ class ControlMenuFrame:
     def __setup_namechange(self) -> None:
         """
         Sets up the name change frame data
+
         :return: None
         """
         # Encapsulate change name entry field and button in a frame
@@ -201,6 +202,7 @@ class ControlMenuFrame:
     def __setup_static_widgets(self) -> None:
         """
         Set up the labels and buttons that won't be overwritten / modified at any point
+
         :return: None
         """
         # The title label will never change so set it here and doesn't need
@@ -262,6 +264,7 @@ class ControlMenuFrame:
     def __on_athlete_swap(self, *args) -> None:
         """
         Gets called when you change which athlete is selected in the dropdown
+
         :return:
         """
         # *args must be here as we get 4 params, yet we do nothing with them so pylint unhappy

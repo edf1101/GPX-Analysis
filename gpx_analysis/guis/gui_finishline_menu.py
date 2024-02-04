@@ -223,7 +223,7 @@ class FinishlineMenuFrame:
         if self.__checkbox_value.get() is False:
             return
 
-        print("precise start pressed")
+        # print("precise start pressed")
         value = self.__text_finishline_start_precise.get()
         valid = validate_float_input(value)
         if valid:
@@ -302,7 +302,7 @@ class FinishlineMenuFrame:
         """
         # Get the state It's trying to switch to
         state = self.__checkbox_value.get()
-        print(f'changed state {state}')
+        # print(f'changed state {state}')
 
         # Find out if it's allowed to switch
         # (ie if playing then cant switch on or if nothing selected it cant modify)

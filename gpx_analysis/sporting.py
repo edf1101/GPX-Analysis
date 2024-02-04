@@ -35,6 +35,7 @@ def get_surrounding_points_at_time(track: gpx.Track, time: float) \
     :return: Two gpx.Trackpoint points
     """
 
+
     track_points = track.get_track_points()
 
     # Iterate through all points to find the two points either side of the position
@@ -161,7 +162,6 @@ def get_cumulative_dist_at_time(track: gpx.Track, time: float) -> float:
     :param time: The time to get the cumulative distance at
     :return: The cumulative distance at the given time (in meters)
     """
-
     track_points = track.get_track_points()
 
     total_dist = 0
@@ -220,6 +220,8 @@ def convert_speed_units(speed: float, unit: str) -> float:
         raise TypeError("Speed must be a float")
     if not isinstance(unit, str):
         raise TypeError("Unit must be a string")
+
+    speed = speed if speed != 0 else 0.1
 
     if unit == "m/s":
         return round(speed, 1)

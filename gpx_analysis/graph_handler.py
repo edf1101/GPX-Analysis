@@ -14,11 +14,8 @@ import matplotlib.legend as mpl_legend
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-try:
-    from gpx_analysis import components as geo
-
-except ImportError:
-    import components as geo
+from gpx_analysis import components as geo
+from gpx_analysis import gpx_parser as gpx
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -56,28 +53,12 @@ def num2deg(xtile: int, ytile: int, zoom: int) -> tuple[float, float]:
     return lat_deg, lon_deg
 
 
-def get_images(bounds: tuple[float, float, float, float],
-               zoom_level: int = 17):
-    """
-    Get all the images for the graph background
-
-    :param bounds: The bounds of the track (NESW)
-    :param zoom_level: How much we want to zoom in on the tiles
-    :return: The collection of images
-    """
-
-    bottom_left_tile_num = deg2num(bounds[2], bounds[3], zoom_level)
-    top_right_tile_num = deg2num(bounds[0], bounds[1], zoom_level)
-    print(bottom_left_tile_num)
-    print(top_right_tile_num)
-
-
 def get_img(x_coord: int, y_coord: int, zoom: int):
     """
     Get the image from the tile either from cache or downloading
 
-    :param x: The x tile index
-    :param y: The y tile index
+    :param x_coord: The x tile index
+    :param y_coord: The y tile index
     :param zoom: The zoom tile index
     :return: The image
     """
@@ -104,13 +85,13 @@ def get_img(x_coord: int, y_coord: int, zoom: int):
     return img
 
 
-def get_all_images_in_bounds(bounds):
+def get_all_images_in_bounds(bounds) -> dict[tuple, PIL.Image]:
     """
     Get all the images in the bounds and put them in a dictionary with their
     tile index as the key
 
     :param bounds:  The bounds of the track (NESW)
-    :return:  The collection of images
+    :return:  The collection of images as a dict key = image pos, value = image
     """
 
     bottom_left_tile_num = deg2num(bounds[3], bounds[2], 17)
@@ -121,6 +102,42 @@ def get_all_images_in_bounds(bounds):
         for y_coord in range(top_right_tile_num[1] - 1, bottom_left_tile_num[1] + 1):
             if (x_coord, y_coord) not in tiles:
                 tiles[(x_coord, y_coord)] = get_img(x_coord, y_coord, 17)
+
+    return tiles
+
+
+def get_all_images_near_track(track: gpx.Track) -> dict[tuple, PIL.Image]:
+    """
+    More Tile server friendly way of getting images, by only fetching the ones near the track
+
+    :param track: The track to get images of nearby
+    :return: The collection of images as a dict key = image pos, value = image
+    """
+
+    radius = 1
+
+    tiles = {}  # a dict of the tile indexes we have found
+
+    all_track_points = track.get_track_points()  # all the points we'll iterate through
+
+    for point in all_track_points:
+        pos = point.get_position_degrees()  # the point's degrees value
+        tile_ind = deg2num(pos[0], pos[1], 17)
+
+        # Look in a radius around this point
+        for x_pos in range(tile_ind[0] - radius, tile_ind[0] + radius + 1):
+            for y_pos in range(tile_ind[1] - radius, tile_ind[1] + radius + 1):
+
+                # skip this position if we have already fetched it
+                if (x_pos, y_pos) in tiles:
+                    continue
+
+                # check its within a smooth radius
+                mag_sqr = pow(x_pos - tile_ind[0], 2) + pow(y_pos - tile_ind[1], 2)
+                if mag_sqr > pow(radius + 0.5, 2):
+                    continue
+
+                tiles[(x_pos, y_pos)] = get_img(x_pos, y_pos, 17)
 
     return tiles
 
@@ -160,7 +177,7 @@ class MapClass:
         self.__set_gpx_bounds(geo.get_track_bounds(athlete_value['track']))
 
         # Redo the images for the graph handler with the new bounds
-        self.__add_images(get_all_images_in_bounds(self.gpx_bounds_deg))
+        self.__add_images(get_all_images_near_track(athlete_value['track']))
 
         self.plot_images()
         self.draw_track(athlete_key, athlete_value['colour'])
@@ -305,9 +322,9 @@ class MapClass:
 
         for tile_index, image in self.__image_dict.items():
             self.__ax.imshow(np.asarray(image), extent=(tile_index[0] * self.tile_size,
-                                                         (tile_index[0] + 1) * self.tile_size,
-                                                         tile_index[1] * self.tile_size,
-                                                         (tile_index[1] + 1) * self.tile_size))
+                                                        (tile_index[0] + 1) * self.tile_size,
+                                                        tile_index[1] * self.tile_size,
+                                                        (tile_index[1] + 1) * self.tile_size))
 
     def __remove_axis(self) -> None:
         """
@@ -457,8 +474,8 @@ class MapClass:
         # return the plotted line, its default in a list, but its only ever of
         # length one so take it out of the list
         return self.__ax.plot([start_graph_pos[0], end_graph_pos[0]],
-                        [start_graph_pos[1], end_graph_pos[1]],
-                        color=color, linewidth=width)[0]
+                              [start_graph_pos[1], end_graph_pos[1]],
+                              color=color, linewidth=width)[0]
 
     def draw_point(self, athlete_key: str,
                    pos: tuple[float, float],
@@ -481,9 +498,9 @@ class MapClass:
 
         graph_pos = self.degrees_to_graph(pos)
         self.__athletes[athlete_key]['draw_point'] = self.__ax.plot(graph_pos[0], graph_pos[1],
-                                                              marker="o", markersize=size,
-                                                              markeredgecolor=color,
-                                                              markerfacecolor=color)[0]
+                                                                    marker="o", markersize=size,
+                                                                    markeredgecolor=color,
+                                                                    markerfacecolor=color)[0]
 
     def remove_point(self, athlete_key: str) -> None:
         """

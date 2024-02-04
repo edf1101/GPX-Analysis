@@ -161,6 +161,9 @@ class Track:
 
                 self.__has_cadence = cadence is not None
 
+                if not self.__has_cadence:
+                    cadence = 0
+
                 self.__track_points.append(TrackPoint(lat, lon, int(cadence), time))
 
     def __redo_timings(self) -> None:

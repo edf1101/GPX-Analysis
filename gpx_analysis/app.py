@@ -223,7 +223,7 @@ class GpxAnalysisApp:
         :param filename: filename to open
         :return: None
         """
-        print(f'app opened {filename}')
+        # print(f'app opened {filename}')
 
         new_track = gpx.Track(filename)
 
@@ -236,7 +236,7 @@ class GpxAnalysisApp:
 
         if same_as:
             # Already been imported
-            print("Already been imported")
+            # print("Already been imported")
             return
 
         # Clean up the filename
@@ -296,7 +296,7 @@ class GpxAnalysisApp:
         :return: None
         """
 
-        print(f'{athlete_key} changed their name to {changed_to}')
+        # print(f'{athlete_key} changed their name to {changed_to}')
 
         # modify athlete data in this class
         self.__athletes[athlete_key]['display_name'] = changed_to
@@ -318,7 +318,7 @@ class GpxAnalysisApp:
         :param athlete_key: The dictionary key for the athlete we are deleting
         :return: None
         """
-        print(f'{athlete_key} got deleted')
+        # print(f'{athlete_key} got deleted')
 
         # first remove from the map and update it
         self.__mpl_map.remove_athlete(athlete_key)

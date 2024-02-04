@@ -19,7 +19,6 @@ class StatsGraph:
         """
         The constructor for the StatsGraph class
         """
-
         # Create the fig and axis for this class
         self.__fig, self.__ax = plt.subplots()
         self.__ax_2 = self.__ax.twinx()
@@ -65,7 +64,7 @@ class StatsGraph:
         :return: None
         """
         mode, unit = mode.split('|')
-        print(f'new {unit}')
+        # print(f'new {unit}')
 
         self.__ax_2.cla()
         self.__ax.cla()

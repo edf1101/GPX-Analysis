@@ -1,21 +1,29 @@
 gpx\_analysis package
 =====================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   gpx_analysis.guis
+
 Submodules
 ----------
 
-gpx\_analysis.flask\_test module
---------------------------------
+gpx\_analysis.app module
+------------------------
 
-.. automodule:: gpx_analysis.flask_test
+.. automodule:: gpx_analysis.app
    :members:
    :undoc-members:
    :show-inheritance:
 
-gpx\_analysis.geo\_components module
-------------------------------------
+gpx\_analysis.components module
+-------------------------------
 
-.. automodule:: gpx_analysis.geo_components
+.. automodule:: gpx_analysis.components
    :members:
    :undoc-members:
    :show-inheritance:
@@ -48,6 +56,14 @@ gpx\_analysis.sporting module
 -----------------------------
 
 .. automodule:: gpx_analysis.sporting
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gpx\_analysis.stats\_graph\_handler module
+------------------------------------------
+
+.. automodule:: gpx_analysis.stats_graph_handler
    :members:
    :undoc-members:
    :show-inheritance:

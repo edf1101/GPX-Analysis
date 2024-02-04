@@ -96,7 +96,7 @@ class StatsMenuFrame:
         :return: None
         """
         # make sure hasn't been called too recently
-        if time.time()-self.__last_graph_update < 0.5:
+        if time.time() - self.__last_graph_update < 0.5:
             return
 
         canvas = FigureCanvasTkAgg(self.__stats_graph.get_fig(), master=self.__frm_stats_graph)
@@ -180,11 +180,11 @@ class StatsMenuFrame:
 
             # change speed so its in correct units
             units = self.__value_speed_selected_option.get()
-            speed = sport.convert_speed_units(speed,units)
-            if units in ['s/500m','s/km']:  # for units measured in mins and secs write diff format
-                mins = int(speed/60)
-                secs = round(speed % 60,1)
-                if secs<10:  # so seconds starts with a preceeding 0
+            speed = sport.convert_speed_units(speed, units)
+            if units in ['s/500m', 's/km']:  # for units measured in mins and secs write diff format
+                mins = int(speed / 60)
+                secs = round(speed % 60, 1)
+                if secs < 10:  # so seconds starts with a preceeding 0
                     secs = f'0{secs}'
                 speed = f'{mins}:{secs} {units}'
             else:
