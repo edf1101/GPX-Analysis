@@ -10,6 +10,7 @@ import os.path
 import PIL.Image
 import numpy as np
 
+import matplotlib.legend as mpl_legend
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -130,9 +131,8 @@ class MapClass:
     """
 
     def __init__(self):
-        # Set up the matplotlib figure
-        # mpl.use('macosx')  # if macOS need to sort out Windows version
-        # mpl.use("Qt5Agg")
+
+        self.__fig, self.__ax = plt.subplots()
 
         self.tile_size = 50
         self.__image_dict = {}
@@ -143,6 +143,8 @@ class MapClass:
         self.tile_bounds_deg = None
 
         self.__athletes = {}
+
+        self.__legend = None
 
     def add_athlete(self, athlete_key: str, athlete_value: dict) -> None:
         """
@@ -302,15 +304,19 @@ class MapClass:
         """
 
         for tile_index, image in self.__image_dict.items():
-            plt.imshow(np.asarray(image), extent=(tile_index[0] * self.tile_size,
-                                                  (tile_index[0] + 1) * self.tile_size,
-                                                  tile_index[1] * self.tile_size,
-                                                  (tile_index[1] + 1) * self.tile_size))
+            self.__ax.imshow(np.asarray(image), extent=(tile_index[0] * self.tile_size,
+                                                         (tile_index[0] + 1) * self.tile_size,
+                                                         tile_index[1] * self.tile_size,
+                                                         (tile_index[1] + 1) * self.tile_size))
 
-    def __remove_axis(self):
-        axis = plt.gca()
-        axis.get_xaxis().set_visible(False)
-        axis.get_yaxis().set_visible(False)
+    def __remove_axis(self) -> None:
+        """
+        Removes the axis from a graph
+
+        :return: None
+        """
+        self.__ax.get_xaxis().set_visible(False)
+        self.__ax.get_yaxis().set_visible(False)
 
     def get_figure(self) -> plt.Figure:
         """
@@ -319,11 +325,11 @@ class MapClass:
         :return: The figure
         """
         self.__remove_axis()
-        plt.gcf().tight_layout()
+        self.__fig.tight_layout()
         # plt.gca().set_position((0, 0, 1, 1))
-        plt.gcf().set_size_inches(4.8, 4.8)
-        plt.gcf().set_dpi(100)
-        return plt.gcf()
+        self.__fig.set_size_inches(4.8, 4.8)
+        self.__fig.set_dpi(100)
+        return self.__fig
 
     def scale_zoom(self, input_value: float) -> float:
         """
@@ -380,7 +386,7 @@ class MapClass:
         right = min(center_x + graph_size / 2 + offset, self.tile_bounds_plt[1])
         down = max(0.0, center_y - graph_size / 2 - offset)
         above = min(center_y + graph_size / 2 + offset, self.tile_bounds_plt[0])
-        plt.axis((left, right, down, above))
+        self.__ax.axis((left, right, down, above))
 
     def draw_track(self, athlete_key: str, color: str | tuple = 'green') -> None:
         """
@@ -402,11 +408,10 @@ class MapClass:
             start_point = track.get_track_points()[i]  # get start and end points of line
             end_point = track.get_track_points()[i + 1]
 
-            # don't plot this line if it's outside the start finish zone
+            # dont plot this line if its out of the start finish zone
             if (end_point.get_relative_time() < self.__athletes[athlete_key]['start_time'] or
                     start_point.get_relative_time() > self.__athletes[athlete_key]['finish_time']):
                 continue
-
 
             single_line = self.draw_line(start_point.get_position_degrees(),
                                          end_point.get_position_degrees(),
@@ -451,7 +456,7 @@ class MapClass:
 
         # return the plotted line, its default in a list, but its only ever of
         # length one so take it out of the list
-        return plt.plot([start_graph_pos[0], end_graph_pos[0]],
+        return self.__ax.plot([start_graph_pos[0], end_graph_pos[0]],
                         [start_graph_pos[1], end_graph_pos[1]],
                         color=color, linewidth=width)[0]
 
@@ -475,7 +480,7 @@ class MapClass:
             self.remove_point(athlete_key)
 
         graph_pos = self.degrees_to_graph(pos)
-        self.__athletes[athlete_key]['draw_point'] = plt.plot(graph_pos[0], graph_pos[1],
+        self.__athletes[athlete_key]['draw_point'] = self.__ax.plot(graph_pos[0], graph_pos[1],
                                                               marker="o", markersize=size,
                                                               markeredgecolor=color,
                                                               markerfacecolor=color)[0]
@@ -526,4 +531,7 @@ class MapClass:
             athlete_name = single_athlete_data['display_name']
             all_patches.append(mpatches.Patch(color=athlete_col, label=athlete_name))
 
-        plt.legend(handles=all_patches, fontsize="9", loc='upper right')
+        if isinstance(self.__legend, mpl_legend.Legend):
+            self.__legend.remove()
+
+        self.__legend = self.__fig.legend(handles=all_patches, fontsize="9", loc='upper right')

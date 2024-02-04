@@ -207,7 +207,7 @@ def get_total_distance(track: gpx.Track) -> float:
     return get_cumulative_dist_at_time(track, track.get_track_points()[-1].get_relative_time())
 
 
-def convert_speed_units(speed: float, unit: str) -> str:
+def convert_speed_units(speed: float, unit: str) -> float:
     """
     Converts the speed from m/s to another unit
 
@@ -222,22 +222,16 @@ def convert_speed_units(speed: float, unit: str) -> str:
         raise TypeError("Unit must be a string")
 
     if unit == "m/s":
-        return f'{round(speed, 1)} m/s'
+        return round(speed, 1)
     if unit == "km/h":
-        return f'{round(speed * 3.6, 1)} km/h'
+        return round(speed * 3.6, 1)
     if unit == "mph":
-        return f'{round(speed * 2.237, 1)} mph'
+        return round(speed * 2.237, 1)
     if unit == "s/500m":
         total = round(500 / speed, 1)
-        mins = int(total // 60)
-        secs = round(total % 60, 1)
-        secs = ('0' if secs < 10 else '') + str(secs)
-        return f'{mins}:{secs} /500m'
+        return total
     if unit == "s/km":
         total = round(1000 / speed, 1)
-        mins = int(total // 60)
-        secs = round(total % 60)
-        secs = ('0' if secs < 10 else '') + str(secs)
-        return f'{mins}:{secs} /km'
+        return total
 
     raise ValueError("Unit must be one of: m/s, km/h, mph, s/500m or s/km")
