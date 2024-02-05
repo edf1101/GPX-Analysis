@@ -10,6 +10,7 @@ opportunity to build a better/ more robust one.
 - Python 3.10 (or later)
 - Numpy ```pip install numpy```
 - Matplotlib ```pip install matplotlib```
+- tkScrolledFrame ```pip install tkScrolledFrame```
 - Pillow (should already be installed with mpl) ```pip install pillow```
 - On mac there are tkinter glitches **It must be run from an interpreter with tkinter v8.6.12+** this comes preinstalled
 with python 3.11

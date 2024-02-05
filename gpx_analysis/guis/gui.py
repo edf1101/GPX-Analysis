@@ -15,10 +15,18 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing
 from gpx_analysis import graph_handler as gh
 
 # import the individual separate classes
-from gpx_analysis.guis.gui_control_menu import ControlMenuFrame
-from gpx_analysis.guis.gui_finishline_menu import FinishlineMenuFrame
-from gpx_analysis.guis.gui_playback_menu import PlaybackMenuFrame
-from gpx_analysis.guis.gui_stats_menu import StatsMenuFrame
+try:
+    from gpx_analysis.guis.gui_control_menu import ControlMenuFrame
+    from gpx_analysis.guis.gui_finishline_menu import FinishlineMenuFrame
+    from gpx_analysis.guis.gui_playback_menu import PlaybackMenuFrame
+    from gpx_analysis.guis.gui_stats_menu import StatsMenuFrame
+except ImportError:
+    from gui_control_menu import ControlMenuFrame
+    from gui_finishline_menu import FinishlineMenuFrame
+    from gui_playback_menu import PlaybackMenuFrame
+    from gui_stats_menu import StatsMenuFrame
+
+from tkscrolledframe import ScrolledFrame
 
 
 class AppGUI:
@@ -40,11 +48,18 @@ class AppGUI:
         self.__window = window
         self.__window.title("GPX Analysis")  # Set the window title
 
+        self.__scroll_window = ScrolledFrame(self.__window, width=880, height=600)
+        self.__scroll_window.pack(side="top", expand=1, fill="both")
+        self.__scroll_window.bind_scroll_wheel(self.__window)
+
+        self.__inner_frame = self.__scroll_window.display_widget(tk.Frame)
+        # self.__window.geometry('400x400')
+
         # Configure the layout of the basic 2x2 grid
-        self.__window.rowconfigure(0, minsize=500, weight=3)
-        self.__window.rowconfigure(1, minsize=250, weight=1)
-        self.__window.columnconfigure(1, minsize=500, weight=8)
-        self.__window.columnconfigure(0, minsize=260, weight=1)
+        self.__inner_frame.rowconfigure(0, minsize=500, weight=3)
+        self.__inner_frame.rowconfigure(1, minsize=250, weight=1)
+        self.__inner_frame.columnconfigure(1, minsize=500, weight=8)
+        self.__inner_frame.columnconfigure(0, minsize=260, weight=1)
 
         # Holds the last stats update time so we can do it only every .5s
         self.__last_stats_update = time.time()
@@ -67,7 +82,7 @@ class AppGUI:
         self.__window.bind_all("<Button-1>", self.__remove_entry_focus)
 
         # Create the stats menu
-        self.__stats_menu = StatsMenuFrame(self)
+        self.__stats_menu = StatsMenuFrame(self, self.__inner_frame)
 
         # create callback function references
         self.__open_file_callback = None
@@ -95,6 +110,11 @@ class AppGUI:
 
         # Set the submenus here after the other variables have been set
         self.__set_submenus()
+
+        # create the map here and its canvas
+        self.__canvas = FigureCanvasTkAgg(self.__mpl_graph.get_figure(), master=self.__inner_frame)
+        self.__map_widget = self.__canvas.get_tk_widget()
+        self.__map_widget.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
 
         # Is it set up: this gets set to true when init is finished
         self.ready = True
@@ -177,9 +197,7 @@ class AppGUI:
             return
         self.__last_map_update = time.time()
 
-        canvas = FigureCanvasTkAgg(self.__mpl_graph.get_figure(), master=self.__window)
-        self.__map_widget = canvas.get_tk_widget()
-        self.__map_widget.grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
+        self.__canvas.draw()
 
     def __set_submenus(self) -> None:
         """
@@ -189,7 +207,7 @@ class AppGUI:
         """
 
         #  Set up the two menus (map menu on top, stats menu on bottom)
-        self.__frm_map_menu = ttk.Frame(self.__window, relief=tk.RAISED, borderwidth=5)
+        self.__frm_map_menu = ttk.Frame(self.__inner_frame, relief=tk.RAISED, borderwidth=5)
         self.__frm_map_menu.grid(row=0, column=0, sticky='nsew')
 
         # Configure the arrangement of the map menu frame so the child frames
@@ -341,3 +359,4 @@ class AppGUI:
         :return: None
         """
         self.get_start_finish_time = func
+

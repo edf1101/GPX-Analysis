@@ -13,8 +13,12 @@ import time
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
 # import our own library
-from gpx_analysis import sporting as sport
-from gpx_analysis import stats_graph_handler as sgh
+try:
+    from gpx_analysis import sporting as sport
+    from gpx_analysis import stats_graph_handler as sgh
+except ImportError:
+    import gpx_analysis.sporting as sport
+    import gpx_analysis.stats_graph_handler as sgh
 
 
 class StatsMenuFrame:
@@ -22,22 +26,25 @@ class StatsMenuFrame:
     This widget contains and abstracts the features of the stats menu
     """
 
-    def __init__(self, parent_class):
+    def __init__(self, parent_class, total_frame):
         """
         Constructor for the StatsMenuFrame class
 
         :param parent_class: pass in the parent_class so we can access its window and
          other frames etc
+         :param total_frame: The whole frame all of the sim/graph elements are in
         """
         self.__parent_class = parent_class
         self.__window = self.__parent_class.get_tk_window()
+
+        self.__total_frame = total_frame
 
         # Athlete data
         self.__athlete_data = {}
 
         # Create the surrounding frame for the graph
         self.__frm_stats_menu = None
-        self.__frm_stats_menu = ttk.Frame(self.__window, relief=tk.RAISED, borderwidth=5)
+        self.__frm_stats_menu = ttk.Frame(self.__total_frame, relief=tk.RAISED, borderwidth=5)
         self.__frm_stats_menu.grid(row=1, column=0, sticky='nsew')
         self.__frm_stats_menu.grid_columnconfigure(0, weight=1)  # center it
 
@@ -75,7 +82,7 @@ class StatsMenuFrame:
 
         # Create the graph frame
         self.__frm_stats_graph = None
-        self.__frm_stats_graph = ttk.Frame(self.__window, relief=tk.RAISED, borderwidth=5)
+        self.__frm_stats_graph = ttk.Frame(self.__total_frame, relief=tk.RAISED, borderwidth=5)
         self.__frm_stats_graph.grid(row=1, column=1, sticky='nsew')
         self.__last_graph_update = time.time()  # this makes sure we don't update too often
 
@@ -87,6 +94,11 @@ class StatsMenuFrame:
         option = (f'{self.__value_graph_selected_option.get()}|'
                   f'{self.__value_speed_selected_option.get()}')
         self.__stats_graph.draw_base_graph(option)
+
+        self.__canvas = FigureCanvasTkAgg(self.__stats_graph.get_fig(), master=self.__frm_stats_graph)
+        self.__map_widget = self.__canvas.get_tk_widget()
+        self.__map_widget.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
+
         self.__update_graph()
 
     def __update_graph(self) -> None:
@@ -99,9 +111,7 @@ class StatsMenuFrame:
         if time.time() - self.__last_graph_update < 0.5:
             return
 
-        canvas = FigureCanvasTkAgg(self.__stats_graph.get_fig(), master=self.__frm_stats_graph)
-        self.__map_widget = canvas.get_tk_widget()
-        self.__map_widget.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
+        self.__canvas.draw()
 
     def __create_graph_type_dropdown(self) -> None:
         """
@@ -117,7 +127,8 @@ class StatsMenuFrame:
         # Create the dropdown menu
         graph_options = ['Speed', 'Distance', 'Gap', 'Rate', 'Speed & Rate']  # options for it
 
-        self.__value_graph_selected_option = tk.StringVar()
+        root = self.__parent_class.get_tk_window()
+        self.__value_graph_selected_option = tk.StringVar(master=root)
         self.__value_graph_selected_option.set(graph_options[0])  # s/500m is default unit
 
         # This doesn't need to be an instance var since we won't modify it again
@@ -209,6 +220,7 @@ class StatsMenuFrame:
         # remake athlete list
         self.__create_athlete_selection_menu()
 
+
         # Set the athlete list on the graph
         self.__stats_graph.set_athletes(athletes)
         option = (f'{self.__value_graph_selected_option.get()}|'
@@ -288,11 +300,13 @@ class StatsMenuFrame:
         self.__menubutton.configure(menu=self.__menu)
         self.__menubutton.grid(row=4, column=0, sticky='w')
         self.__menu_choices = {}
+        root = self.__parent_class.get_tk_window()
 
         for athlete in self.__athlete_data.values():
             display_name = athlete['display_name']
             filename = athlete['filename']
-            self.__menu_choices[filename] = tk.IntVar(value=1)
+
+            self.__menu_choices[filename] = tk.IntVar(master=root, value=1)
             self.__menu.add_checkbutton(label=display_name, variable=self.__menu_choices[filename],
                                         onvalue=1, offvalue=0, command=self.__on_athlete_change)
         self.__on_athlete_change()
@@ -309,8 +323,9 @@ class StatsMenuFrame:
 
         # Create the dropdown menu
         speed_options = ['s/500m', 's/km', 'm/s', 'km/h', 'mph']  # options for it
+        root = self.__parent_class.get_tk_window()
 
-        self.__value_speed_selected_option = tk.StringVar()
+        self.__value_speed_selected_option = tk.StringVar(master = root)
         self.__value_speed_selected_option.set(speed_options[0])  # s/500m is default unit
 
         # This doesn't need to be an instance var since we won't modify it again
@@ -341,6 +356,22 @@ class StatsMenuFrame:
 
         # update the stats with the new selection
         self.update_stats()
+
+        # only include the athletes selected on the graph
+        graph_athletes = {}
+        for key, value in self.__athlete_data.items():
+            if (isinstance(self.__menu_choices[value['filename']], tk.IntVar)
+                    and self.__menu_choices[value['filename']].get() == 0):
+                continue
+            graph_athletes[key] = value
+
+        if self.__parent_class.ready:
+
+            self.__stats_graph.set_athletes(graph_athletes)
+            option = (f'{self.__value_graph_selected_option.get()}|'
+                      f'{self.__value_speed_selected_option.get()}')
+            self.__stats_graph.draw_base_graph(option)
+            self.__update_graph()
 
     def __on_speed_option_change(self, *args) -> None:
         """

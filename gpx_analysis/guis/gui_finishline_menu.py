@@ -89,7 +89,8 @@ class FinishlineMenuFrame:
 
         :return: None
         """
-        self.__checkbox_value = tk.BooleanVar()
+        root = self.__parent_class.get_tk_window()
+        self.__checkbox_value = tk.BooleanVar(master=root)
         self.__checkbox_value.set(False)
         self.__checkbox_finishline_status = ttk.Checkbutton(master=self.__frm_map_finishline_menu,
                                                             text='Enable start/finish modifying?',
@@ -158,7 +159,8 @@ class FinishlineMenuFrame:
         self.__slider_finishline_menu_start.grid(row=1, column=0)
 
         # entry box for precise entry
-        self.__text_finishline_start_precise = tk.StringVar()
+        root = self.__parent_class.get_tk_window()
+        self.__text_finishline_start_precise = tk.StringVar(master=root)
 
         # This doesn't need to be an instance variable as not used again
         entry__start_precise = ttk.Entry(self.__frm_map_finishline_start,
@@ -203,7 +205,8 @@ class FinishlineMenuFrame:
 
         # entry box for precise entry
         # the text data needs to be accessible outside but entry itself won't be modified again
-        self.__text_finishline_end_precise = tk.StringVar()
+        root = self.__parent_class.get_tk_window()
+        self.__text_finishline_end_precise = tk.StringVar(master=root)
         entry_finishline_end_precise = ttk.Entry(self.__frm_map_finishline_end,
                                                  textvariable=self.__text_finishline_end_precise,
                                                  width=5)

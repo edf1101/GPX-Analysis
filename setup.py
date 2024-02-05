@@ -19,6 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    package_data={'': ['image_cache/blank.txt']},
     python_requires=">=3.11",
-    install_requires=["matplotlib", "numpy"]
+    install_requires=["matplotlib", "numpy", "tkScrolledFrame"]
 )

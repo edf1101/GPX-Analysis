@@ -4,10 +4,15 @@ This module handles the small stats line graph at the bottom of the screen
 
 # import external modules
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
 # import our own
-from gpx_analysis import sporting as sport
-from gpx_analysis.components import lighten_color
+try:
+    from gpx_analysis import sporting as sport
+    from gpx_analysis.components import lighten_color
+except ImportError:
+    import sporting as sport
+    from components import lighten_color
 
 
 class StatsGraph:
@@ -21,6 +26,7 @@ class StatsGraph:
         """
         # Create the fig and axis for this class
         self.__fig, self.__ax = plt.subplots()
+        self.__fig.set_size_inches(6, 2.5)
         self.__ax_2 = self.__ax.twinx()
         self.__secondary_visibility(False)
 
@@ -185,8 +191,8 @@ class StatsGraph:
         :return: The figure of the graph
         """
         # self.__fig.tight_layout()
-        self.__fig.set_size_inches(6, 2.5)
-        self.__fig.set_dpi(100)
+        # self.__fig.set_size_inches(6, 2.5)
+        # self.__fig.set_dpi(200)
 
         return self.__fig
 

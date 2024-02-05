@@ -109,7 +109,9 @@ class Track:
 
         # Define namespaces
         self.__namespaces = {'gpx': 'http://www.topografix.com/GPX/1/1',
-                           'gpxdata': 'http://www.cluetrust.com/XML/GPXDATA/1/0'}
+                             'gpxdata': 'http://www.cluetrust.com/XML/GPXDATA/1/0',
+                             'gpxx': "http://www.garmin.com/xmlschemas/GpxExtensions/v3",
+                             'gpxtpx': "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"}
         self.__track_points = []
         self.__create_track_points()
 

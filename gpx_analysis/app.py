@@ -12,11 +12,18 @@ import tkinter as tk
 import pathlib
 import random
 
-from gpx_analysis import gpx_parser as gpx
-from gpx_analysis import graph_handler as gh
-from gpx_analysis.guis.gui import AppGUI
-from gpx_analysis import sporting as sport
-from gpx_analysis import components as geo
+try:
+    from gpx_analysis import gpx_parser as gpx
+    from gpx_analysis import graph_handler as gh
+    from gpx_analysis.guis.gui import AppGUI
+    from gpx_analysis import sporting as sport
+    from gpx_analysis import components as geo
+except ImportError:
+    import gpx_parser as gpx
+    import graph_handler as gh
+    from guis.gui import AppGUI
+    import sporting as sport
+    import components as geo
 
 
 class GpxAnalysisApp:

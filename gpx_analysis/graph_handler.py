@@ -14,8 +14,12 @@ import matplotlib.legend as mpl_legend
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from gpx_analysis import components as geo
-from gpx_analysis import gpx_parser as gpx
+try:
+    from gpx_analysis import components as geo
+    from gpx_analysis import gpx_parser as gpx
+except ImportError:
+    import components as geo
+    import gpx_parser as gpx
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -150,6 +154,7 @@ class MapClass:
     def __init__(self):
 
         self.__fig, self.__ax = plt.subplots()
+        self.__fig.set_size_inches(4.8, 4.8)
 
         self.tile_size = 50
         self.__image_dict = {}
@@ -343,9 +348,7 @@ class MapClass:
         """
         self.__remove_axis()
         self.__fig.tight_layout()
-        # plt.gca().set_position((0, 0, 1, 1))
-        self.__fig.set_size_inches(4.8, 4.8)
-        self.__fig.set_dpi(100)
+        # self.__fig.set_dpi(100)
         return self.__fig
 
     def scale_zoom(self, input_value: float) -> float:

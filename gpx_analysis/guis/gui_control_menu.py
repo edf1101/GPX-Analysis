@@ -65,7 +65,7 @@ class ControlMenuFrame:
         self.__delete_callback = None
 
     def update_athlete_data(self, athlete_data: dict,
-                            remake_widgets:bool = True) -> None:
+                            remake_widgets: bool = True) -> None:
         """
         Set the athlete data in this class (setter method)
 
@@ -95,8 +95,8 @@ class ControlMenuFrame:
         self.__frm_map_control_changename = ttk.Frame(self.__frm_map_control_menu, relief=tk.FLAT,
                                                       borderwidth=0)
         self.__frm_map_control_changename.grid(row=8, column=0, sticky='nsew')
-
-        self.__text_map_control_changename = tk.StringVar()
+        root = self.__parent_class.get_tk_window()
+        self.__text_map_control_changename = tk.StringVar(master=root)
 
         # The entry widget doesn't need to be an instance var as we won't modify it again
         entry_map_control_changename = ttk.Entry(self.__frm_map_control_changename,
@@ -171,9 +171,9 @@ class ControlMenuFrame:
 
         :return: None
         """
-        self.__value_map_dropdown = tk.StringVar()
+        root = self.__parent_class.get_tk_window()
+        self.__value_map_dropdown = tk.StringVar(master=root)
         self.__value_map_dropdown.set(self.__athlete_names[0])
-        self.__value_map_dropdown.trace('w', self.__on_athlete_swap)
         self.__last_selected = self.__athlete_names[0]
 
         # If we have made it before destroy the old copy
@@ -182,7 +182,8 @@ class ControlMenuFrame:
 
         self.__dropdown_map_control = tk.OptionMenu(self.__frm_map_control_dropdown,
                                                     self.__value_map_dropdown,
-                                                    *self.__athlete_names)
+                                                    *self.__athlete_names,
+                                                    command=self.__on_athlete_swap)
         self.__dropdown_map_control.grid(row=0, column=0, sticky='nsew')
 
         # if athlete data has been created, run this so it also updates the finishline menu
@@ -197,7 +198,6 @@ class ControlMenuFrame:
 
             self.__parent_class.set_finishline_athlete_selected(athlete_key)
             self.__parent_class.stop_finish_start_editing()
-
 
     def __setup_static_widgets(self) -> None:
         """
@@ -313,6 +313,8 @@ class ControlMenuFrame:
 
         # Make sure an athlete is selected and the new name isn't blank
         valid_key = False if (changed_to == '') or (athlete_key is None) else valid_key
+
+        # print(f'changed to {changed_to}  athlete key = {athlete_key} last selected = {self.__last_selected}')
 
         if valid_key:
             self.__changename_callback(athlete_key, changed_to)  # execute callback
