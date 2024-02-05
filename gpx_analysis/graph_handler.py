@@ -7,10 +7,11 @@ import math
 import urllib.request
 import io
 import os.path
+from sys import platform as sys_pf
 import PIL.Image
 import numpy as np
 
-import matplotlib.legend as mpl_legend
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -20,6 +21,10 @@ try:
 except ImportError:
     import components as geo
     import gpx_parser as gpx
+
+# If we are on macos then run this to fix the issues
+if sys_pf == 'darwin':
+    matplotlib.use("TkAgg")
 
 
 def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
@@ -166,7 +171,27 @@ class MapClass:
 
         self.__athletes = {}
 
-        self.__legend = None
+    def reset(self) -> None:
+        """
+        Resets the map to a blank state
+
+        :return: None
+        """
+        self.__ax.cla()
+        self.tile_size = 50
+        self.__image_dict = {}
+        self.__raw_image_dict = {}
+
+        self.gpx_bounds_deg = None
+        self.tile_bounds_plt = None
+        self.tile_bounds_deg = None
+
+        self.__athletes = {}
+
+        for axis in self.__fig.get_axes():
+            axis.legend_ = None
+            if axis.get_legend():
+                axis.get_legend().remove()
 
     def add_athlete(self, athlete_key: str, athlete_value: dict) -> None:
         """
@@ -179,13 +204,16 @@ class MapClass:
         self.__athletes[athlete_key] = athlete_value
 
         # Add its bounds to the graph handler's bounds
-        self.__set_gpx_bounds(geo.get_track_bounds(athlete_value['track']))
+        new_bounds = geo.get_track_bounds(athlete_value['track'])
+        self.__set_gpx_bounds(new_bounds)
 
         # Redo the images for the graph handler with the new bounds
         self.__add_images(get_all_images_near_track(athlete_value['track']))
 
+        self.__ax.cla()
         self.plot_images()
-        self.draw_track(athlete_key, athlete_value['colour'])
+        for athlete in self.__athletes.values():
+            self.draw_track(athlete['filename'], athlete['colour'])
         self.__draw_legend()
 
     def modify_athlete(self, athlete_key: str, new_value: dict) -> None:
@@ -551,7 +579,7 @@ class MapClass:
             athlete_name = single_athlete_data['display_name']
             all_patches.append(mpatches.Patch(color=athlete_col, label=athlete_name))
 
-        if isinstance(self.__legend, mpl_legend.Legend):
-            self.__legend.remove()
+        if self.__ax.get_legend():
+            self.__ax.get_legend().remove()
 
-        self.__legend = self.__fig.legend(handles=all_patches, fontsize="9", loc='upper right')
+        self.__ax.legend(handles=all_patches, fontsize="9", loc='upper right')

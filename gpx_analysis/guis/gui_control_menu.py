@@ -314,8 +314,6 @@ class ControlMenuFrame:
         # Make sure an athlete is selected and the new name isn't blank
         valid_key = False if (changed_to == '') or (athlete_key is None) else valid_key
 
-        # print(f'changed to {changed_to}  athlete key = {athlete_key} last selected = {self.__last_selected}')
-
         if valid_key:
             self.__changename_callback(athlete_key, changed_to)  # execute callback
         else:

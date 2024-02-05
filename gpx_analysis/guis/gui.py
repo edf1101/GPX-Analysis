@@ -12,21 +12,21 @@ from tkinter import ttk
 import time
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
-from gpx_analysis import graph_handler as gh
-
 # import the individual separate classes
 try:
+    from gpx_analysis import graph_handler as gh
     from gpx_analysis.guis.gui_control_menu import ControlMenuFrame
     from gpx_analysis.guis.gui_finishline_menu import FinishlineMenuFrame
     from gpx_analysis.guis.gui_playback_menu import PlaybackMenuFrame
     from gpx_analysis.guis.gui_stats_menu import StatsMenuFrame
+    from gpx_analysis.tkscrolledframe import ScrolledFrame
 except ImportError:
-    from gui_control_menu import ControlMenuFrame
-    from gui_finishline_menu import FinishlineMenuFrame
-    from gui_playback_menu import PlaybackMenuFrame
-    from gui_stats_menu import StatsMenuFrame
-
-from tkscrolledframe import ScrolledFrame
+    from .gui_control_menu import ControlMenuFrame
+    from .gui_finishline_menu import FinishlineMenuFrame
+    from .gui_playback_menu import PlaybackMenuFrame
+    from .gui_stats_menu import StatsMenuFrame
+    from .. import graph_handler as gh
+    from gpx_analysis.tkscrolledframe import ScrolledFrame
 
 
 class AppGUI:
@@ -186,14 +186,15 @@ class AppGUI:
         if not isinstance(event.widget, ttk.Entry):
             self.__window.focus()
 
-    def update_map(self) -> None:
+    def update_map(self,force:bool = False) -> None:
         """
         This sets/ updates the mpl figure map on the GUI
 
+        :param force: whether to force an update regardless of whether it's too soon
         :return: None
         """
 
-        if time.time() - self.__last_map_update < 0.2:
+        if time.time() - self.__last_map_update < 0.2 and not force:
             return
         self.__last_map_update = time.time()
 
@@ -359,4 +360,3 @@ class AppGUI:
         :return: None
         """
         self.get_start_finish_time = func
-

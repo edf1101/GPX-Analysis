@@ -3,8 +3,9 @@ This module handles the small stats line graph at the bottom of the screen
 """
 
 # import external modules
+from sys import platform as sys_pf
+import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
 
 # import our own
 try:
@@ -13,6 +14,10 @@ try:
 except ImportError:
     import sporting as sport
     from components import lighten_color
+
+# If on macos then run this to fix the mpl issues
+if sys_pf == 'darwin':
+    matplotlib.use("TkAgg")
 
 
 class StatsGraph:
@@ -53,7 +58,7 @@ class StatsGraph:
 
         graph_height_range = self.__ax.get_ylim()
         height = graph_height_range[1] - graph_height_range[0]
-        offset = height*0.1
+        offset = height * 0.1
 
         self.__time_line = self.__ax.plot([time, time],
                                           [graph_height_range[0] + offset,
@@ -90,6 +95,8 @@ class StatsGraph:
         elif mode == 'Gap':
             self.__ax.set_ylabel("meters")
             self.__secondary_visibility(False)
+
+            self.__plot_gap()
 
         elif mode == 'Speed & Rate':
             self.__ax.set_ylabel(unit)
@@ -159,6 +166,40 @@ class StatsGraph:
                           [start_y, end_y],
                           color=colour, linewidth=2,
                           linestyle='dotted' if axis == self.__ax_2 else 'solid')
+
+    def __plot_gap(self) -> None:
+        """
+        It woudld be very inefficient to plot the gap using the same method
+         as previously so we'll do it here
+
+        :return: None
+        """
+        max_time = int(self.__max_time)
+        time_intervals = int(self.__time_intervals)
+        # self.__ax.plot([0,10,20],[20,30,10])
+        athlete_points = {key: [] for key in self.__athletes.keys()}
+
+        for time in range(0, max_time - time_intervals, time_intervals):
+
+            cdf = sport.get_cumulative_dist_at_time  # abbreviation for get_cumulative_dist func
+
+            # Get the furthest distance anyone has got at this time
+            max_dist = max(cdf(data['track'], time + data['start_time']) -
+                           cdf(data['track'], data['start_time'])  # Makes sure it starts at 0
+                           for data in self.__athletes.values())
+
+            # append each athletes dist to an list this will be the y values
+            for key, data in self.__athletes.items():
+                start_dist = cdf(data['track'],data['start_time'])
+                current_dist = cdf(data['track'], time + data['start_time']) - start_dist
+                athlete_points[key].append(max_dist - current_dist)
+
+        # Plot the line for each athlete
+        for key, athlete_data in self.__athletes.items():
+            self.__ax.plot(range(0, max_time - time_intervals, time_intervals),
+                           athlete_points[key],
+                           color=athlete_data['colour'], linewidth=2,
+                           linestyle='solid')
 
     def __secondary_visibility(self, state: bool) -> None:
         """

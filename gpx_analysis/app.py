@@ -327,9 +327,13 @@ class GpxAnalysisApp:
         """
         # print(f'{athlete_key} got deleted')
 
-        # first remove from the map and update it
-        self.__mpl_map.remove_athlete(athlete_key)
-        self.__gui.update_map()
+        if len(self.__athletes) - 1 == 0:  # if its now empty
+            self.__mpl_map.reset()
+            self.__gui.update_map()
+        else:
+            # first remove from the map and update it
+            self.__mpl_map.remove_athlete(athlete_key)
+            self.__gui.update_map()
 
         # next remove from our list of athletes and update the guis's list
         del self.__athletes[athlete_key]

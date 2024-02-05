@@ -17,8 +17,8 @@ try:
     from gpx_analysis import sporting as sport
     from gpx_analysis import stats_graph_handler as sgh
 except ImportError:
-    import gpx_analysis.sporting as sport
-    import gpx_analysis.stats_graph_handler as sgh
+    from .. import sporting as sport
+    from .. import stats_graph_handler as sgh
 
 
 class StatsMenuFrame:
@@ -35,7 +35,6 @@ class StatsMenuFrame:
          :param total_frame: The whole frame all of the sim/graph elements are in
         """
         self.__parent_class = parent_class
-        self.__window = self.__parent_class.get_tk_window()
 
         self.__total_frame = total_frame
 
@@ -95,7 +94,8 @@ class StatsMenuFrame:
                   f'{self.__value_speed_selected_option.get()}')
         self.__stats_graph.draw_base_graph(option)
 
-        self.__canvas = FigureCanvasTkAgg(self.__stats_graph.get_fig(), master=self.__frm_stats_graph)
+        self.__canvas = FigureCanvasTkAgg(self.__stats_graph.get_fig(),
+                                          master=self.__frm_stats_graph)
         self.__map_widget = self.__canvas.get_tk_widget()
         self.__map_widget.grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
 
