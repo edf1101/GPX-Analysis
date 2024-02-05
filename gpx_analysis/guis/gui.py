@@ -105,6 +105,8 @@ class AppGUI:
         self.set_start_finish_time = None
         self.get_start_finish_time = None
 
+        self.on_colour_change = None
+
         # Athlete list
         self.__athletes = {}
 
@@ -360,3 +362,12 @@ class AppGUI:
         :return: None
         """
         self.get_start_finish_time = func
+
+    def set_on_colour_change(self,func) -> None:
+        """
+        Setter for on colour change callback func
+
+        :param func: the function to be called
+        :return: None
+        """
+        self.on_colour_change = func

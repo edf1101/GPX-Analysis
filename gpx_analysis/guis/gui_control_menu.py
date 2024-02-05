@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as msgbox  # for popups
 from tkinter import filedialog  # for choosing gpx file to open
+from tkinter import colorchooser
 
 
 class ControlMenuFrame:
@@ -231,6 +232,12 @@ class ControlMenuFrame:
                                                   text="Change display name:")
         label_control_menu_changename.grid(row=7, column=0, sticky='w', )
 
+        # add the button to change colours
+        self.__btn_colour_picker = ttk.Button(master=self.__frm_map_control_menu,
+                                              text="Change colour",
+                                              command=self.__on_change_colour)
+        self.__btn_colour_picker.grid(row=9, column=0, sticky='w')
+
     def __on_open_press(self) -> None:
         """
         When the open file button is pressed this is called
@@ -242,6 +249,35 @@ class ControlMenuFrame:
         if file_path != '':  # check it's not blank
             self.__open_file_callback(file_path)
 
+    def __on_change_colour(self) -> None:
+        """
+        Gets called when the change colour button is pressed
+
+        :return: None
+        """
+        if self.__athlete_data == {}:  # no one to assign to
+            return
+
+        color_tuple = colorchooser.askcolor(title="Choose color")[0]
+        if color_tuple is None:
+            return  # no colour picked
+
+        # modify the colours so they are 0-1
+        color_tuple = (color_tuple[0] / 255.0, color_tuple[1] / 255.0, color_tuple[2] / 255.0)
+
+        # Get the athlete's key
+        athlete_key = None
+
+        # Also need to find the current filename.
+        for key, value in self.__athlete_data.items():
+
+            if value['display_name'] == self.__last_selected:
+                athlete_key = key
+
+        # if it is found then change it in the callback function
+        if athlete_key:
+            self.__parent_class.on_colour_change(athlete_key, color_tuple)
+
     def __on_remove_press(self) -> None:
         """
         When the remove athlete button is pressed this is called
@@ -252,7 +288,6 @@ class ControlMenuFrame:
         # Get the athlete being removed
         athlete_key = None
 
-        # Also need to find the current filename.
         for key, value in self.__athlete_data.items():
 
             if value['display_name'] == self.__last_selected:

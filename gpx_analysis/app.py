@@ -80,6 +80,7 @@ class GpxAnalysisApp:
         self.__gui.set_zoom_level_callback(self.__set_zoom_level)
         self.__gui.set_set_start_finish_time_callback(self.__set_start_finish_times)
         self.__gui.set_get_start_finish_time_callback(self.__get_start_finish_times)
+        self.__gui.set_on_colour_change(self.__on_athlete_colour_change)
 
     def __get_playing(self) -> bool:
         """
@@ -317,6 +318,26 @@ class GpxAnalysisApp:
 
         # update the gui's stats display with the new name
         self.__gui.update_stats()
+
+    def __on_athlete_colour_change(self, athlete_key: str,
+                                   colour: tuple[float, float, float]) -> None:
+        """
+        Gets called when an athlete changes their colour
+
+        :param athlete_key: The key of the athlete changing colour
+        :param colour: The colour changing to
+        :return: None
+        """
+
+        # update the data in the app class dict
+        self.__athletes[athlete_key]['colour'] = colour
+
+        # update the guis's list of athletes
+        self.__gui.update_athletes(self.__athletes,remake_widgets=False)
+
+        # update the map
+        self.__mpl_map.modify_athlete(athlete_key, self.__athletes[athlete_key])
+        self.__gui.update_map()
 
     def __on_athlete_deleted(self, athlete_key: str) -> None:
         """
