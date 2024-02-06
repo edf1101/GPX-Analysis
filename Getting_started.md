@@ -29,7 +29,7 @@ name, colour display along with adding and removing new ones.
 #### Adding athletes
 To add an athlete you click the "Open File" button. The file must be a valid GPX file (explained later) or the program may crash.
 
-<img src="readme_images/open file.png" alt="drawing" width="300"/>
+<img src="readme_images/open file.png" alt="drawing" width="500"/>
 
 You cannot open the same file if it is already open, if you do so it just won't load into the program. Each time you open a new file
 It will be added to the dropdown menu below, each time you do add an athlete the dropdown menu will reset to its default position.
@@ -42,7 +42,7 @@ If you want to remove an athlete from the simulation you must make sure the drop
 The display name for an athlete is what is shown in the Dropdown menus for selection as well as in the map legend.
 By default it is the GPX filename, but it can be changed to something shorter/recognisable.
 
-<img src="readme_images/name.png" alt="drawing" width="300"/>
+<img src="readme_images/name.png" alt="drawing" width="600"/>
 
 In the above image we have changed the display name to Test1, you do this by typing into the highlighted entry box, and then clicking the tick button
 
@@ -54,14 +54,14 @@ As this program compares different athletes doing different time trials they are
 this isn't ideal as we want to compare them side by side across the same distance. This menu allows you to modify the start and end of their
 GPS recordings so the two athletes start side by side.
 
-<img src="readme_images/Poor start.png" alt="drawing" width="300"/>
+<img src="readme_images/Poor start.png" alt="drawing" width="600"/>
 
 In this case the orange track stars far ahead of the blue one so we want to modify the blue one to start at the same place
 
 To do that we make sure the track we want to modify is selected in the dropdown selector in the athlete menu and that the simulation is not playing.
 We can then tick the Enable start/finish modifying checkbox.
 
-<img src="readme_images/checkbox.png" alt="drawing" width="200"/>
+<img src="readme_images/checkbox.png" alt="drawing" width="300"/>
 
 After this you can drag the Slider to move the start/ finish roughly where you want it. Or you can use the Entry box to type in a more precise amount in seconds then press SET.
 You only need to press SET if you are typing in a precise number.
@@ -76,7 +76,7 @@ The simulation menu relates to the playback of the simulation.
 #### Pausing & Playing
 To pause or play the simulation you click the pause/ play button at the bottom of the screen.
 
-<img src="readme_images/pause.png" alt="drawing" width="200"/>
+<img src="readme_images/pause.png" alt="drawing" width="300"/>
 
 If it shows a play sign that means it is currently paused and you can click to play it. If it shows a pause sign that means its currently playing and you can click to pause.
 
@@ -95,7 +95,7 @@ NB: the further you zoom out the slower it is to run.
 
 ### Statistics Menu and Graph
 
-<img src="readme_images/stats.png" alt="drawing" width="400"/>
+<img src="readme_images/stats.png" alt="drawing" width="650"/>
 
 The stats menu (and graph) display statistics about the athletes in the scene.
 
