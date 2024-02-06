@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.components &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.components</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.components</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains functions used for doing geographic calculations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">colorsys</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">gpx_parser</span> <span class="k">as</span> <span class="n">gpx</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gpx_parser</span> <span class="k">as</span> <span class="nn">gpx</span>
+
+
+<div class="viewcode-block" id="geo_distance">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.components.geo_distance">[docs]</a>
+<span class="k">def</span> <span class="nf">geo_distance</span><span class="p">(</span><span class="n">latitude1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longitude1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">latitude2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longitude2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the distance between two points in the world in meters</span>
+
+<span class="sd">    :param latitude1: The latitude of the first point</span>
+<span class="sd">    :param longitude1: The longitude of the first point</span>
+<span class="sd">    :param latitude2: The latitude of the second point</span>
+<span class="sd">    :param longitude2: The longitude of the second point</span>
+<span class="sd">    :return: The distance between the two points in meters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">6378.137</span>  <span class="c1"># Radius of earth in KM</span>
+    <span class="n">d_lat</span> <span class="o">=</span> <span class="n">latitude2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">-</span> <span class="n">latitude1</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+    <span class="n">d_lon</span> <span class="o">=</span> <span class="n">longitude2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">-</span> <span class="n">longitude1</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+    <span class="n">a_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lat</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lat</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> \
+        <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude1</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span> <span class="o">*</span> \
+        <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">c_val</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a_val</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a_val</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">c_val</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># meters</span></div>
+
+
+
+<div class="viewcode-block" id="standardise_gpx_distances">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.components.standardise_gpx_distances">[docs]</a>
+<span class="k">def</span> <span class="nf">standardise_gpx_distances</span><span class="p">(</span><span class="n">input_track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts the original (lat lon) distances in the track into meters</span>
+<span class="sd">    where 0,0 is bottom left of the track</span>
+
+<span class="sd">    :param input_track: The already parsed GPX class</span>
+<span class="sd">    :return: the modified track</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Deepcopy the track so we don&#39;t modify the original</span>
+    <span class="n">modify_track</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">input_track</span><span class="p">)</span>
+
+    <span class="c1"># Get the bottom left of the track</span>
+    <span class="n">all_track_points</span> <span class="o">=</span> <span class="n">modify_track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">get_track_bounds</span><span class="p">(</span><span class="n">modify_track</span><span class="p">)</span>
+    <span class="n">bottom_left</span> <span class="o">=</span> <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># Convert all the points to meters from the bottom left</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">:</span>
+        <span class="n">point_lon</span><span class="p">,</span> <span class="n">point_lat</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+
+        <span class="n">new_y</span> <span class="o">=</span> <span class="n">geo_distance</span><span class="p">(</span><span class="n">bottom_left</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point_lat</span><span class="p">,</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">new_x</span> <span class="o">=</span> <span class="n">geo_distance</span><span class="p">(</span><span class="n">bottom_left</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">point_lon</span><span class="p">)</span>
+
+        <span class="n">point</span><span class="o">.</span><span class="n">set_position_standard</span><span class="p">(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">)</span>  <span class="c1"># Update the point</span>
+
+    <span class="k">return</span> <span class="n">modify_track</span></div>
+
+
+
+<div class="viewcode-block" id="get_track_bounds">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.components.get_track_bounds">[docs]</a>
+<span class="k">def</span> <span class="nf">get_track_bounds</span><span class="p">(</span><span class="n">input_track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the bounding regions of the track</span>
+
+<span class="sd">    :param input_track: The input track</span>
+<span class="sd">    :return: North latitude, east longitude, south latitude, west longitude</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the bottom left of the track</span>
+    <span class="n">all_track_points</span> <span class="o">=</span> <span class="n">input_track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">west</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">)</span>
+    <span class="n">south</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">)</span>
+    <span class="n">east</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">)</span>
+    <span class="n">north</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">north</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">south</span><span class="p">,</span> <span class="n">west</span></div>
+
+
+
+<div class="viewcode-block" id="union_bounds">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.components.union_bounds">[docs]</a>
+<span class="k">def</span> <span class="nf">union_bounds</span><span class="p">(</span><span class="n">bounds1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">bounds2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the union of two bounds</span>
+
+<span class="sd">    :param bounds1: The first bounds</span>
+<span class="sd">    :param bounds2: The second bounds</span>
+<span class="sd">    :return: The union of the two bounds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">bounds1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds2</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="n">bounds1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds2</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">bounds1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bounds2</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">bounds1</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bounds2</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="lighten_color">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.components.lighten_color">[docs]</a>
+<span class="k">def</span> <span class="nf">lighten_color</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    lightens a given rgb colour</span>
+
+<span class="sd">    :param colour: RGB tuple colour</span>
+<span class="sd">    :param amount: the lower the number below 0 the lighter</span>
+<span class="sd">    :return: An rgb colour lightened</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">rgb_to_hls</span><span class="p">(</span><span class="o">*</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">hls_to_rgb</span><span class="p">(</span><span class="n">colour</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">amount</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">colour</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">colour</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

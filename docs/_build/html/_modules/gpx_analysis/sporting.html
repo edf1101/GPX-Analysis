@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.sporting &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.sporting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.sporting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the functions needed for the sporting analysis</span>
+<span class="sd">eg. getting position,velocity etc. at a given time</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">gpx_parser</span> <span class="k">as</span> <span class="n">gpx</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">components</span> <span class="k">as</span> <span class="n">geo</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gpx_parser</span> <span class="k">as</span> <span class="nn">gpx</span>
+    <span class="kn">import</span> <span class="nn">components</span> <span class="k">as</span> <span class="nn">geo</span>
+
+
+<div class="viewcode-block" id="map_ranges">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.map_ranges">[docs]</a>
+<span class="k">def</span> <span class="nf">map_ranges</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">in_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">in_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">out_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">out_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maps a value from one range to another</span>
+
+<span class="sd">    :param value: The value within the input range</span>
+<span class="sd">    :param in_min: The lower end of the input range</span>
+<span class="sd">    :param in_max: The upper end of the input range</span>
+<span class="sd">    :param out_min: The lower end of the output range</span>
+<span class="sd">    :param out_max: The upper end of the output range</span>
+<span class="sd">    :return: The value mapped to the output range</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">in_min</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">out_max</span> <span class="o">-</span> <span class="n">out_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">in_max</span> <span class="o">-</span> <span class="n">in_min</span><span class="p">)</span> <span class="o">+</span> <span class="n">out_min</span></div>
+
+
+
+<div class="viewcode-block" id="get_surrounding_points_at_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_surrounding_points_at_time">[docs]</a>
+<span class="k">def</span> <span class="nf">get_surrounding_points_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">gpx</span><span class="o">.</span><span class="n">TrackPoint</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">gpx</span><span class="o">.</span><span class="n">TrackPoint</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the two points either side of a given time</span>
+
+<span class="sd">    :param track: The input track</span>
+<span class="sd">    :param time: The time to get the points at</span>
+<span class="sd">    :return: Two gpx.Trackpoint points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="c1"># Iterate through all points to find the two points either side of the position</span>
+    <span class="c1"># Also get the time the boat was at these two points</span>
+
+    <span class="n">point_id_above</span><span class="p">,</span> <span class="n">point_id_below</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">point_id</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">track_points</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">time</span><span class="p">:</span>
+            <span class="n">point_id_above</span> <span class="o">=</span> <span class="n">point_id</span>
+            <span class="n">point_id_below</span> <span class="o">=</span> <span class="n">point_id</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">track_points</span><span class="p">[</span><span class="n">point_id_below</span><span class="p">],</span> <span class="n">track_points</span><span class="p">[</span><span class="n">point_id_above</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="get_position_at_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_position_at_time">[docs]</a>
+<span class="k">def</span> <span class="nf">get_position_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the position on a gpx track at a given time</span>
+
+<span class="sd">    :param track: The track to get the position from</span>
+<span class="sd">    :param time: The time to get the position at</span>
+<span class="sd">    :return: The lat lon position at the given time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">last_point</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;=</span> <span class="n">last_point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">():</span>
+        <span class="c1"># WARNING this time is after the end time it is technically invalid</span>
+        <span class="k">return</span> <span class="n">last_point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+
+    <span class="c1"># Iterate through all points to find the two points either side of the position</span>
+    <span class="c1"># Also get the time the boat was at these two points</span>
+
+    <span class="n">point_below</span><span class="p">,</span> <span class="n">point_above</span> <span class="o">=</span> <span class="n">get_surrounding_points_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">time_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+    <span class="n">time_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+
+    <span class="c1"># Interpolate the position between the two points</span>
+    <span class="n">position_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+    <span class="n">position_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+    <span class="n">new_lat</span> <span class="o">=</span> <span class="n">map_ranges</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time_below</span><span class="p">,</span> <span class="n">time_above</span><span class="p">,</span> <span class="n">position_below</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_above</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">new_lon</span> <span class="o">=</span> <span class="n">map_ranges</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time_below</span><span class="p">,</span> <span class="n">time_above</span><span class="p">,</span> <span class="n">position_below</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">position_above</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">new_lat</span><span class="p">,</span> <span class="n">new_lon</span></div>
+
+
+
+<div class="viewcode-block" id="get_speed_at_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_speed_at_time">[docs]</a>
+<span class="k">def</span> <span class="nf">get_speed_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the speed on a gpx track at a given time</span>
+
+<span class="sd">    :param track: The track to get the speed from</span>
+<span class="sd">    :param time: The time to get the speed at</span>
+<span class="sd">    :return: The speed at the given time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">last_point</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="n">last_point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">():</span>
+        <span class="c1"># WARNING this time is after the end time it is technically invalid</span>
+        <span class="k">return</span> <span class="mf">0.1</span>
+
+    <span class="c1"># Get the points above and below</span>
+    <span class="n">point_below</span><span class="p">,</span> <span class="n">point_above</span> <span class="o">=</span> <span class="n">get_surrounding_points_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">position_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+        <span class="n">position_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># when out of range this happens</span>
+        <span class="k">return</span> <span class="mf">0.1</span>
+
+    <span class="n">time_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+    <span class="n">time_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">time_above</span> <span class="o">-</span> <span class="n">time_below</span>
+
+    <span class="c1"># Get distance between two points</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">geo_distance</span><span class="p">(</span><span class="n">position_below</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_below</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="n">position_above</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_above</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">/</span> <span class="n">time_delta</span>  <span class="c1"># Speeds are always in m/s</span>
+
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_cadence_at_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_cadence_at_time">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cadence_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the cadence on a gpx track at a given time</span>
+
+<span class="sd">    :param track: The track to get the cadence from</span>
+<span class="sd">    :param time: The time to get the cadence at</span>
+<span class="sd">    :return: The cadence at the given time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">last_point</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="n">last_point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">():</span>
+        <span class="c1"># WARNING this time is after the end time it is technically invalid</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Get the points above and below</span>
+    <span class="n">point_below</span><span class="p">,</span> <span class="n">point_above</span> <span class="o">=</span> <span class="n">get_surrounding_points_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cadence_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_cadence</span><span class="p">()</span>
+        <span class="n">cadence_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_cadence</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># When out of range</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="n">time_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+    <span class="n">time_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+
+    <span class="n">cadence</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">map_ranges</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time_below</span><span class="p">,</span> <span class="n">time_above</span><span class="p">,</span> <span class="n">cadence_below</span><span class="p">,</span> <span class="n">cadence_above</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cadence</span></div>
+
+
+
+<div class="viewcode-block" id="get_cumulative_dist_at_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_cumulative_dist_at_time">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cumulative_dist_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the cumulative distance on a gpx track at a given time</span>
+
+<span class="sd">    :param track: The track to get the cumulative distance from</span>
+<span class="sd">    :param time: The time to get the cumulative distance at</span>
+<span class="sd">    :return: The cumulative distance at the given time (in meters)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
+
+    <span class="n">total_dist</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># Iterate through all points until I get to one greater than my time</span>
+
+    <span class="k">for</span> <span class="n">point_id</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">track_points</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>  <span class="c1"># Ignore the first item as we use it</span>
+        <span class="c1"># Is this the set of points I&#39;m currently between at this time</span>
+        <span class="n">point_id</span> <span class="o">=</span> <span class="n">point_id</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># So enumerate id starts at 1</span>
+
+        <span class="k">if</span> <span class="n">point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">time</span><span class="p">:</span>
+            <span class="c1"># Yes get the distance I am from the point before and add it on then return</span>
+            <span class="n">point_below</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="n">point_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">time_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+            <span class="n">time_above</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
+            <span class="n">dist_between</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">geo_distance</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="c1"># print(dist_between)</span>
+
+            <span class="n">total_dist</span> <span class="o">+=</span> <span class="n">map_ranges</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">time_below</span><span class="p">,</span> <span class="n">time_above</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dist_between</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="c1"># No need for an else since it broke in the last if</span>
+        <span class="c1"># No Add the distance between this point and the last point to the total distance</span>
+        <span class="n">point_below</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="n">point_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">total_dist</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">geo_distance</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                                           <span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                                           <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                                           <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_dist</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_total_distance">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.get_total_distance">[docs]</a>
+<span class="k">def</span> <span class="nf">get_total_distance</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the total distance of a track</span>
+
+<span class="sd">    :param track: The track to get the distance from</span>
+<span class="sd">    :return: The total distance of the track</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">get_cumulative_dist_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="convert_speed_units">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.sporting.convert_speed_units">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_speed_units</span><span class="p">(</span><span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the speed from m/s to another unit</span>
+
+<span class="sd">    :param speed: The speed in m/s</span>
+<span class="sd">    :param unit: The unit to convert to either: m/s, km/h, mph, s/500m or s/km</span>
+<span class="sd">    :return: The speed in the new unit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Speed must be a float&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unit must be a string&quot;</span><span class="p">)</span>
+
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">speed</span> <span class="k">if</span> <span class="n">speed</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.1</span>
+
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;m/s&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;km/h&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;mph&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">*</span> <span class="mf">2.237</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;s/500m&quot;</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">500</span> <span class="o">/</span> <span class="n">speed</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;s/km&quot;</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="n">speed</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unit must be one of: m/s, km/h, mph, s/500m or s/km&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

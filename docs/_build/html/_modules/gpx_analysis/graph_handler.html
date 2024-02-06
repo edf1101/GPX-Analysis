@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.graph_handler &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.graph_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.graph_handler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module handles the graphing of the GPX file and the fetching of OSM tiles</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: disable=R0902</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span> <span class="k">as</span> <span class="n">sys_pf</span>
+<span class="kn">import</span> <span class="nn">PIL.Image</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">appdirs</span> <span class="kn">import</span> <span class="n">user_data_dir</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">mpatches</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">components</span> <span class="k">as</span> <span class="n">geo</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">gpx_parser</span> <span class="k">as</span> <span class="n">gpx</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">components</span> <span class="k">as</span> <span class="nn">geo</span>
+    <span class="kn">import</span> <span class="nn">gpx_parser</span> <span class="k">as</span> <span class="nn">gpx</span>
+
+<span class="c1"># If we are on macos then run this to fix the issues</span>
+<span class="k">if</span> <span class="n">sys_pf</span> <span class="o">==</span> <span class="s1">&#39;darwin&#39;</span><span class="p">:</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;TkAgg&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="deg2num">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.deg2num">[docs]</a>
+<span class="k">def</span> <span class="nf">deg2num</span><span class="p">(</span><span class="n">lat_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Code for converting lat lon to tile number from</span>
+<span class="sd">    https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames</span>
+
+<span class="sd">    :param lat_deg: Input latitude</span>
+<span class="sd">    :param lon_deg: Input longitude</span>
+<span class="sd">    :param zoom: OSM zoom level</span>
+<span class="sd">    :return: the OSM tile position</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat_deg</span><span class="p">)</span>
+    <span class="n">exp_zoom</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="n">zoom</span>
+    <span class="n">xtile</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">lon_deg</span> <span class="o">+</span> <span class="mf">180.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">360.0</span> <span class="o">*</span> <span class="n">exp_zoom</span><span class="p">)</span>
+    <span class="n">ytile</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">+</span>
+                                <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)))</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">exp_zoom</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xtile</span><span class="p">,</span> <span class="n">ytile</span></div>
+
+
+
+<div class="viewcode-block" id="num2deg">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.num2deg">[docs]</a>
+<span class="k">def</span> <span class="nf">num2deg</span><span class="p">(</span><span class="n">xtile</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ytile</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">zoom</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Code for converting tile number to lat lon from</span>
+<span class="sd">    https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames</span>
+
+<span class="sd">    :param xtile: The tile x coordinate</span>
+<span class="sd">    :param ytile: The tile y corrdinate</span>
+<span class="sd">    :param zoom: The osm zoom level</span>
+<span class="sd">    :return: (latitude, longitude)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exp_zoom</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="n">zoom</span>
+    <span class="n">lon_deg</span> <span class="o">=</span> <span class="n">xtile</span> <span class="o">/</span> <span class="n">exp_zoom</span> <span class="o">*</span> <span class="mf">360.0</span> <span class="o">-</span> <span class="mf">180.0</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ytile</span> <span class="o">/</span> <span class="n">exp_zoom</span><span class="p">)))</span>
+    <span class="n">lat_deg</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lat_deg</span><span class="p">,</span> <span class="n">lon_deg</span></div>
+
+
+
+<div class="viewcode-block" id="get_img">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.get_img">[docs]</a>
+<span class="k">def</span> <span class="nf">get_img</span><span class="p">(</span><span class="n">x_coord</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">zoom</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the image from the tile either from cache or downloading</span>
+
+<span class="sd">    :param x_coord: The x tile index</span>
+<span class="sd">    :param y_coord: The y tile index</span>
+<span class="sd">    :param zoom: The zoom tile index</span>
+<span class="sd">    :return: The image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get the app data path and add the image cache folder on</span>
+
+    <span class="n">app_data_path</span> <span class="o">=</span> <span class="n">user_data_dir</span><span class="p">(</span><span class="s2">&quot;GPX Analysis&quot;</span><span class="p">,</span> <span class="s1">&#39;edf1101&#39;</span><span class="p">)</span>
+    <span class="n">image_cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app_data_path</span><span class="p">,</span> <span class="s1">&#39;image_cache&#39;</span><span class="p">)</span>
+
+    <span class="c1"># create the image cache if it doesn&#39;t already exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">image_cache_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">image_cache_dir</span><span class="p">)</span>
+
+    <span class="c1"># Check if its cached first</span>
+    <span class="n">endings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">]</span>  <span class="c1"># the acceptable filetypes to use</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">f_type</span> <span class="ow">in</span> <span class="n">endings</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">zoom</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">y_coord</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">x_coord</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">f_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Otherwise download it and cache</span>
+        <span class="n">image_url</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;https://server.arcgisonline.com/ArcGIS/rest/services/&#39;</span>
+                     <span class="sa">f</span><span class="s1">&#39;World_Topo_Map/MapServer/tile/</span><span class="si">{</span><span class="n">zoom</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">y_coord</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">x_coord</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()))</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">zoom</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">y_coord</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">x_coord</span><span class="si">}</span><span class="s1">.jpg&#39;</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Save as jpg into cache folder</span>
+
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+
+<div class="viewcode-block" id="get_all_images_in_bounds">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.get_all_images_in_bounds">[docs]</a>
+<span class="k">def</span> <span class="nf">get_all_images_in_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the images in the bounds and put them in a dictionary with their</span>
+<span class="sd">    tile index as the key</span>
+
+<span class="sd">    :param bounds:  The bounds of the track (NESW)</span>
+<span class="sd">    :return:  The collection of images as a dict key = image pos, value = image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">bottom_left_tile_num</span> <span class="o">=</span> <span class="n">deg2num</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">17</span><span class="p">)</span>
+    <span class="n">top_right_tile_num</span> <span class="o">=</span> <span class="n">deg2num</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">17</span><span class="p">)</span>
+
+    <span class="n">tiles</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">x_coord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bottom_left_tile_num</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">top_right_tile_num</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">y_coord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">top_right_tile_num</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bottom_left_tile_num</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tiles</span><span class="p">:</span>
+                <span class="n">tiles</span><span class="p">[(</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">)]</span> <span class="o">=</span> <span class="n">get_img</span><span class="p">(</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tiles</span></div>
+
+
+
+<div class="viewcode-block" id="get_all_images_near_track">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.get_all_images_near_track">[docs]</a>
+<span class="k">def</span> <span class="nf">get_all_images_near_track</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    More Tile server friendly way of getting images, by only fetching the ones near the track</span>
+
+<span class="sd">    :param track: The track to get images of nearby</span>
+<span class="sd">    :return: The collection of images as a dict key = image pos, value = image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">radius</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">tiles</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># a dict of the tile indexes we have found</span>
+
+    <span class="n">all_track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>  <span class="c1"># all the points we&#39;ll iterate through</span>
+
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">all_track_points</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>  <span class="c1"># the point&#39;s degrees value</span>
+        <span class="n">tile_ind</span> <span class="o">=</span> <span class="n">deg2num</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">17</span><span class="p">)</span>
+
+        <span class="c1"># Look in a radius around this point</span>
+        <span class="k">for</span> <span class="n">x_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tile_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">radius</span><span class="p">,</span> <span class="n">tile_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">y_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tile_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">radius</span><span class="p">,</span> <span class="n">tile_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="c1"># skip this position if we have already fetched it</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">x_pos</span><span class="p">,</span> <span class="n">y_pos</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tiles</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># check its within a smooth radius</span>
+                <span class="n">mag_sqr</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x_pos</span> <span class="o">-</span> <span class="n">tile_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">pow</span><span class="p">(</span><span class="n">y_pos</span> <span class="o">-</span> <span class="n">tile_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mag_sqr</span> <span class="o">&gt;</span> <span class="nb">pow</span><span class="p">(</span><span class="n">radius</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">tiles</span><span class="p">[(</span><span class="n">x_pos</span><span class="p">,</span> <span class="n">y_pos</span><span class="p">)]</span> <span class="o">=</span> <span class="n">get_img</span><span class="p">(</span><span class="n">x_pos</span><span class="p">,</span> <span class="n">y_pos</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tiles</span></div>
+
+
+
+<div class="viewcode-block" id="MapClass">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass">[docs]</a>
+<span class="k">class</span> <span class="nc">MapClass</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for converting scales between the GPX file and the graph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">4.8</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="MapClass.reset">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the map to a blank state</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">():</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">legend_</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">axis</span><span class="o">.</span><span class="n">get_legend</span><span class="p">():</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">get_legend</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MapClass.add_athlete">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.add_athlete">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_athlete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">athlete_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a track to the graph handler instance</span>
+
+<span class="sd">        :param athlete_key: The key that gets added to the dictionary (simple filename)</span>
+<span class="sd">        :param athlete_value: The dict of athlete data</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">athlete_value</span>
+
+        <span class="c1"># Add its bounds to the graph handler&#39;s bounds</span>
+        <span class="n">new_bounds</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_track_bounds</span><span class="p">(</span><span class="n">athlete_value</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_gpx_bounds</span><span class="p">(</span><span class="n">new_bounds</span><span class="p">)</span>
+
+        <span class="c1"># Redo the images for the graph handler with the new bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_images</span><span class="p">(</span><span class="n">get_all_images_near_track</span><span class="p">(</span><span class="n">athlete_value</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_images</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">draw_track</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_legend</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MapClass.modify_athlete">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.modify_athlete">[docs]</a>
+    <span class="k">def</span> <span class="nf">modify_athlete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        gets called when an athlete changes something (either a colour or display name)</span>
+
+<span class="sd">        :param athlete_key: The key to modify in the dictionary</span>
+<span class="sd">        :param new_value: The new value</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># modify new parts individually so we don&#39;t remove references to drawn tracks/ points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span>
+
+        <span class="c1"># redo track / legend which contain old data / colours</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_track</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="n">new_value</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_legend</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MapClass.modify_start_finish_times">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.modify_start_finish_times">[docs]</a>
+    <span class="k">def</span> <span class="nf">modify_start_finish_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">finish</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modifies the start and finish times for an athlete</span>
+
+<span class="sd">        :param athlete_key: The key to modify in the dictionary</span>
+<span class="sd">        :param start: The new start time</span>
+<span class="sd">        :param finish: The new finish time</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finish</span>
+
+        <span class="c1"># redraw the track with new size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_track</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="MapClass.remove_athlete">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.remove_athlete">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_athlete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove an athlete + track and points from the graph</span>
+
+<span class="sd">        :param athlete_key: the dictionary key to remove</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">athlete_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span>
+
+        <span class="c1"># first remove any points if they have them</span>
+        <span class="k">if</span> <span class="s1">&#39;draw_point&#39;</span> <span class="ow">in</span> <span class="n">athlete_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_point</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+        <span class="c1"># next remove any lines if they have them</span>
+        <span class="k">if</span> <span class="s1">&#39;draw_track&#39;</span> <span class="ow">in</span> <span class="n">athlete_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__remove_drawn_track</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+        <span class="c1"># then we can remove them from the athletes dict</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span>
+
+        <span class="c1"># update the legend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_legend</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__add_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_image_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the image dictionary</span>
+
+<span class="sd">        :param _image_dict: The image dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only add the new images to the dict</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_image_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># recalibrate this dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__reindex_tiles</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__set_gpx_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_gpx_bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the gpx bounds</span>
+
+<span class="sd">        :param _gpx_bounds: The gpx bounds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># If it hasn&#39;t been set yet just set it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="o">=</span> <span class="n">_gpx_bounds</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Otherwise do a union of the two bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">union_bounds</span><span class="p">(</span><span class="n">_gpx_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set_tile_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the tile bounds based on the tile image array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Image dictionary not set&quot;</span><span class="p">)</span>
+
+        <span class="n">tile_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="c1"># North (min y val since it goes up as you go down on OSM tiles)</span>
+        <span class="n">tile_ind_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># north</span>
+                           <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># east</span>
+                           <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># south</span>
+                           <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">))</span>  <span class="c1"># west</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span> <span class="o">=</span> <span class="p">((</span><span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">,</span>
+                                <span class="p">(</span><span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">,</span>
+                                <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">bottom_left</span> <span class="o">=</span> <span class="n">num2deg</span><span class="p">(</span><span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+        <span class="n">top_right</span> <span class="o">=</span> <span class="n">num2deg</span><span class="p">(</span><span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">17</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span> <span class="o">=</span> <span class="p">(</span><span class="n">top_right</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">top_right</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bottom_left</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__reindex_tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make it so the bottom left tile is (0, 0) and then as it goes up and right</span>
+<span class="sd">        It increments(1,1) etc ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Make sure we set tile bounds before we remove original tile indexes in this func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_tile_bounds</span><span class="p">()</span>
+
+        <span class="n">tile_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="c1"># North (min y val since it goes up as you go down on OSM tiles)</span>
+        <span class="n">tile_ind_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># north</span>
+                           <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># east</span>
+                           <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">),</span>  <span class="c1"># south</span>
+                           <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tile_indexes</span><span class="p">))</span>  <span class="c1"># west</span>
+
+        <span class="c1"># Go through the dict and remake it with keys starting at (0, 0)</span>
+        <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">old_key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__raw_image_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">new_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">tile_ind_bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">old_key</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">new_dict</span><span class="p">[</span><span class="n">new_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image_dict</span> <span class="o">=</span> <span class="n">new_dict</span>
+
+<div class="viewcode-block" id="MapClass.plot_images">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.plot_images">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots all the images in the image dictionary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">tile_index</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">tile_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">,</span>
+                                                        <span class="p">(</span><span class="n">tile_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">,</span>
+                                                        <span class="n">tile_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">,</span>
+                                                        <span class="p">(</span><span class="n">tile_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_size</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__remove_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the axis from a graph</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MapClass.get_figure">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.get_figure">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the figure</span>
+
+<span class="sd">        :return: The figure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__remove_axis</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="c1"># self.__fig.set_dpi(100)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span></div>
+
+
+<div class="viewcode-block" id="MapClass.scale_zoom">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.scale_zoom">[docs]</a>
+    <span class="k">def</span> <span class="nf">scale_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This takes an input zoom level and scales it exponentially to be max</span>
+<span class="sd">        the max size of the image</span>
+
+<span class="sd">        :param input_value: input value between 0 and 1</span>
+<span class="sd">        :return: the scaled zoom value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">smallest_zoom_level</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># the most zoomed in we want is an offset of 5</span>
+
+        <span class="n">exp_value</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.3</span> <span class="o">+</span> <span class="mf">3.7</span> <span class="o">*</span> <span class="n">input_value</span><span class="p">)</span>
+        <span class="c1"># So we can get the smallest zoom better</span>
+        <span class="c1"># could probs precompute for speed but this makes sense</span>
+        <span class="n">exp_value_at_0</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.3</span> <span class="o">+</span> <span class="mf">3.7</span> <span class="o">*</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">max_map_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span><span class="p">)</span> <span class="o">-</span> <span class="n">smallest_zoom_level</span> <span class="o">+</span> <span class="n">exp_value_at_0</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">exp_value</span> <span class="o">-</span> <span class="n">exp_value_at_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">max_map_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">smallest_zoom_level</span></div>
+
+
+<div class="viewcode-block" id="MapClass.center_viewpoint">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.center_viewpoint">[docs]</a>
+    <span class="k">def</span> <span class="nf">center_viewpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This rebounds the viewpoint of the mpl figure so it includes all the boats</span>
+<span class="sd">        and it&#39;s roughly centered around them</span>
+
+<span class="sd">        :param positions: A list of the tuple (lat,lon) coordinates of the boats</span>
+<span class="sd">        :param offset: The border around the points (how zoomed it is) between 0 and 1</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># convert the relative offset to the actual border value</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_zoom</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+
+        <span class="c1"># convert all lat lon positions to x,y graph coords</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">degrees_to_graph</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">]</span>
+
+        <span class="c1"># Get the highest and lowest position for the boats</span>
+        <span class="n">max_x</span><span class="p">,</span> <span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">)</span>
+        <span class="n">min_x</span><span class="p">,</span> <span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">)</span>
+
+        <span class="c1"># We always want the viewpoint to be a square, this determines whether we</span>
+        <span class="c1"># Scale by the y or the x-axis. Pick the larger one so we always fit everything in</span>
+        <span class="n">focus_on</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;x&#39;</span>
+
+        <span class="k">if</span> <span class="n">focus_on</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>  <span class="c1"># focusing on the y-axis</span>
+            <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># focusing on the x-axis</span>
+            <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span>
+
+        <span class="c1"># get the center of the boats</span>
+        <span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_x</span> <span class="o">+</span> <span class="n">min_x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">max_y</span> <span class="o">+</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">left</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">center_x</span> <span class="o">-</span> <span class="n">graph_size</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">center_x</span> <span class="o">+</span> <span class="n">graph_size</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">down</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">-</span> <span class="n">graph_size</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="n">above</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">center_y</span> <span class="o">+</span> <span class="n">graph_size</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">axis</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">down</span><span class="p">,</span> <span class="n">above</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MapClass.draw_track">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.draw_track">[docs]</a>
+    <span class="k">def</span> <span class="nf">draw_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw a track on the graph</span>
+
+<span class="sd">        :param athlete_key: The key of the athlete&#39;s track to draw in the track list (filename)</span>
+<span class="sd">        :param color: The color of the track</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;draw_track&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_track&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__remove_drawn_track</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+        <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;track&#39;</span><span class="p">]</span>
+        <span class="n">line_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">start_point</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># get start and end points of line</span>
+            <span class="n">end_point</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># dont plot this line if its out of the start finish zone</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">end_point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="ow">or</span>
+                    <span class="n">start_point</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]):</span>
+                <span class="k">continue</span>
+
+            <span class="n">single_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw_line</span><span class="p">(</span><span class="n">start_point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">(),</span>
+                                         <span class="n">end_point</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">(),</span>
+                                         <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">line_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_line</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_track&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_data</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__remove_drawn_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a track drawn onto the map</span>
+
+<span class="sd">        :param athlete_key: The athletes track to remove</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;draw_track&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_track&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+
+            <span class="c1"># Go through the list of lines making up the track we drew and remove each</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_track&#39;</span><span class="p">]:</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+            <span class="c1"># Set the list to be None at the end</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_track&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="MapClass.draw_line">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.draw_line">[docs]</a>
+    <span class="k">def</span> <span class="nf">draw_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                  <span class="n">end</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                  <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw a line on the graph</span>
+
+<span class="sd">        :param start: tuple lat,lon coordinates</span>
+<span class="sd">        :param end: tuple lat,lon coordinates</span>
+<span class="sd">        :param color: colour of the point default green</span>
+<span class="sd">        :param width: width of the line default 2</span>
+<span class="sd">        :return: the line data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">start_graph_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_to_graph</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">end_graph_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_to_graph</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="c1"># return the plotted line, its default in a list, but its only ever of</span>
+        <span class="c1"># length one so take it out of the list</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">start_graph_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end_graph_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                              <span class="p">[</span><span class="n">start_graph_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">end_graph_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                              <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">width</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MapClass.draw_point">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.draw_point">[docs]</a>
+    <span class="k">def</span> <span class="nf">draw_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                   <span class="n">pos</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                   <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                   <span class="n">size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw a point on the graph</span>
+
+<span class="sd">        :param athlete_key: The key of the athlete whose marker we&#39;re adding</span>
+<span class="sd">        :param pos: tuple (lat,lon) coordinates</span>
+<span class="sd">        :param color: colour of the point default green</span>
+<span class="sd">        :param size: radius of the point default 1</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if this athlete has a point already remove it</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;draw_point&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_point&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_point</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+        <span class="n">graph_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_to_graph</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_point&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">graph_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">graph_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                                    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                                                                    <span class="n">markeredgecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                                                                    <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">color</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MapClass.remove_point">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.remove_point">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a point plotted earlier</span>
+
+<span class="sd">        :param athlete_key: The str key of the athlete in the dict (simple filename usually)</span>
+<span class="sd">        :return:  None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;draw_point&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_point&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_point&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;draw_point&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MapClass.degrees_to_graph">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.graph_handler.MapClass.degrees_to_graph">[docs]</a>
+    <span class="k">def</span> <span class="nf">degrees_to_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degrees</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the degrees to the graph coordinates</span>
+
+<span class="sd">        :param degrees: The degrees to convert (lat,lon)</span>
+<span class="sd">        :return: The graph coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpx_bounds_deg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;GPX bounds not set&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tile bounds not set&quot;</span><span class="p">)</span>
+
+        <span class="n">y_coord</span> <span class="o">=</span> <span class="p">((</span><span class="n">degrees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span>
+                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_coord</span> <span class="o">=</span> <span class="p">((</span><span class="n">degrees</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span>
+                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_deg</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tile_bounds_plt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__draw_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        draws a legend onto the plot</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">all_patches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">single_athlete_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">athlete_col</span> <span class="o">=</span> <span class="n">single_athlete_data</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span>
+            <span class="n">athlete_name</span> <span class="o">=</span> <span class="n">single_athlete_data</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span>
+            <span class="n">all_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mpatches</span><span class="o">.</span><span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">athlete_col</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">athlete_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">get_legend</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">get_legend</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">all_patches</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

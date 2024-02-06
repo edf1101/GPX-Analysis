@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.app &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.app</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains the app class for the GPX analysis tool.</span>
+<span class="sd">Controls the GUI, MapHandler and more.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Pylint ignores</span>
+<span class="c1"># pylint: disable=R0902</span>
+<span class="c1"># pylint: disable=R0914</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="c1"># Import external libs</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">gpx_parser</span> <span class="k">as</span> <span class="n">gpx</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">graph_handler</span> <span class="k">as</span> <span class="n">gh</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui</span> <span class="kn">import</span> <span class="n">AppGUI</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">sporting</span> <span class="k">as</span> <span class="n">sport</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">components</span> <span class="k">as</span> <span class="n">geo</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gpx_parser</span> <span class="k">as</span> <span class="nn">gpx</span>
+    <span class="kn">import</span> <span class="nn">graph_handler</span> <span class="k">as</span> <span class="nn">gh</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui</span> <span class="kn">import</span> <span class="n">AppGUI</span>
+    <span class="kn">import</span> <span class="nn">sporting</span> <span class="k">as</span> <span class="nn">sport</span>
+    <span class="kn">import</span> <span class="nn">components</span> <span class="k">as</span> <span class="nn">geo</span>
+
+
+<div class="viewcode-block" id="GpxAnalysisApp">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.app.GpxAnalysisApp">[docs]</a>
+<span class="k">class</span> <span class="nc">GpxAnalysisApp</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This app handles all the functionality of the GPX analysis tool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for GpxAnalysisApp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the important 2 mpl helper classes, MapClass and TODO statsGraph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span> <span class="o">=</span> <span class="n">gh</span><span class="o">.</span><span class="n">MapClass</span><span class="p">()</span>
+
+        <span class="c1"># Now instantiate the guis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>  <span class="c1"># Create the tk window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shutdown</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span> <span class="o">=</span> <span class="n">AppGUI</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="p">,</span> <span class="n">map_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="p">)</span>
+
+        <span class="c1"># Athletes are a dict: key = simple filename, value = dict of other properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># playback attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_speed</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># The longest time on any of the athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__zoom_level</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># the border zoom</span>
+
+        <span class="c1"># Link the callback functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__link_callback_functions</span><span class="p">()</span>
+
+        <span class="c1"># Things for the update function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_speed</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># how many ms between each update call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_speed</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="c1"># MUST be last otherwise things may not be initialised</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">ms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_speed</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__update</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shuts down the app</span>
+
+<span class="sd">        :return:None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__link_callback_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Link the callback attributes from this app class to the child gui class</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Link the callback functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_open_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_open_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_changename_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_display_name_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_delete_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_deleted</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_get_playback_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_playing</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_set_playback_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__set_playing</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_set_plaback_speed_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__set_playback_speed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_set_playback_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_playback_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_get_playback_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_playback_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_zoom_level_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__set_zoom_level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_set_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__set_start_finish_times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_get_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_start_finish_times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_on_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_colour_change</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_playing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A getter for the playing variable</span>
+
+<span class="sd">        :return: is the simulation playing or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__playing</span>
+
+    <span class="k">def</span> <span class="nf">__set_playing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A setter for the playing variable</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playing</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="GpxAnalysisApp.get_playback_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.app.GpxAnalysisApp.get_playback_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A getter for the playback_time variable</span>
+
+<span class="sd">        :return: the playback_time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span></div>
+
+
+<div class="viewcode-block" id="GpxAnalysisApp.set_playback_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.app.GpxAnalysisApp.set_playback_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A setter for the playback_time variable</span>
+
+<span class="sd">        :param value: the time to set</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># update the map too</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_athletes_on_map</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__set_playback_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A setter for the playback_speed variable</span>
+
+<span class="sd">        :param value: the speed to set</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_speed</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__set_zoom_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A setter for the zoom variable</span>
+
+<span class="sd">        :param value: float between 0 and 1</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># clamp it between 0 and 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__zoom_level</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># update the map to show new zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_athletes_on_map</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__assign_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes sure each boat has a unique colour</span>
+
+<span class="sd">        :return: The tuple colour of floats each float ranges 0.0 -&gt; 1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define some predetermined nice but spaced out colours,</span>
+        <span class="c1"># they are in order of most far from each other roughly,</span>
+        <span class="c1"># so go down the list to find next colour</span>
+
+        <span class="n">colours</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.169</span><span class="p">,</span> <span class="mf">0.161</span><span class="p">,</span> <span class="mf">0.671</span><span class="p">),</span>  <span class="c1"># Blue</span>
+                   <span class="p">(</span><span class="mf">0.859</span><span class="p">,</span> <span class="mf">0.494</span><span class="p">,</span> <span class="mf">0.153</span><span class="p">),</span>  <span class="c1"># Orange</span>
+                   <span class="p">(</span><span class="mf">0.235</span><span class="p">,</span> <span class="mf">0.710</span><span class="p">,</span> <span class="mf">0.169</span><span class="p">),</span>  <span class="c1"># green</span>
+                   <span class="p">(</span><span class="mf">0.709</span><span class="p">,</span> <span class="mf">0.168</span><span class="p">,</span> <span class="mf">0.639</span><span class="p">),</span>  <span class="c1"># Pink</span>
+                   <span class="p">(</span><span class="mf">0.902</span><span class="p">,</span> <span class="mf">0.930</span><span class="p">,</span> <span class="mf">0.054</span><span class="p">),</span>  <span class="c1"># Yellow</span>
+                   <span class="p">(</span><span class="mf">0.768</span><span class="p">,</span> <span class="mf">0.290</span><span class="p">,</span> <span class="mf">0.247</span><span class="p">),</span>  <span class="c1"># red</span>
+                   <span class="p">]</span>
+
+        <span class="c1"># remove all items from the list that have been used already</span>
+        <span class="k">for</span> <span class="n">athlete_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">their_colour</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">their_colour</span> <span class="ow">in</span> <span class="n">colours</span><span class="p">:</span>
+                <span class="n">colours</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">their_colour</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">colours</span><span class="p">:</span>  <span class="c1"># if there are any left</span>
+            <span class="k">return</span> <span class="n">colours</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># If they have all been used return a random colour</span>
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__set_start_finish_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">finish_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the start and finish times for an athlete</span>
+
+<span class="sd">        :param athlete_key: The key of the athlete we are modifying</span>
+<span class="sd">        :param start_time: The new start time or none if not setting one</span>
+<span class="sd">        :param finish_time: The new end time or none if not setting one</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># fill in the missing info for the data checks</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">finish_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">finish_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span>
+
+        <span class="c1"># check if data is invalid</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="o">&gt;=</span> <span class="n">finish_time</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;track&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start_time</span> <span class="o">&gt;=</span> <span class="n">max_time</span> <span class="ow">or</span> <span class="n">finish_time</span> <span class="o">&gt;</span> <span class="n">max_time</span> <span class="ow">or</span>
+                <span class="n">start_time</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span> <span class="ow">or</span> <span class="n">finish_time</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># set the new times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finish_time</span>
+
+        <span class="c1"># update the athlete lists with the new times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">,</span> <span class="n">remake_widgets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># update the max time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_longest_time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_gui_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">)</span>
+
+        <span class="c1"># change the map&#39;s start finish times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">modify_start_finish_times</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">finish_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__get_start_finish_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get the athlete&#39;s start and finish times</span>
+
+<span class="sd">        :param athlete_key: the athlete to check</span>
+<span class="sd">        :return: a tuple (start_time, finish_time)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">athlete</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">],</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__on_open_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when a file is opened to make a new GPX track</span>
+
+<span class="sd">        :param filename: filename to open</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(f&#39;app opened {filename}&#39;)</span>
+
+        <span class="n">new_track</span> <span class="o">=</span> <span class="n">gpx</span><span class="o">.</span><span class="n">Track</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c1"># check if the same file is already there</span>
+        <span class="n">same_as</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">athlete_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_filename</span><span class="p">():</span>
+                <span class="n">same_as</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">same_as</span><span class="p">:</span>
+            <span class="c1"># Already been imported</span>
+            <span class="c1"># print(&quot;Already been imported&quot;)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Clean up the filename</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">clean_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="c1"># We will put the athlete data into the list as a dict of the important parts</span>
+        <span class="n">athlete_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;track&#39;</span><span class="p">:</span> <span class="n">new_track</span><span class="p">,</span>
+                        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">clean_path</span><span class="p">,</span>
+                        <span class="s1">&#39;display_name&#39;</span><span class="p">:</span> <span class="n">clean_path</span><span class="p">,</span>
+                        <span class="s1">&#39;colour&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__assign_colour</span><span class="p">(),</span>
+                        <span class="s1">&#39;start_time&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s1">&#39;finish_time&#39;</span><span class="p">:</span> <span class="n">new_track</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">clean_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">athlete_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">add_athlete</span><span class="p">(</span><span class="n">clean_path</span><span class="p">,</span> <span class="n">athlete_data</span><span class="p">)</span>  <span class="c1"># add it to the map</span>
+
+        <span class="c1"># update the GUI&#39;s list of athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span>
+
+        <span class="c1"># update the GUI&#39;s map as a new track is there</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+        <span class="c1"># update the gui stats</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
+
+        <span class="c1"># check if this is a new longest_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_longest_time</span><span class="p">()</span>
+
+        <span class="c1"># center view around all the athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__draw_athletes_on_map</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__calculate_longest_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the longest time amongst the athletes</span>
+
+<span class="sd">        :return: the longest time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">:</span>
+            <span class="n">max_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_time</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># default max value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span><span class="p">,</span> <span class="n">max_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_gui_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span><span class="p">,</span> <span class="n">max_time</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">max_time</span>
+
+    <span class="k">def</span> <span class="nf">__on_display_name_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">changed_to</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for when a display name is changed for an athlete</span>
+
+<span class="sd">        :param athlete_key: the filename of the athlete that&#39;s changing their name</span>
+<span class="sd">        :param changed_to: What they change their display name to</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># print(f&#39;{athlete_key} changed their name to {changed_to}&#39;)</span>
+
+        <span class="c1"># modify athlete data in this class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed_to</span>
+
+        <span class="c1"># update the guis&#39;s list of athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span>
+
+        <span class="c1"># update the map&#39;s list of athletes and then update the map image on the GUI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">modify_athlete</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+        <span class="c1"># update the gui&#39;s stats display with the new name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_athlete_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">colour</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when an athlete changes their colour</span>
+
+<span class="sd">        :param athlete_key: The key of the athlete changing colour</span>
+<span class="sd">        :param colour: The colour changing to</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># update the data in the app class dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colour</span>
+
+        <span class="c1"># update the guis&#39;s list of athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">,</span><span class="n">remake_widgets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># update the map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">modify_athlete</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_athlete_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback function for when an athlete is deleted</span>
+
+<span class="sd">        :param athlete_key: The dictionary key for the athlete we are deleting</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(f&#39;{athlete_key} got deleted&#39;)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if its now empty</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># first remove from the map and update it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">remove_athlete</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+        <span class="c1"># next remove from our list of athletes and update the guis&#39;s list</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_longest_time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__set_athlete_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called to change the athletes&#39; markers to a point in time</span>
+
+<span class="sd">        :param set_time: the time which we&#39;ll draw the point at on the athlete&#39;s track</span>
+<span class="sd">        :return: a list of the athlete positions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">athlete_positions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># set time is relative to the athlete</span>
+            <span class="c1"># as diff athletes start at diff times on their track, change this</span>
+            <span class="n">athlete_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">set_time</span><span class="p">,</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;finish_time&#39;</span><span class="p">])</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_position_at_time</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">athlete_time</span><span class="p">)</span>
+            <span class="n">athlete_positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+
+            <span class="c1"># create a new lighter colour for the athlete to make</span>
+            <span class="c1"># the point stand out from the track</span>
+            <span class="n">rgb_light</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">lighten_color</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">],</span> <span class="mf">0.65</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">draw_point</span><span class="p">(</span><span class="n">athlete_key</span><span class="o">=</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
+                                      <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                                      <span class="n">color</span><span class="o">=</span><span class="n">rgb_light</span><span class="p">,</span>
+                                      <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">athlete_positions</span>
+
+    <span class="k">def</span> <span class="nf">__draw_athletes_on_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws athletes markers on the map</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check we have something to draw</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">:</span>
+            <span class="c1"># update the athletes positions</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__set_athlete_positions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span><span class="p">)</span>
+            <span class="c1"># center the map around them</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">center_viewpoint</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__zoom_level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loop function, called every simulation frame</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate the deltaTime</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">delta_time</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_update</span> <span class="o">=</span> <span class="n">current_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">gui_loop</span><span class="p">()</span>  <span class="c1"># call the gui loop</span>
+
+        <span class="c1"># Update the positions on the map</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__playing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__draw_athletes_on_map</span><span class="p">()</span>
+
+        <span class="c1"># Increase the time if playing</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__playing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span> <span class="o">+</span> <span class="p">(</span><span class="n">delta_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__playback_speed</span><span class="p">),</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_gui_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__playback_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">)</span>
+
+        <span class="c1"># Call the update function again in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">ms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_speed</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__update</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GpxAnalysisApp.run_app">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.app.GpxAnalysisApp.run_app">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_app</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Starts running the App</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

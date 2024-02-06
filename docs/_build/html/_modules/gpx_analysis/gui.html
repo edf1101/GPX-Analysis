@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.gui &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.gui</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.gui</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains the main GUI class</span>
+<span class="sd">The AppGUI class is the only one to use outside of this class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Pylint ignores</span>
+<span class="c1"># pylint: disable=R0902</span>
+<span class="c1"># pylint: disable=R0914</span>
+<span class="c1"># pylint: disable=R0904</span>
+
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_tkagg</span> <span class="kn">import</span> <span class="n">FigureCanvasTkAgg</span>  <span class="c1"># for importing figs to mpl</span>
+
+<span class="c1"># import the individual separate classes</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">graph_handler</span> <span class="k">as</span> <span class="n">gh</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui_control_menu</span> <span class="kn">import</span> <span class="n">ControlMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui_finishline_menu</span> <span class="kn">import</span> <span class="n">FinishlineMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui_playback_menu</span> <span class="kn">import</span> <span class="n">PlaybackMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.gui_stats_menu</span> <span class="kn">import</span> <span class="n">StatsMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.tkscrolledframe</span> <span class="kn">import</span> <span class="n">ScrolledFrame</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.gui_control_menu</span> <span class="kn">import</span> <span class="n">ControlMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">.gui_finishline_menu</span> <span class="kn">import</span> <span class="n">FinishlineMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">.gui_playback_menu</span> <span class="kn">import</span> <span class="n">PlaybackMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">.gui_stats_menu</span> <span class="kn">import</span> <span class="n">StatsMenuFrame</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">graph_handler</span> <span class="k">as</span> <span class="n">gh</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.tkscrolledframe</span> <span class="kn">import</span> <span class="n">ScrolledFrame</span>
+
+
+<div class="viewcode-block" id="AppGUI">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI">[docs]</a>
+<span class="k">class</span> <span class="nc">AppGUI</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class containing the entire GUI for the GPX Analysis App, using OOP so encapsulation makes</span>
+<span class="sd">    it better for modularity, readability etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">,</span> <span class="n">map_class</span><span class="p">:</span> <span class="n">gh</span><span class="o">.</span><span class="n">MapClass</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the AppGUI Class</span>
+
+<span class="sd">        :param window: the root for the Tk window, created in the global scope</span>
+<span class="sd">        :param map_class: Reference to the graph_handler.MapClass handler for the mpl map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_graph</span> <span class="o">=</span> <span class="n">map_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window</span> <span class="o">=</span> <span class="n">window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;GPX Analysis&quot;</span><span class="p">)</span>  <span class="c1"># Set the window title</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scroll_window</span> <span class="o">=</span> <span class="n">ScrolledFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">880</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scroll_window</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__scroll_window</span><span class="o">.</span><span class="n">bind_scroll_wheel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__scroll_window</span><span class="o">.</span><span class="n">display_widget</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">)</span>
+        <span class="c1"># self.__window.geometry(&#39;400x400&#39;)</span>
+
+        <span class="c1"># Configure the layout of the basic 2x2 grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="o">.</span><span class="n">columnconfigure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="o">.</span><span class="n">columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">260</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Holds the last stats update time so we can do it only every .5s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_stats_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_map_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># Set the map widget in the TOP RIGHT corner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_map</span><span class="p">()</span>
+
+        <span class="c1"># Create the menus and submenus down the side</span>
+        <span class="c1"># First initialise the main menus as None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Now initialise the submenu classes as None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finishline_menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_menu</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Function for removing focus from widgets once they have been clicked off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="o">.</span><span class="n">bind_all</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__remove_entry_focus</span><span class="p">)</span>
+
+        <span class="c1"># Create the stats menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_menu</span> <span class="o">=</span> <span class="n">StatsMenuFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="p">)</span>
+
+        <span class="c1"># create callback function references</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__change_name_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># reference these quickly to make pylint happy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__change_name_callback</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># These are public as they&#39;ll turn into public methods for the sub frames to use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_playing</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playing</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playback_speed</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playback_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_playback_time</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_zoom_level</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_start_finish_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_start_finish_time</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_colour_change</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Athlete list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Set the submenus here after the other variables have been set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_submenus</span><span class="p">()</span>
+
+        <span class="c1"># create the map here and its canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span> <span class="o">=</span> <span class="n">FigureCanvasTkAgg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mpl_graph</span><span class="o">.</span><span class="n">get_figure</span><span class="p">(),</span> <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span><span class="o">.</span><span class="n">get_tk_widget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;nsew&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Is it set up: this gets set to true when init is finished</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AppGUI.gui_loop">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.gui_loop">[docs]</a>
+    <span class="k">def</span> <span class="nf">gui_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The GUI code to loop through each frame in the simulation</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if its playing then update stats every 1s</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_stats_update</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__last_stats_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.update_stats">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.update_stats">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        update the statistics menu display</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_menu</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.stop_finish_start_editing">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.stop_finish_start_editing">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop_finish_start_editing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        disables the start/finish editing menu</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finishline_menu</span><span class="o">.</span><span class="n">stop_editing</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_finishline_athlete_selected">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_finishline_athlete_selected">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_finishline_athlete_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pass the athlete data held by athlete key to the currently selected field</span>
+<span class="sd">        in the finishline menu</span>
+
+<span class="sd">        :param athlete_key: The athlete whose data we are sending</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__finishline_menu</span><span class="o">.</span><span class="n">set_currently_selected</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__finishline_menu</span><span class="o">.</span><span class="n">set_currently_selected</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.update_athletes">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.update_athletes">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_athletes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+                        <span class="n">remake_widgets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the GUI&#39;s list of athletes</span>
+
+<span class="sd">        :param new_athletes: the new list</span>
+<span class="sd">        :param remake_widgets: Whether or not to rebuild the widgets</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="n">new_athletes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span><span class="o">.</span><span class="n">update_athlete_data</span><span class="p">(</span><span class="n">new_athletes</span><span class="p">,</span> <span class="n">remake_widgets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_menu</span><span class="o">.</span><span class="n">set_athlete_list</span><span class="p">(</span><span class="n">new_athletes</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__remove_entry_focus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function removes focuses from widgets when they are clicked off</span>
+
+<span class="sd">        :param event:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AppGUI.update_map">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.update_map">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">force</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This sets/ updates the mpl figure map on the GUI</span>
+
+<span class="sd">        :param force: whether to force an update regardless of whether it&#39;s too soon</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_map_update</span> <span class="o">&lt;</span> <span class="mf">0.2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_map_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__set_submenus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This creates and initialises the submenus</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#  Set up the two menus (map menu on top, stats menu on bottom)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__inner_frame</span><span class="p">,</span> <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RAISED</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Configure the arrangement of the map menu frame so the child frames</span>
+        <span class="c1"># span its height equally</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Create the frames to contain the menus inside the map menu frame</span>
+        <span class="c1"># using smaller classes for readability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span> <span class="o">=</span> <span class="n">ControlMenuFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Next the start/finish line menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__finishline_menu</span> <span class="o">=</span> <span class="n">FinishlineMenuFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Next the playback menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_menu</span> <span class="o">=</span> <span class="n">PlaybackMenuFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AppGUI.get_tk_window">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.get_tk_window">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_tk_window</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the private tk window variable</span>
+
+<span class="sd">        :return: the tk window</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.get_frm_map_menu">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.get_frm_map_menu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_frm_map_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the private variable frm_map_menu</span>
+
+<span class="sd">        :return: frm_map_menu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_menu</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.get_frm_stats_menu">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.get_frm_stats_menu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_frm_stats_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the private variable frm_stats_menu</span>
+
+<span class="sd">        :return: frm_stats_menu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span></div>
+
+
+    <span class="c1"># Lots setter for callback functions!</span>
+<div class="viewcode-block" id="AppGUI.set_open_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_open_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_open_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Open file callbacks</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the callback function to be used when a file is opened</span>
+
+<span class="sd">        :param func: The function to be called when a file is opened in control window</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span><span class="o">.</span><span class="n">set_open_callback</span><span class="p">(</span><span class="n">func</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_delete_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_delete_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_delete_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Open file callbacks</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the callback function to be used when a file is opened</span>
+
+<span class="sd">        :param func: The function to be called when an athlete is deleted</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span><span class="o">.</span><span class="n">set_delete_callback</span><span class="p">(</span><span class="n">func</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_changename_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_changename_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_changename_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when an athlete changes display name</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__control_menu</span><span class="o">.</span><span class="n">set_changename_callback</span><span class="p">(</span><span class="n">func</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_get_playback_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_get_playback_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_get_playback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a class requests playback state</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_playing</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_set_playback_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_set_playback_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_set_playback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a class sets playback state</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playing</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_set_plaback_speed_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_set_plaback_speed_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_set_plaback_speed_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a class sets playback speed</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playback_speed</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_get_playback_time_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_get_playback_time_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_get_playback_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a class requests playback state</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_playback_time</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_set_playback_time_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_set_playback_time_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_set_playback_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a class sets playback state</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_playback_time</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_gui_playback_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_gui_playback_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_gui_playback_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the time passed on the GUI</span>
+
+<span class="sd">        :param time_val: the time passed</span>
+<span class="sd">        :param max_time: how much total time</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__playback_menu</span><span class="o">.</span><span class="n">set_playback_time</span><span class="p">(</span><span class="n">time_val</span><span class="p">,</span> <span class="n">max_time</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_zoom_level_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_zoom_level_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_zoom_level_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when the zoom level changes</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_zoom_level</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_set_start_finish_time_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_set_start_finish_time_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_set_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a start or finish time is set</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_start_finish_time</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_get_start_finish_time_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_get_start_finish_time_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_get_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the callback function to be used when a start or finish time is requested</span>
+
+<span class="sd">        :param func: The function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_start_finish_time</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_on_colour_change">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_on_colour_change">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_on_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for on colour change callback func</span>
+
+<span class="sd">        :param func: the function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_colour_change</span> <span class="o">=</span> <span class="n">func</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

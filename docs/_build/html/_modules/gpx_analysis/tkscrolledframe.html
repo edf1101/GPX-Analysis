@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.tkscrolledframe &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.tkscrolledframe</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.tkscrolledframe</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implementation of the scrollable frame widget.&quot;&quot;&quot;</span>
+
+<span class="c1"># pylint: disable=R0902</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ScrolledFrame&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ScrolledFrame">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame">[docs]</a>
+<span class="k">class</span> <span class="nc">ScrolledFrame</span><span class="p">(</span><span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scrollable Frame widget.</span>
+
+<span class="sd">    Use display_widget() to set the interior widget. For example,</span>
+<span class="sd">    to display a Label with the text &quot;Hello, world!&quot;, you can say:</span>
+
+<span class="sd">        sf = ScrolledFrame(self)</span>
+<span class="sd">        sf.pack()</span>
+<span class="sd">        sf.display_widget(Label, text=&quot;Hello, world!&quot;)</span>
+
+<span class="sd">    The constructor accepts the usual Tkinter keyword arguments, plus</span>
+<span class="sd">    a handful of its own:</span>
+
+<span class="sd">      scrollbars (str; default: &quot;both&quot;)</span>
+<span class="sd">        Which scrollbars to provide.</span>
+<span class="sd">        Must be one of &quot;vertical&quot;, &quot;horizontal,&quot; &quot;both&quot;, or &quot;neither&quot;.</span>
+
+<span class="sd">      use_ttk (bool; default: False)</span>
+<span class="sd">        Whether to use ttk widgets if available.</span>
+<span class="sd">        The default is to use standard Tk widgets. This setting has</span>
+<span class="sd">        no effect if ttk is not available on your system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new scrollable frame widget.&quot;&quot;&quot;</span>
+
+        <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master</span><span class="p">)</span>
+
+        <span class="c1"># Hold these names for the interior widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Whether to fit the interior widget&#39;s width to the canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_width</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Which scrollbars to provide</span>
+        <span class="k">if</span> <span class="s2">&quot;scrollbars&quot;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+            <span class="n">scrollbars</span> <span class="o">=</span> <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;scrollbars&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;scrollbars&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">scrollbars</span><span class="p">:</span>
+                <span class="n">scrollbars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_SCROLLBARS</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">scrollbars</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_VALID_SCROLLBARS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scrollbars parameter must be one of &quot;</span>
+                                 <span class="s2">&quot;&#39;vertical&#39;, &#39;horizontal&#39;, &#39;both&#39;, or &quot;</span>
+                                 <span class="s2">&quot;&#39;neither&#39;&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scrollbars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_SCROLLBARS</span>
+
+        <span class="c1"># Whether to use ttk widgets if available</span>
+        <span class="k">if</span> <span class="s2">&quot;use_ttk&quot;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ttk</span> <span class="ow">and</span> <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;use_ttk&quot;</span><span class="p">]:</span>
+                <span class="n">Scrollbar</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Scrollbar</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Scrollbar</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Scrollbar</span>
+            <span class="k">del</span> <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;use_ttk&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Scrollbar</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Scrollbar</span>
+
+        <span class="c1"># Default to a 1px sunken border</span>
+        <span class="k">if</span> <span class="s2">&quot;borderwidth&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+            <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;borderwidth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="s2">&quot;relief&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+            <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;relief&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sunken&quot;</span>
+
+        <span class="c1"># Set up the grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_rowconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Canvas to hold the interior widget</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                          <span class="n">borderwidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                          <span class="n">highlightthickness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                          <span class="n">takefocus</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Enable scrolling when the canvas has the focus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_arrow_keys</span><span class="p">(</span><span class="n">canvas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_scroll_wheel</span><span class="p">(</span><span class="n">canvas</span><span class="p">)</span>
+
+        <span class="c1"># Call _resize_interior() when the canvas widget is updated</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Configure&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resize_interior</span><span class="p">)</span>
+
+        <span class="c1"># Scrollbars</span>
+        <span class="n">xscroll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_scrollbar</span> <span class="o">=</span> <span class="n">Scrollbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+                                                <span class="n">command</span><span class="o">=</span><span class="n">canvas</span><span class="o">.</span><span class="n">xview</span><span class="p">)</span>
+        <span class="n">yscroll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_scrollbar</span> <span class="o">=</span> <span class="n">Scrollbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
+                                                <span class="n">command</span><span class="o">=</span><span class="n">canvas</span><span class="o">.</span><span class="n">yview</span><span class="p">)</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">xscrollcommand</span><span class="o">=</span><span class="n">xscroll</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="n">yscrollcommand</span><span class="o">=</span><span class="n">yscroll</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
+
+        <span class="c1"># Lay out our widgets</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;nsew&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scrollbars</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">yscroll</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;ns&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scrollbars</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="n">xscroll</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;we&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Forward these to the canvas widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">bind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">focus_set</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">focus_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unbind</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">unbind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xview</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">xview</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xview_moveto</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">xview_moveto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yview</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">yview</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yview_moveto</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">yview_moveto</span>
+
+        <span class="c1"># Process our remaining configuration options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure resources of a widget.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CANVAS_KEYS</span><span class="p">:</span>
+            <span class="c1"># Forward these to the canvas widget</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Handle everything else normally</span>
+            <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+    <span class="c1"># ------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="ScrolledFrame.bind_arrow_keys">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_arrow_keys">[docs]</a>
+    <span class="k">def</span> <span class="nf">bind_arrow_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bind the specified widget&#39;s arrow key events to the canvas.&quot;&quot;&quot;</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Up&gt;&quot;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">))</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Down&gt;&quot;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">))</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Left&gt;&quot;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">xview_scroll</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">))</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Right&gt;&quot;</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">xview_scroll</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ScrolledFrame.bind_scroll_wheel">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_scroll_wheel">[docs]</a>
+    <span class="k">def</span> <span class="nf">bind_scroll_wheel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bind the specified widget&#39;s mouse scroll event to the canvas.&quot;&quot;&quot;</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;MouseWheel&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_canvas</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-4&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_canvas</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-5&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scroll_canvas</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ScrolledFrame.cget">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.cget">[docs]</a>
+    <span class="k">def</span> <span class="nf">cget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the resource value for a KEY given as string.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CANVAS_KEYS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">cget</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">cget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span></div>
+
+
+    <span class="c1"># Also override this alias for cget()</span>
+    <span class="fm">__getitem__</span> <span class="o">=</span> <span class="n">cget</span>
+
+<div class="viewcode-block" id="ScrolledFrame.configure">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.configure">[docs]</a>
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure resources of a widget.&quot;&quot;&quot;</span>
+
+        <span class="c1"># This is overridden so we can use our custom __setitem__()</span>
+        <span class="c1"># to pass certain options directly to the canvas.</span>
+        <span class="k">if</span> <span class="n">cnf</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cnf</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cnf</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+    <span class="c1"># Also override this alias for configure()</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">configure</span>
+
+<div class="viewcode-block" id="ScrolledFrame.display_widget">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.display_widget">[docs]</a>
+    <span class="k">def</span> <span class="nf">display_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget_class</span><span class="p">,</span> <span class="n">fit_width</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and display a new widget.</span>
+
+<span class="sd">        If fit_width == True, the interior widget will be stretched as</span>
+<span class="sd">        needed to fit the width of the frame.</span>
+
+<span class="sd">        Keyword arguments are passed to the widget_class constructor.</span>
+
+<span class="sd">        Returns the new widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Blank the canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">erase</span><span class="p">()</span>
+
+        <span class="c1"># Set width fitting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_width</span> <span class="o">=</span> <span class="n">fit_width</span>
+
+        <span class="c1"># Set the new interior widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span> <span class="o">=</span> <span class="n">widget_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="c1"># Add the interior widget to the canvas, and save its widget ID</span>
+        <span class="c1"># for use in _resize_interior()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                                       <span class="n">anchor</span><span class="o">=</span><span class="s2">&quot;nw&quot;</span><span class="p">,</span>
+                                                       <span class="n">window</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_interior</span><span class="p">)</span>
+
+        <span class="c1"># Call _update_scroll_region() when the interior widget is resized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Configure&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_scroll_region</span><span class="p">)</span>
+
+        <span class="c1"># Fit the interior widget to the canvas if requested</span>
+        <span class="c1"># We don&#39;t need to check fit_width here since _resize_interior()</span>
+        <span class="c1"># already does.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resize_interior</span><span class="p">()</span>
+
+        <span class="c1"># Scroll to the top-left corner of the canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scroll_to_top</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span></div>
+
+
+<div class="viewcode-block" id="ScrolledFrame.erase">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.erase">[docs]</a>
+    <span class="k">def</span> <span class="nf">erase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Erase the displayed widget.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Clear the canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Delete the interior widget</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span>
+
+        <span class="c1"># Save these names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Reset width fitting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_width</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ScrolledFrame.scroll_to_top">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.tkscrolledframe.ScrolledFrame.scroll_to_top">[docs]</a>
+    <span class="k">def</span> <span class="nf">scroll_to_top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scroll to the top-left corner of the canvas.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">xview_moveto</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">yview_moveto</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">_resize_interior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize the interior widget to fit the canvas.&quot;&quot;&quot;</span>
+
+        <span class="c1"># compare event to keep pylint happy</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_width</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span><span class="p">:</span>
+            <span class="c1"># The current width of the canvas</span>
+            <span class="n">canvas_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">winfo_width</span><span class="p">()</span>
+
+            <span class="c1"># The interior widget&#39;s requested width</span>
+            <span class="n">requested_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span><span class="o">.</span><span class="n">winfo_reqwidth</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">requested_width</span> <span class="o">!=</span> <span class="n">canvas_width</span><span class="p">:</span>
+                <span class="c1"># Resize the interior widget</span>
+                <span class="n">new_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">canvas_width</span><span class="p">,</span> <span class="n">requested_width</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">itemconfigure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interior_id</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">new_width</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_scroll_canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scroll the canvas.&quot;&quot;&quot;</span>
+
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span>
+
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;darwin&quot;</span><span class="p">):</span>
+            <span class="c1"># macOS</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">event</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">num</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># Unix - scroll up</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">num</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="c1"># Unix - scroll down</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Windows</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">yview_scroll</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">delta</span> <span class="o">//</span> <span class="mi">120</span><span class="p">),</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_scroll_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the scroll region when the interior widget is resized.&quot;&quot;&quot;</span>
+
+        <span class="c1"># compare event to keep pylint happy</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># The interior widget&#39;s requested width and height</span>
+        <span class="n">req_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span><span class="o">.</span><span class="n">winfo_reqwidth</span><span class="p">()</span>
+        <span class="n">req_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interior</span><span class="o">.</span><span class="n">winfo_reqheight</span><span class="p">()</span>
+
+        <span class="c1"># Set the scroll region to fit the interior widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_canvas</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">scrollregion</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">req_width</span><span class="p">,</span> <span class="n">req_height</span><span class="p">))</span>
+
+    <span class="c1"># ------------------------------------------------------------------------</span>
+
+    <span class="c1"># Keys for configure() to forward to the canvas widget</span>
+    <span class="n">_CANVAS_KEYS</span> <span class="o">=</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;takefocus&quot;</span>
+
+    <span class="c1"># Scrollbar-related configuration</span>
+    <span class="n">_DEFAULT_SCROLLBARS</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span>
+    <span class="n">_VALID_SCROLLBARS</span> <span class="o">=</span> <span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;neither&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

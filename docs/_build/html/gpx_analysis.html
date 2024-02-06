@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis package &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=9d552775"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="gpx_analysis" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">gpx_analysis</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">gpx_analysis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.app">gpx_analysis.app module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.app.GpxAnalysisApp"><code class="docutils literal notranslate"><span class="pre">GpxAnalysisApp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.components">gpx_analysis.components module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.components.geo_distance"><code class="docutils literal notranslate"><span class="pre">geo_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.components.get_track_bounds"><code class="docutils literal notranslate"><span class="pre">get_track_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.components.lighten_color"><code class="docutils literal notranslate"><span class="pre">lighten_color()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.components.standardise_gpx_distances"><code class="docutils literal notranslate"><span class="pre">standardise_gpx_distances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.components.union_bounds"><code class="docutils literal notranslate"><span class="pre">union_bounds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gpx_parser">gpx_analysis.gpx_parser module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track"><code class="docutils literal notranslate"><span class="pre">Track</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gpx_parser.TrackPoint"><code class="docutils literal notranslate"><span class="pre">TrackPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.graph_handler">gpx_analysis.graph_handler module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.MapClass"><code class="docutils literal notranslate"><span class="pre">MapClass</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.deg2num"><code class="docutils literal notranslate"><span class="pre">deg2num()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.get_all_images_in_bounds"><code class="docutils literal notranslate"><span class="pre">get_all_images_in_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.get_all_images_near_track"><code class="docutils literal notranslate"><span class="pre">get_all_images_near_track()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.get_img"><code class="docutils literal notranslate"><span class="pre">get_img()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.graph_handler.num2deg"><code class="docutils literal notranslate"><span class="pre">num2deg()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gui">gpx_analysis.gui module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui.AppGUI"><code class="docutils literal notranslate"><span class="pre">AppGUI</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gui_control_menu">gpx_analysis.gui_control_menu module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui_control_menu.ControlMenuFrame"><code class="docutils literal notranslate"><span class="pre">ControlMenuFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gui_finishline_menu">gpx_analysis.gui_finishline_menu module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame"><code class="docutils literal notranslate"><span class="pre">FinishlineMenuFrame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui_finishline_menu.validate_float_input"><code class="docutils literal notranslate"><span class="pre">validate_float_input()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gui_playback_menu">gpx_analysis.gui_playback_menu module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui_playback_menu.PlaybackMenuFrame"><code class="docutils literal notranslate"><span class="pre">PlaybackMenuFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.gui_stats_menu">gpx_analysis.gui_stats_menu module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.gui_stats_menu.StatsMenuFrame"><code class="docutils literal notranslate"><span class="pre">StatsMenuFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.sporting">gpx_analysis.sporting module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.convert_speed_units"><code class="docutils literal notranslate"><span class="pre">convert_speed_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_cadence_at_time"><code class="docutils literal notranslate"><span class="pre">get_cadence_at_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_cumulative_dist_at_time"><code class="docutils literal notranslate"><span class="pre">get_cumulative_dist_at_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_position_at_time"><code class="docutils literal notranslate"><span class="pre">get_position_at_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_speed_at_time"><code class="docutils literal notranslate"><span class="pre">get_speed_at_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_surrounding_points_at_time"><code class="docutils literal notranslate"><span class="pre">get_surrounding_points_at_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.get_total_distance"><code class="docutils literal notranslate"><span class="pre">get_total_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.sporting.map_ranges"><code class="docutils literal notranslate"><span class="pre">map_ranges()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.stats_graph_handler">gpx_analysis.stats_graph_handler module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.stats_graph_handler.StatsGraph"><code class="docutils literal notranslate"><span class="pre">StatsGraph</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.tkscrolledframe">gpx_analysis.tkscrolledframe module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.tkscrolledframe.ScrolledFrame"><code class="docutils literal notranslate"><span class="pre">ScrolledFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">gpx_analysis</a></li>
+      <li class="breadcrumb-item active">gpx_analysis package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gpx_analysis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gpx-analysis-package">
+<h1>gpx_analysis package<a class="headerlink" href="#gpx-analysis-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-gpx_analysis.app">
+<span id="gpx-analysis-app-module"></span><h2>gpx_analysis.app module<a class="headerlink" href="#module-gpx_analysis.app" title="Link to this heading"></a></h2>
+<p>This script contains the app class for the GPX analysis tool.
+Controls the GUI, MapHandler and more.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.app.GpxAnalysisApp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.app.</span></span><span class="sig-name descname"><span class="pre">GpxAnalysisApp</span></span><a class="reference internal" href="_modules/gpx_analysis/app.html#GpxAnalysisApp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.app.GpxAnalysisApp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This app handles all the functionality of the GPX analysis tool</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.app.GpxAnalysisApp.get_playback_time">
+<span class="sig-name descname"><span class="pre">get_playback_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/app.html#GpxAnalysisApp.get_playback_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.app.GpxAnalysisApp.get_playback_time" title="Link to this definition"></a></dt>
+<dd><p>A getter for the playback_time variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the playback_time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.app.GpxAnalysisApp.run_app">
+<span class="sig-name descname"><span class="pre">run_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/app.html#GpxAnalysisApp.run_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.app.GpxAnalysisApp.run_app" title="Link to this definition"></a></dt>
+<dd><p>Starts running the App</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.app.GpxAnalysisApp.set_playback_time">
+<span class="sig-name descname"><span class="pre">set_playback_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/app.html#GpxAnalysisApp.set_playback_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.app.GpxAnalysisApp.set_playback_time" title="Link to this definition"></a></dt>
+<dd><p>A setter for the playback_time variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – the time to set</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.components">
+<span id="gpx-analysis-components-module"></span><h2>gpx_analysis.components module<a class="headerlink" href="#module-gpx_analysis.components" title="Link to this heading"></a></h2>
+<p>This file contains functions used for doing geographic calculations</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.components.geo_distance">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.components.</span></span><span class="sig-name descname"><span class="pre">geo_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/components.html#geo_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.components.geo_distance" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the distance between two points in the world in meters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>latitude1</strong> – The latitude of the first point</p></li>
+<li><p><strong>longitude1</strong> – The longitude of the first point</p></li>
+<li><p><strong>latitude2</strong> – The latitude of the second point</p></li>
+<li><p><strong>longitude2</strong> – The longitude of the second point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The distance between the two points in meters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.components.get_track_bounds">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.components.</span></span><span class="sig-name descname"><span class="pre">get_track_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/gpx_analysis/components.html#get_track_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.components.get_track_bounds" title="Link to this definition"></a></dt>
+<dd><p>Return the bounding regions of the track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_track</strong> – The input track</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>North latitude, east longitude, south latitude, west longitude</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.components.lighten_color">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.components.</span></span><span class="sig-name descname"><span class="pre">lighten_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/components.html#lighten_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.components.lighten_color" title="Link to this definition"></a></dt>
+<dd><p>lightens a given rgb colour</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>colour</strong> – RGB tuple colour</p></li>
+<li><p><strong>amount</strong> – the lower the number below 0 the lighter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An rgb colour lightened</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.components.standardise_gpx_distances">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.components.</span></span><span class="sig-name descname"><span class="pre">standardise_gpx_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></span><a class="reference internal" href="_modules/gpx_analysis/components.html#standardise_gpx_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.components.standardise_gpx_distances" title="Link to this definition"></a></dt>
+<dd><p>This function converts the original (lat lon) distances in the track into meters
+where 0,0 is bottom left of the track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_track</strong> – The already parsed GPX class</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the modified track</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.components.union_bounds">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.components.</span></span><span class="sig-name descname"><span class="pre">union_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/gpx_analysis/components.html#union_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.components.union_bounds" title="Link to this definition"></a></dt>
+<dd><p>Return the union of two bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds1</strong> – The first bounds</p></li>
+<li><p><strong>bounds2</strong> – The second bounds</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The union of the two bounds</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gpx_parser">
+<span id="gpx-analysis-gpx-parser-module"></span><h2>gpx_analysis.gpx_parser module<a class="headerlink" href="#module-gpx_analysis.gpx_parser" title="Link to this heading"></a></h2>
+<p>This module parses a GPX file into the track class which is made up of track points
+(another new class).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.Track">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gpx_parser.</span></span><span class="sig-name descname"><span class="pre">Track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#Track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.Track" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class represents a track in a GPX file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.Track.get_filename">
+<span class="sig-name descname"><span class="pre">get_filename</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#Track.get_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.Track.get_filename" title="Link to this definition"></a></dt>
+<dd><p>returns the filename of this gpx track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>filename as a string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.Track.get_has_cadence">
+<span class="sig-name descname"><span class="pre">get_has_cadence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#Track.get_has_cadence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.Track.get_has_cadence" title="Link to this definition"></a></dt>
+<dd><p>Getter for has_cadence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the track has cadence</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.Track.get_total_time">
+<span class="sig-name descname"><span class="pre">get_total_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#Track.get_total_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.Track.get_total_time" title="Link to this definition"></a></dt>
+<dd><p>The total time willl just be the last one, return that</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The total time on the track</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.Track.get_track_points">
+<span class="sig-name descname"><span class="pre">get_track_points</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gpx_analysis.gpx_parser.TrackPoint" title="gpx_analysis.gpx_parser.TrackPoint"><span class="pre">TrackPoint</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#Track.get_track_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.Track.get_track_points" title="Link to this definition"></a></dt>
+<dd><p>Getter for track points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of track points</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gpx_parser.</span></span><span class="sig-name descname"><span class="pre">TrackPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class represents a track point in a GPX file.
+Also features cadence and time.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.get_cadence">
+<span class="sig-name descname"><span class="pre">get_cadence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.get_cadence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.get_cadence" title="Link to this definition"></a></dt>
+<dd><p>Getter for cadence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the cadence of the track point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.get_formatted_time">
+<span class="sig-name descname"><span class="pre">get_formatted_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.get_formatted_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.get_formatted_time" title="Link to this definition"></a></dt>
+<dd><p>Getter for formatted datetime time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The datetime time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.get_position_degrees">
+<span class="sig-name descname"><span class="pre">get_position_degrees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.get_position_degrees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.get_position_degrees" title="Link to this definition"></a></dt>
+<dd><p>Getter for the position in degrees</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the position of the track point (lat,lon)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.get_position_standard">
+<span class="sig-name descname"><span class="pre">get_position_standard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'float'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.get_position_standard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.get_position_standard" title="Link to this definition"></a></dt>
+<dd><p>Getter for the position in meters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the position of the track point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.get_relative_time">
+<span class="sig-name descname"><span class="pre">get_relative_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.get_relative_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.get_relative_time" title="Link to this definition"></a></dt>
+<dd><p>Getter for relative time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the relative time of the track point</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.set_position_standard">
+<span class="sig-name descname"><span class="pre">set_position_standard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nex_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.set_position_standard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.set_position_standard" title="Link to this definition"></a></dt>
+<dd><p>Update the track point position fields</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nex_x</strong> – The updated x value</p></li>
+<li><p><strong>new_y</strong> – The updated y value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gpx_parser.TrackPoint.set_relative_time">
+<span class="sig-name descname"><span class="pre">set_relative_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gpx_parser.html#TrackPoint.set_relative_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gpx_parser.TrackPoint.set_relative_time" title="Link to this definition"></a></dt>
+<dd><p>Setter for relative time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>relative_time</strong> – the relative time of the track point</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.graph_handler">
+<span id="gpx-analysis-graph-handler-module"></span><h2>gpx_analysis.graph_handler module<a class="headerlink" href="#module-gpx_analysis.graph_handler" title="Link to this heading"></a></h2>
+<p>This module handles the graphing of the GPX file and the fetching of OSM tiles</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">MapClass</span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for converting scales between the GPX file and the graph</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.add_athlete">
+<span class="sig-name descname"><span class="pre">add_athlete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">athlete_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.add_athlete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.add_athlete" title="Link to this definition"></a></dt>
+<dd><p>Add a track to the graph handler instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_key</strong> – The key that gets added to the dictionary (simple filename)</p></li>
+<li><p><strong>athlete_value</strong> – The dict of athlete data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.center_viewpoint">
+<span class="sig-name descname"><span class="pre">center_viewpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.center_viewpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.center_viewpoint" title="Link to this definition"></a></dt>
+<dd><p>This rebounds the viewpoint of the mpl figure so it includes all the boats
+and it’s roughly centered around them</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>positions</strong> – A list of the tuple (lat,lon) coordinates of the boats</p></li>
+<li><p><strong>offset</strong> – The border around the points (how zoomed it is) between 0 and 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.degrees_to_graph">
+<span class="sig-name descname"><span class="pre">degrees_to_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.degrees_to_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.degrees_to_graph" title="Link to this definition"></a></dt>
+<dd><p>Convert the degrees to the graph coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>degrees</strong> – The degrees to convert (lat,lon)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The graph coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.draw_line">
+<span class="sig-name descname"><span class="pre">draw_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Line2D</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.draw_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.draw_line" title="Link to this definition"></a></dt>
+<dd><p>Draw a line on the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> – tuple lat,lon coordinates</p></li>
+<li><p><strong>end</strong> – tuple lat,lon coordinates</p></li>
+<li><p><strong>color</strong> – colour of the point default green</p></li>
+<li><p><strong>width</strong> – width of the line default 2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the line data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.draw_point">
+<span class="sig-name descname"><span class="pre">draw_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.draw_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.draw_point" title="Link to this definition"></a></dt>
+<dd><p>Draw a point on the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_key</strong> – The key of the athlete whose marker we’re adding</p></li>
+<li><p><strong>pos</strong> – tuple (lat,lon) coordinates</p></li>
+<li><p><strong>color</strong> – colour of the point default green</p></li>
+<li><p><strong>size</strong> – radius of the point default 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.draw_track">
+<span class="sig-name descname"><span class="pre">draw_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'green'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.draw_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.draw_track" title="Link to this definition"></a></dt>
+<dd><p>Draw a track on the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_key</strong> – The key of the athlete’s track to draw in the track list (filename)</p></li>
+<li><p><strong>color</strong> – The color of the track</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.get_figure">
+<span class="sig-name descname"><span class="pre">get_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.get_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.get_figure" title="Link to this definition"></a></dt>
+<dd><p>Return the figure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.modify_athlete">
+<span class="sig-name descname"><span class="pre">modify_athlete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.modify_athlete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.modify_athlete" title="Link to this definition"></a></dt>
+<dd><p>gets called when an athlete changes something (either a colour or display name)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_key</strong> – The key to modify in the dictionary</p></li>
+<li><p><strong>new_value</strong> – The new value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.modify_start_finish_times">
+<span class="sig-name descname"><span class="pre">modify_start_finish_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finish</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.modify_start_finish_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.modify_start_finish_times" title="Link to this definition"></a></dt>
+<dd><p>Modifies the start and finish times for an athlete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_key</strong> – The key to modify in the dictionary</p></li>
+<li><p><strong>start</strong> – The new start time</p></li>
+<li><p><strong>finish</strong> – The new finish time</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.plot_images">
+<span class="sig-name descname"><span class="pre">plot_images</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.plot_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.plot_images" title="Link to this definition"></a></dt>
+<dd><p>Plots all the images in the image dictionary
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.remove_athlete">
+<span class="sig-name descname"><span class="pre">remove_athlete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.remove_athlete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.remove_athlete" title="Link to this definition"></a></dt>
+<dd><p>Remove an athlete + track and points from the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athlete_key</strong> – the dictionary key to remove</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.remove_point">
+<span class="sig-name descname"><span class="pre">remove_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.remove_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.remove_point" title="Link to this definition"></a></dt>
+<dd><p>Remove a point plotted earlier</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athlete_key</strong> – The str key of the athlete in the dict (simple filename usually)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets the map to a blank state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.MapClass.scale_zoom">
+<span class="sig-name descname"><span class="pre">scale_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#MapClass.scale_zoom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.MapClass.scale_zoom" title="Link to this definition"></a></dt>
+<dd><p>This takes an input zoom level and scales it exponentially to be max
+the max size of the image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_value</strong> – input value between 0 and 1</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the scaled zoom value</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.deg2num">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">deg2num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#deg2num"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.deg2num" title="Link to this definition"></a></dt>
+<dd><p>Code for converting lat lon to tile number from
+<a class="reference external" href="https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames">https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat_deg</strong> – Input latitude</p></li>
+<li><p><strong>lon_deg</strong> – Input longitude</p></li>
+<li><p><strong>zoom</strong> – OSM zoom level</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the OSM tile position</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.get_all_images_in_bounds">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/Rowing-GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_in_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_in_bounds" title="Link to this definition"></a></dt>
+<dd><p>Get all the images in the bounds and put them in a dictionary with their
+tile index as the key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bounds</strong> – The bounds of the track (NESW)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The collection of images as a dict key = image pos, value = image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.get_all_images_near_track">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_near_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/Rowing-GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_near_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_near_track" title="Link to this definition"></a></dt>
+<dd><p>More Tile server friendly way of getting images, by only fetching the ones near the track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track</strong> – The track to get images of nearby</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The collection of images as a dict key = image pos, value = image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.get_img">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_img</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_img"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_img" title="Link to this definition"></a></dt>
+<dd><p>Get the image from the tile either from cache or downloading</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_coord</strong> – The x tile index</p></li>
+<li><p><strong>y_coord</strong> – The y tile index</p></li>
+<li><p><strong>zoom</strong> – The zoom tile index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.graph_handler.num2deg">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">num2deg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xtile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#num2deg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.num2deg" title="Link to this definition"></a></dt>
+<dd><p>Code for converting tile number to lat lon from
+<a class="reference external" href="https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames">https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xtile</strong> – The tile x coordinate</p></li>
+<li><p><strong>ytile</strong> – The tile y corrdinate</p></li>
+<li><p><strong>zoom</strong> – The osm zoom level</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(latitude, longitude)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gui">
+<span id="gpx-analysis-gui-module"></span><h2>gpx_analysis.gui module<a class="headerlink" href="#module-gpx_analysis.gui" title="Link to this heading"></a></h2>
+<p>This script contains the main GUI class
+The AppGUI class is the only one to use outside of this class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui.</span></span><span class="sig-name descname"><span class="pre">AppGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.graph_handler.MapClass" title="gpx_analysis.graph_handler.MapClass"><span class="pre">MapClass</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class containing the entire GUI for the GPX Analysis App, using OOP so encapsulation makes
+it better for modularity, readability etc.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.get_frm_map_menu">
+<span class="sig-name descname"><span class="pre">get_frm_map_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Frame</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.get_frm_map_menu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.get_frm_map_menu" title="Link to this definition"></a></dt>
+<dd><p>Getter for the private variable frm_map_menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>frm_map_menu</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.get_frm_stats_menu">
+<span class="sig-name descname"><span class="pre">get_frm_stats_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Frame</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.get_frm_stats_menu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.get_frm_stats_menu" title="Link to this definition"></a></dt>
+<dd><p>Getter for the private variable frm_stats_menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>frm_stats_menu</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.get_tk_window">
+<span class="sig-name descname"><span class="pre">get_tk_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tk</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.get_tk_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.get_tk_window" title="Link to this definition"></a></dt>
+<dd><p>Getter for the private tk window variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the tk window</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.gui_loop">
+<span class="sig-name descname"><span class="pre">gui_loop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.gui_loop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.gui_loop" title="Link to this definition"></a></dt>
+<dd><p>The GUI code to loop through each frame in the simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_changename_callback">
+<span class="sig-name descname"><span class="pre">set_changename_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_changename_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_changename_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when an athlete changes display name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_delete_callback">
+<span class="sig-name descname"><span class="pre">set_delete_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_delete_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_delete_callback" title="Link to this definition"></a></dt>
+<dd><p>Set the callback function to be used when a file is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called when an athlete is deleted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_finishline_athlete_selected">
+<span class="sig-name descname"><span class="pre">set_finishline_athlete_selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_finishline_athlete_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_finishline_athlete_selected" title="Link to this definition"></a></dt>
+<dd><p>Pass the athlete data held by athlete key to the currently selected field
+in the finishline menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athlete_key</strong> – The athlete whose data we are sending</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_get_playback_callback">
+<span class="sig-name descname"><span class="pre">set_get_playback_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_get_playback_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_get_playback_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a class requests playback state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_get_playback_time_callback">
+<span class="sig-name descname"><span class="pre">set_get_playback_time_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_get_playback_time_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_get_playback_time_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a class requests playback state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_get_start_finish_time_callback">
+<span class="sig-name descname"><span class="pre">set_get_start_finish_time_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_get_start_finish_time_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_get_start_finish_time_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a start or finish time is requested</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_gui_playback_time">
+<span class="sig-name descname"><span class="pre">set_gui_playback_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_gui_playback_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_gui_playback_time" title="Link to this definition"></a></dt>
+<dd><p>Set the time passed on the GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_val</strong> – the time passed</p></li>
+<li><p><strong>max_time</strong> – how much total time</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_on_colour_change">
+<span class="sig-name descname"><span class="pre">set_on_colour_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_on_colour_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_on_colour_change" title="Link to this definition"></a></dt>
+<dd><p>Setter for on colour change callback func</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – the function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_open_callback">
+<span class="sig-name descname"><span class="pre">set_open_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_open_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_open_callback" title="Link to this definition"></a></dt>
+<dd><p>Set the callback function to be used when a file is opened</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called when a file is opened in control window</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_set_plaback_speed_callback">
+<span class="sig-name descname"><span class="pre">set_set_plaback_speed_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_set_plaback_speed_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_set_plaback_speed_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a class sets playback speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_set_playback_callback">
+<span class="sig-name descname"><span class="pre">set_set_playback_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_set_playback_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_set_playback_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a class sets playback state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_set_playback_time_callback">
+<span class="sig-name descname"><span class="pre">set_set_playback_time_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_set_playback_time_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_set_playback_time_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a class sets playback state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_set_start_finish_time_callback">
+<span class="sig-name descname"><span class="pre">set_set_start_finish_time_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_set_start_finish_time_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_set_start_finish_time_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when a start or finish time is set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_zoom_level_callback">
+<span class="sig-name descname"><span class="pre">set_zoom_level_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_zoom_level_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_zoom_level_callback" title="Link to this definition"></a></dt>
+<dd><p>Sets the callback function to be used when the zoom level changes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.stop_finish_start_editing">
+<span class="sig-name descname"><span class="pre">stop_finish_start_editing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.stop_finish_start_editing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.stop_finish_start_editing" title="Link to this definition"></a></dt>
+<dd><p>disables the start/finish editing menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.update_athletes">
+<span class="sig-name descname"><span class="pre">update_athletes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_athletes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remake_widgets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.update_athletes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.update_athletes" title="Link to this definition"></a></dt>
+<dd><p>Updates the GUI’s list of athletes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_athletes</strong> – the new list</p></li>
+<li><p><strong>remake_widgets</strong> – Whether or not to rebuild the widgets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.update_map">
+<span class="sig-name descname"><span class="pre">update_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.update_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.update_map" title="Link to this definition"></a></dt>
+<dd><p>This sets/ updates the mpl figure map on the GUI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>force</strong> – whether to force an update regardless of whether it’s too soon</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.update_stats">
+<span class="sig-name descname"><span class="pre">update_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.update_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.update_stats" title="Link to this definition"></a></dt>
+<dd><p>update the statistics menu display</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gui_control_menu">
+<span id="gpx-analysis-gui-control-menu-module"></span><h2>gpx_analysis.gui_control_menu module<a class="headerlink" href="#module-gpx_analysis.gui_control_menu" title="Link to this heading"></a></h2>
+<p>This script contains the athlete menu sub frame class related to the tk GUI
+The AppGUI class is the only one to use outside of this class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gui_control_menu.ControlMenuFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui_control_menu.</span></span><span class="sig-name descname"><span class="pre">ControlMenuFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui_control_menu.html#ControlMenuFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_control_menu.ControlMenuFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This widget contains and abstracts the features of the control menu</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_control_menu.ControlMenuFrame.set_changename_callback">
+<span class="sig-name descname"><span class="pre">set_changename_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_control_menu.html#ControlMenuFrame.set_changename_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_control_menu.ControlMenuFrame.set_changename_callback" title="Link to this definition"></a></dt>
+<dd><p>Set the callback function to be used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called when a display name is changed</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_control_menu.ControlMenuFrame.set_delete_callback">
+<span class="sig-name descname"><span class="pre">set_delete_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_control_menu.html#ControlMenuFrame.set_delete_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_control_menu.ControlMenuFrame.set_delete_callback" title="Link to this definition"></a></dt>
+<dd><p>Set the callback function to be used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called when an athlete is deleted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_control_menu.ControlMenuFrame.set_open_callback">
+<span class="sig-name descname"><span class="pre">set_open_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_control_menu.html#ControlMenuFrame.set_open_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_control_menu.ControlMenuFrame.set_open_callback" title="Link to this definition"></a></dt>
+<dd><p>Set the callback function to be used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – The function to be called when a file is opened in control window</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_control_menu.ControlMenuFrame.update_athlete_data">
+<span class="sig-name descname"><span class="pre">update_athlete_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remake_widgets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_control_menu.html#ControlMenuFrame.update_athlete_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_control_menu.ControlMenuFrame.update_athlete_data" title="Link to this definition"></a></dt>
+<dd><p>Set the athlete data in this class (setter method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>athlete_data</strong> – Data to set</p></li>
+<li><p><strong>remake_widgets</strong> – whether or not to remake the widgets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gui_finishline_menu">
+<span id="gpx-analysis-gui-finishline-menu-module"></span><h2>gpx_analysis.gui_finishline_menu module<a class="headerlink" href="#module-gpx_analysis.gui_finishline_menu" title="Link to this heading"></a></h2>
+<p>This script contains the finishline sub frame class related to the tk GUI
+The AppGUI class is the only one to use outside of this class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gui_finishline_menu.FinishlineMenuFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui_finishline_menu.</span></span><span class="sig-name descname"><span class="pre">FinishlineMenuFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui_finishline_menu.html#FinishlineMenuFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This widget contains and abstracts the features of the finishline menu</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.set_currently_selected">
+<span class="sig-name descname"><span class="pre">set_currently_selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athlete_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_finishline_menu.html#FinishlineMenuFrame.set_currently_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.set_currently_selected" title="Link to this definition"></a></dt>
+<dd><p>setter for private variable self.__currently_selected</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athlete_data</strong> – The data to set to it</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.stop_editing">
+<span class="sig-name descname"><span class="pre">stop_editing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_finishline_menu.html#FinishlineMenuFrame.stop_editing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.stop_editing" title="Link to this definition"></a></dt>
+<dd><p>Gets called when a different class wants to stop editing the finish/start lines
+ie when athlete focus is swapped or started playback</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.gui_finishline_menu.validate_float_input">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui_finishline_menu.</span></span><span class="sig-name descname"><span class="pre">validate_float_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_finishline_menu.html#validate_float_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_finishline_menu.validate_float_input" title="Link to this definition"></a></dt>
+<dd><p>Validates whether a string can be a float or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>number</strong> – string form of the number to enter</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>whether it is (true) or isn’t (false)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gui_playback_menu">
+<span id="gpx-analysis-gui-playback-menu-module"></span><h2>gpx_analysis.gui_playback_menu module<a class="headerlink" href="#module-gpx_analysis.gui_playback_menu" title="Link to this heading"></a></h2>
+<p>This script contains the playback menu sub frame class related to the tk GUI
+The AppGUI class is the only one to use outside of this class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gui_playback_menu.PlaybackMenuFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui_playback_menu.</span></span><span class="sig-name descname"><span class="pre">PlaybackMenuFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui_playback_menu.html#PlaybackMenuFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_playback_menu.PlaybackMenuFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This widget contains and abstracts the features of the playback menu</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_playback_menu.PlaybackMenuFrame.set_playback_speed">
+<span class="sig-name descname"><span class="pre">set_playback_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playback_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_playback_menu.html#PlaybackMenuFrame.set_playback_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_playback_menu.PlaybackMenuFrame.set_playback_speed" title="Link to this definition"></a></dt>
+<dd><p>Set the playback speed of the simulation and display it on the text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>playback_speed</strong> – The playback speed to set</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_playback_menu.PlaybackMenuFrame.set_playback_time">
+<span class="sig-name descname"><span class="pre">set_playback_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playback_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_playback_menu.html#PlaybackMenuFrame.set_playback_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_playback_menu.PlaybackMenuFrame.set_playback_time" title="Link to this definition"></a></dt>
+<dd><p>Set the playback time of the simulation and display it on the text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>playback_time</strong> – The playback time to set</p></li>
+<li><p><strong>total_time</strong> – The maximum time</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.gui_stats_menu">
+<span id="gpx-analysis-gui-stats-menu-module"></span><h2>gpx_analysis.gui_stats_menu module<a class="headerlink" href="#module-gpx_analysis.gui_stats_menu" title="Link to this heading"></a></h2>
+<p>This script contains the playback menu sub frame class related to the tk GUI
+The AppGUI class is the only one to use outside of this class</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.gui_stats_menu.StatsMenuFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.gui_stats_menu.</span></span><span class="sig-name descname"><span class="pre">StatsMenuFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/gui_stats_menu.html#StatsMenuFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_stats_menu.StatsMenuFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This widget contains and abstracts the features of the stats menu</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_stats_menu.StatsMenuFrame.set_athlete_list">
+<span class="sig-name descname"><span class="pre">set_athlete_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athletes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_stats_menu.html#StatsMenuFrame.set_athlete_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_stats_menu.StatsMenuFrame.set_athlete_list" title="Link to this definition"></a></dt>
+<dd><p>Setter for the athlete list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athletes</strong> – The athletes to set</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui_stats_menu.StatsMenuFrame.update_stats">
+<span class="sig-name descname"><span class="pre">update_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui_stats_menu.html#StatsMenuFrame.update_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui_stats_menu.StatsMenuFrame.update_stats" title="Link to this definition"></a></dt>
+<dd><p>Updates the text statistics based on the time and who’s selected</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.sporting">
+<span id="gpx-analysis-sporting-module"></span><h2>gpx_analysis.sporting module<a class="headerlink" href="#module-gpx_analysis.sporting" title="Link to this heading"></a></h2>
+<p>This module contains the functions needed for the sporting analysis
+eg. getting position,velocity etc. at a given time</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.convert_speed_units">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">convert_speed_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#convert_speed_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.convert_speed_units" title="Link to this definition"></a></dt>
+<dd><p>Converts the speed from m/s to another unit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>speed</strong> – The speed in m/s</p></li>
+<li><p><strong>unit</strong> – The unit to convert to either: m/s, km/h, mph, s/500m or s/km</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The speed in the new unit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_cadence_at_time">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_cadence_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_cadence_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_cadence_at_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the cadence on a gpx track at a given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> – The track to get the cadence from</p></li>
+<li><p><strong>time</strong> – The time to get the cadence at</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cadence at the given time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_cumulative_dist_at_time">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_cumulative_dist_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_cumulative_dist_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_cumulative_dist_at_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the cumulative distance on a gpx track at a given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> – The track to get the cumulative distance from</p></li>
+<li><p><strong>time</strong> – The time to get the cumulative distance at</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cumulative distance at the given time (in meters)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_position_at_time">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_position_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_position_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_position_at_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the position on a gpx track at a given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> – The track to get the position from</p></li>
+<li><p><strong>time</strong> – The time to get the position at</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The lat lon position at the given time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_speed_at_time">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_speed_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_speed_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_speed_at_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the speed on a gpx track at a given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> – The track to get the speed from</p></li>
+<li><p><strong>time</strong> – The time to get the speed at</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The speed at the given time</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_surrounding_points_at_time">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_surrounding_points_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#gpx_analysis.gpx_parser.TrackPoint" title="gpx_analysis.gpx_parser.TrackPoint"><span class="pre">TrackPoint</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#gpx_analysis.gpx_parser.TrackPoint" title="gpx_analysis.gpx_parser.TrackPoint"><span class="pre">TrackPoint</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_surrounding_points_at_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_surrounding_points_at_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the two points either side of a given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> – The input track</p></li>
+<li><p><strong>time</strong> – The time to get the points at</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two gpx.Trackpoint points</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.get_total_distance">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">get_total_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#get_total_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.get_total_distance" title="Link to this definition"></a></dt>
+<dd><p>Returns the total distance of a track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>track</strong> – The track to get the distance from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The total distance of the track</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gpx_analysis.sporting.map_ranges">
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.sporting.</span></span><span class="sig-name descname"><span class="pre">map_ranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gpx_analysis/sporting.html#map_ranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.sporting.map_ranges" title="Link to this definition"></a></dt>
+<dd><p>Maps a value from one range to another</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The value within the input range</p></li>
+<li><p><strong>in_min</strong> – The lower end of the input range</p></li>
+<li><p><strong>in_max</strong> – The upper end of the input range</p></li>
+<li><p><strong>out_min</strong> – The lower end of the output range</p></li>
+<li><p><strong>out_max</strong> – The upper end of the output range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value mapped to the output range</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.stats_graph_handler">
+<span id="gpx-analysis-stats-graph-handler-module"></span><h2>gpx_analysis.stats_graph_handler module<a class="headerlink" href="#module-gpx_analysis.stats_graph_handler" title="Link to this heading"></a></h2>
+<p>This module handles the small stats line graph at the bottom of the screen</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.stats_graph_handler.StatsGraph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.stats_graph_handler.</span></span><span class="sig-name descname"><span class="pre">StatsGraph</span></span><a class="reference internal" href="_modules/gpx_analysis/stats_graph_handler.html#StatsGraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.stats_graph_handler.StatsGraph" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class holds the stats graph and functions relating to it</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.stats_graph_handler.StatsGraph.draw_base_graph">
+<span class="sig-name descname"><span class="pre">draw_base_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/stats_graph_handler.html#StatsGraph.draw_base_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.stats_graph_handler.StatsGraph.draw_base_graph" title="Link to this definition"></a></dt>
+<dd><p>Draw a graph according to its mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> – clears the graph if none, otherwise draw according to the mode</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.stats_graph_handler.StatsGraph.draw_time_line">
+<span class="sig-name descname"><span class="pre">draw_time_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/stats_graph_handler.html#StatsGraph.draw_time_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.stats_graph_handler.StatsGraph.draw_time_line" title="Link to this definition"></a></dt>
+<dd><p>Draw a line on the graph to mark what time it is in the simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> – the current time</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.stats_graph_handler.StatsGraph.get_fig">
+<span class="sig-name descname"><span class="pre">get_fig</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="_modules/gpx_analysis/stats_graph_handler.html#StatsGraph.get_fig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.stats_graph_handler.StatsGraph.get_fig" title="Link to this definition"></a></dt>
+<dd><p>getter for the figure of the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The figure of the graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.stats_graph_handler.StatsGraph.set_athletes">
+<span class="sig-name descname"><span class="pre">set_athletes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">athletes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/stats_graph_handler.html#StatsGraph.set_athletes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.stats_graph_handler.StatsGraph.set_athletes" title="Link to this definition"></a></dt>
+<dd><p>Setter for the list of athletes then update the graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>athletes</strong> – the new dictionary</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis.tkscrolledframe">
+<span id="gpx-analysis-tkscrolledframe-module"></span><h2>gpx_analysis.tkscrolledframe module<a class="headerlink" href="#module-gpx_analysis.tkscrolledframe" title="Link to this heading"></a></h2>
+<p>Implementation of the scrollable frame widget.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.tkscrolledframe.</span></span><span class="sig-name descname"><span class="pre">ScrolledFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></p>
+<p>Scrollable Frame widget.</p>
+<p>Use display_widget() to set the interior widget. For example,
+to display a Label with the text “Hello, world!”, you can say:</p>
+<blockquote>
+<div><p>sf = ScrolledFrame(self)
+sf.pack()
+sf.display_widget(Label, text=”Hello, world!”)</p>
+</div></blockquote>
+<p>The constructor accepts the usual Tkinter keyword arguments, plus
+a handful of its own:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>scrollbars (str; default: “both”)</dt><dd><p>Which scrollbars to provide.
+Must be one of “vertical”, “horizontal,” “both”, or “neither”.</p>
+</dd>
+<dt>use_ttk (bool; default: False)</dt><dd><p>Whether to use ttk widgets if available.
+The default is to use standard Tk widgets. This setting has
+no effect if ttk is not available on your system.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.bind_arrow_keys">
+<span class="sig-name descname"><span class="pre">bind_arrow_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.bind_arrow_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_arrow_keys" title="Link to this definition"></a></dt>
+<dd><p>Bind the specified widget’s arrow key events to the canvas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.bind_scroll_wheel">
+<span class="sig-name descname"><span class="pre">bind_scroll_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.bind_scroll_wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_scroll_wheel" title="Link to this definition"></a></dt>
+<dd><p>Bind the specified widget’s mouse scroll event to the canvas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.cget">
+<span class="sig-name descname"><span class="pre">cget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.cget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.cget" title="Link to this definition"></a></dt>
+<dd><p>Return the resource value for a KEY given as string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.config">
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cnf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.config" title="Link to this definition"></a></dt>
+<dd><p>Configure resources of a widget.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.configure">
+<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cnf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.configure" title="Link to this definition"></a></dt>
+<dd><p>Configure resources of a widget.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.display_widget">
+<span class="sig-name descname"><span class="pre">display_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.display_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.display_widget" title="Link to this definition"></a></dt>
+<dd><p>Create and display a new widget.</p>
+<p>If fit_width == True, the interior widget will be stretched as
+needed to fit the width of the frame.</p>
+<p>Keyword arguments are passed to the widget_class constructor.</p>
+<p>Returns the new widget.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.erase">
+<span class="sig-name descname"><span class="pre">erase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.erase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.erase" title="Link to this definition"></a></dt>
+<dd><p>Erase the displayed widget.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.scroll_to_top">
+<span class="sig-name descname"><span class="pre">scroll_to_top</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.scroll_to_top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.scroll_to_top" title="Link to this definition"></a></dt>
+<dd><p>Scroll to the top-left corner of the canvas.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-gpx_analysis">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gpx_analysis" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="gpx_analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.gui_finishline_menu &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.gui_finishline_menu</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.gui_finishline_menu</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains the finishline sub frame class related to the tk GUI</span>
+<span class="sd">The AppGUI class is the only one to use outside of this class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Pylint ignores</span>
+<span class="c1"># pylint: disable=R0902</span>
+<span class="c1"># pylint: disable=R0914</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+<span class="kn">import</span> <span class="nn">tkinter.messagebox</span> <span class="k">as</span> <span class="nn">msgbox</span>  <span class="c1"># for popups</span>
+
+
+<div class="viewcode-block" id="FinishlineMenuFrame">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame">[docs]</a>
+<span class="k">class</span> <span class="nc">FinishlineMenuFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This widget contains and abstracts the features of the finishline menu</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the FinishlineMenuFrame class</span>
+
+<span class="sd">        :param parent_class: pass in the parent_class so we can access its window and</span>
+<span class="sd">         other frames etc</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span> <span class="o">=</span> <span class="n">parent_class</span>
+
+        <span class="c1"># The data for the athlete currently selected by the athlete menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span> <span class="o">=</span> <span class="mi">100</span>
+
+        <span class="c1"># Set up the frame to contain the widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_frm_map_menu</span><span class="p">(),</span>
+                                                   <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RIDGE</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># centers it</span>
+        <span class="c1"># have a blank row on row 2 for aesthetics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+        <span class="c1"># Put buttons etc. in the Start finish line menu</span>
+        <span class="c1"># Create the title for the frame</span>
+        <span class="c1"># doesn&#39;t need to be instance var as not referenced elsewhere</span>
+        <span class="n">label_finishline_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="p">,</span>
+                                          <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Start/Finish Line Menu&quot;</span><span class="p">,</span>
+                                          <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Minion Pro&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span>
+        <span class="n">label_finishline_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Put a checkbox below to enable or disable it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_finishline_status</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_checkbox</span><span class="p">()</span>
+
+        <span class="c1"># Encapsulate start slider precise entry and label in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_start_precise</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds the precise data for start line time</span>
+
+        <span class="c1"># Encapsulate finish slider precise entry and label in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_end</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_end</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_end_precise</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__enable_widgets</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FinishlineMenuFrame.stop_editing">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.stop_editing">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop_editing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when a different class wants to stop editing the finish/start lines</span>
+<span class="sd">        ie when athlete focus is swapped or started playback</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__enable_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        enables widgets for the GUI that are required for editing start/finish locations</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_start_frame</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_end_frame</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__update_start_finish_times_text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__create_checkbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the checkbox and containing frame which enable or disable the menu</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">BooleanVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_finishline_status</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Checkbutton</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="p">,</span>
+                                                            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Enable start/finish modifying?&#39;</span><span class="p">,</span>
+                                                            <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_checkbox_changed</span><span class="p">,</span>
+                                                            <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_finishline_status</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FinishlineMenuFrame.set_currently_selected">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_finishline_menu.FinishlineMenuFrame.set_currently_selected">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_currently_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        setter for private variable self.__currently_selected</span>
+
+<span class="sd">        :param athlete_data: The data to set to it</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span> <span class="o">=</span> <span class="n">athlete_data</span>
+
+        <span class="k">if</span> <span class="n">athlete_data</span><span class="p">:</span>  <span class="c1"># if its a real athlete not None then modify the fields</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__update_start_finish_times_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        update the text for what the real start finish time is</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>  <span class="c1"># don&#39;t execute if not fully set up</span>
+            <span class="k">return</span>
+
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="n">start_time</span><span class="p">,</span> <span class="n">finish_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_start_finish_time</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+        <span class="c1"># update the text labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_start</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Start Line: </span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">s&quot;</span>
+                                                          <span class="sa">f</span><span class="s2">&quot;  Total: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_end</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Finish Line: </span><span class="si">{</span><span class="n">finish_time</span><span class="si">}</span><span class="s2">s&quot;</span>
+                                                        <span class="sa">f</span><span class="s2">&quot;  Total: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setup_start_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the start frame widgets</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="n">personal_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">personal_total</span> <span class="o">=</span> <span class="mi">100</span>
+
+        <span class="c1"># Encapsulate slider precise entry and label in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Set up the start line info text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_start</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span><span class="p">,</span>
+                                                       <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Start Line: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">s&quot;</span>
+                                                            <span class="sa">f</span><span class="s2">&quot;  Total: </span><span class="si">{</span><span class="n">personal_total</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_start</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Set up the slider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_start</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span><span class="p">,</span>
+                                                        <span class="n">orient</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">,</span>
+                                                        <span class="n">from_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                                                        <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_start_slider_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_start</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># entry box for precise entry</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_start_precise</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="c1"># This doesn&#39;t need to be an instance variable as not used again</span>
+        <span class="n">entry__start_precise</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span><span class="p">,</span>
+                                         <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_start_precise</span><span class="p">,</span>
+                                         <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">entry__start_precise</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># button for entry box, his doesn&#39;t need to be an instance variable as not used again</span>
+        <span class="n">btn_finishline_start</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_start</span><span class="p">,</span>
+                                          <span class="n">text</span><span class="o">=</span><span class="s1">&#39;SET&#39;</span><span class="p">,</span>
+                                          <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_precise_button_start_pressed</span><span class="p">)</span>
+        <span class="n">btn_finishline_start</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setup_end_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the frame containing all the end widgets</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+            <span class="n">personal_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">personal_total</span> <span class="o">=</span> <span class="mi">100</span>
+
+        <span class="c1"># Set up the bounding frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="c1"># set up the text saying where the finish line is</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_end</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span><span class="p">,</span>
+                                                     <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Finish Line: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">s &quot;</span>
+                                                          <span class="sa">f</span><span class="s2">&quot; Total: </span><span class="si">{</span><span class="n">personal_total</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_finishline_menu_end</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># set up the slider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_end</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span><span class="p">,</span>
+                                                      <span class="n">orient</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">,</span>
+                                                      <span class="n">from_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                                                      <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_end_slider_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_end</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># entry box for precise entry</span>
+        <span class="c1"># the text data needs to be accessible outside but entry itself won&#39;t be modified again</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_end_precise</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+        <span class="n">entry_finishline_end_precise</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span><span class="p">,</span>
+                                                 <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_end_precise</span><span class="p">,</span>
+                                                 <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">entry_finishline_end_precise</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># button for entry box</span>
+        <span class="n">btn_finishline_end</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_finishline_end</span><span class="p">,</span>
+                                        <span class="n">text</span><span class="o">=</span><span class="s1">&#39;SET&#39;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_precise_button_end_pressed</span><span class="p">)</span>
+        <span class="n">btn_finishline_end</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_precise_button_start_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets called when the start precise button gets pressed</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># print(&quot;precise start pressed&quot;)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_start_precise</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">validate_float_input</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+                <span class="c1"># print(f&quot;precise end pressed value: {value}&quot;)</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_start_finish_time</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span>
+                                                          <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__update_start_finish_times_text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_start_slider_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets called when the start slider changed</span>
+
+<span class="sd">        :param event: doesn&#39;t get used</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># test to keep pylint happy</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Not allowed to change when not editing, ignore it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_start</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;start slider changed to {value}&#39;)</span>
+
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_start_finish_time</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_start_finish_times_text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_precise_button_end_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets called when the end precise button gets pressed</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__text_finishline_end_precise</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">validate_float_input</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
+            <span class="c1"># print(f&quot;precise end pressed value: {value}&quot;)</span>
+            <span class="n">athlete_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_start_finish_time</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span>
+                                                      <span class="kc">None</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__update_start_finish_times_text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_end_slider_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets called when the end slider changed</span>
+
+<span class="sd">        :param event: doesn&#39;t get used</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># test to keep pylint happy</span>
+            <span class="k">pass</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__slider_finishline_menu_end</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__total_time</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;end slider changed to {value}&#39;)</span>
+
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_start_finish_time</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_start_finish_times_text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_checkbox_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when the checkbox changes state</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the state It&#39;s trying to switch to</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="c1"># print(f&#39;changed state {state}&#39;)</span>
+
+        <span class="c1"># Find out if it&#39;s allowed to switch</span>
+        <span class="c1"># (ie if playing then cant switch on or if nothing selected it cant modify)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__currently_selected</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_playing</span><span class="p">():</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_value</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__enable_widgets</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="validate_float_input">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_finishline_menu.validate_float_input">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_float_input</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates whether a string can be a float or not</span>
+
+<span class="sd">    :param number: string form of the number to enter</span>
+<span class="sd">    :return: whether it is (true) or isn&#39;t (false)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># display a warning popup</span>
+        <span class="n">msgbox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Invalid input&quot;</span><span class="p">,</span> <span class="s2">&quot;This was an invalid input, must be a decimal number&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

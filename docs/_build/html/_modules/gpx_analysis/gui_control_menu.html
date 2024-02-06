@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.gui_control_menu &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.gui_control_menu</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.gui_control_menu</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains the athlete menu sub frame class related to the tk GUI</span>
+<span class="sd">The AppGUI class is the only one to use outside of this class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Pylint ignores</span>
+<span class="c1"># pylint: disable=R0902</span>
+<span class="c1"># pylint: disable=R0914</span>
+
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+<span class="kn">import</span> <span class="nn">tkinter.messagebox</span> <span class="k">as</span> <span class="nn">msgbox</span>  <span class="c1"># for popups</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">filedialog</span>  <span class="c1"># for choosing gpx file to open</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">colorchooser</span>
+
+
+<div class="viewcode-block" id="ControlMenuFrame">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_control_menu.ControlMenuFrame">[docs]</a>
+<span class="k">class</span> <span class="nc">ControlMenuFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This widget contains and abstracts the features of the control menu</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the ControlMenuFrame class</span>
+
+<span class="sd">        :param parent_class: pass in the parent_class so we can access its window and</span>
+<span class="sd">         other frames etc</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span> <span class="o">=</span> <span class="n">parent_class</span>
+        <span class="c1"># First the open / master menu (open file, name boats etc)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_frm_map_menu</span><span class="p">(),</span>
+                                                <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RIDGE</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the control menu items</span>
+        <span class="c1"># Athlete Data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># This centers the items (unless we specify a stickiness)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Set up the widgets that won&#39;t ever change</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_static_widgets</span><span class="p">()</span>
+
+        <span class="c1"># Create the name selector / deletion menu and initialise its variables here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Holds the last athlete selected so we know what swapped</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_dropdown</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dropdown_map_control</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_map_dropdown</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_name_selector</span><span class="p">()</span>
+
+        <span class="c1"># Athlete and file name labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_display</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_athlete_data</span><span class="p">()</span>
+
+        <span class="c1"># Encapsulate change name entry field and button in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_changename</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_map_control_changename</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The value of the entry field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_namechange</span><span class="p">()</span>
+
+        <span class="c1"># Callbacks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__changename_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__delete_callback</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ControlMenuFrame.update_athlete_data">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_control_menu.ControlMenuFrame.update_athlete_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_athlete_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                            <span class="n">remake_widgets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the athlete data in this class (setter method)</span>
+
+<span class="sd">        :param athlete_data: Data to set</span>
+<span class="sd">        :param remake_widgets: whether or not to remake the widgets</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span> <span class="o">=</span> <span class="n">athlete_data</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">athlete_data</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">athlete_data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">remake_widgets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__create_name_selector</span><span class="p">()</span>  <span class="c1"># recreate name selector with new fields</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__set_athlete_data</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__setup_namechange</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets up the name change frame data</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Encapsulate change name entry field and button in a frame</span>
+
+        <span class="c1"># Create the frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_changename</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span> <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">FLAT</span><span class="p">,</span>
+                                                      <span class="n">borderwidth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_changename</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_map_control_changename</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="c1"># The entry widget doesn&#39;t need to be an instance var as we won&#39;t modify it again</span>
+        <span class="n">entry_map_control_changename</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_changename</span><span class="p">,</span>
+                                                 <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__text_map_control_changename</span><span class="p">)</span>
+        <span class="n">entry_map_control_changename</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nswe&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create a confirm button doesn&#39;t need to be instance as we won&#39;t modify it</span>
+        <span class="n">btn_control_changename</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_changename</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\U00002713</span><span class="s1">&#39;</span><span class="p">,</span>
+                                            <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_name_change</span><span class="p">)</span>
+        <span class="n">btn_control_changename</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__set_athlete_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This sets the text fields for the athlete</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">current_option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span>
+        <span class="k">if</span> <span class="n">current_option</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="n">filename</span><span class="p">,</span> <span class="n">display_name</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># initialise here in case we cant find right values</span>
+            <span class="n">filename</span><span class="p">,</span> <span class="n">display_name</span> <span class="o">=</span> <span class="n">current_option</span><span class="p">,</span> <span class="n">current_option</span>
+
+            <span class="c1"># find the athlete with the same display name and get its filename</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">current_option</span><span class="p">:</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">key</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># If we have made it before destroy the old copy</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_file</span><span class="p">,</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_file</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_file</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                                   <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Filename: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_file</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+        <span class="c1"># If we have made it before destroy the old copy</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_display</span><span class="p">,</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_display</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_display</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                                      <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Display Name: </span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_control_menu_display</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__create_name_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This creates the name selector widgets, dropdown button frame etc</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Encapsulate dropdown and delete in a frame</span>
+
+        <span class="c1"># Create the frame to hold the widgets in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_dropdown</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                                    <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">FLAT</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_dropdown</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the dropdown menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_dropdown</span><span class="p">()</span>
+
+        <span class="c1"># Create a remove name button, we don&#39;t need to reference this button again so no need</span>
+        <span class="c1"># to make it an instance variable</span>
+        <span class="n">btn_control_del</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_dropdown</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\U0001F5D1</span><span class="s1">&#39;</span><span class="p">,</span>
+                                     <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_remove_press</span><span class="p">)</span>
+        <span class="n">btn_control_del</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;swen&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__create_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates/ recreates the dropdown menu with a set of athletes</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_map_dropdown</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_map_dropdown</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># If we have made it before destroy the old copy</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dropdown_map_control</span><span class="p">,</span> <span class="n">ttk</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dropdown_map_control</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dropdown_map_control</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_dropdown</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">__value_map_dropdown</span><span class="p">,</span>
+                                                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__athlete_names</span><span class="p">,</span>
+                                                    <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_swap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dropdown_map_control</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># if athlete data has been created, run this so it also updates the finishline menu</span>
+        <span class="c1"># when athletes are modified / deleted</span>
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="p">:</span>
+            <span class="c1"># Also need to find the current athlete key</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                    <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_finishline_athlete_selected</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">stop_finish_start_editing</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__setup_static_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the labels and buttons that won&#39;t be overwritten / modified at any point</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The title label will never change so set it here and doesn&#39;t need</span>
+        <span class="c1"># to be an instance variable</span>
+        <span class="n">label_control_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                       <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Athlete Menu&quot;</span><span class="p">,</span>
+                                       <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Minion Pro&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span>
+        <span class="n">label_control_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+        <span class="c1"># This button also won&#39;t change so lets declare it here</span>
+        <span class="n">btn_control_open</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                      <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Open File&quot;</span><span class="p">,</span>
+                                      <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_open_press</span><span class="p">)</span>
+        <span class="n">btn_control_open</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;nsew&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Select/ Remove althletes label</span>
+        <span class="n">label_control_menu_select</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                              <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select &amp; Remove Athletes:&quot;</span><span class="p">)</span>
+        <span class="n">label_control_menu_select</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+        <span class="c1"># Have an empty row on row 4 for aesthetics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+        <span class="c1"># This won&#39;t be modified either</span>
+        <span class="n">label_control_menu_changename</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                                  <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Change display name:&quot;</span><span class="p">)</span>
+        <span class="n">label_control_menu_changename</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+        <span class="c1"># add the button to change colours</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__btn_colour_picker</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                              <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Change colour&quot;</span><span class="p">,</span>
+                                              <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_change_colour</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__btn_colour_picker</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_open_press</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When the open file button is pressed this is called</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">()</span>  <span class="c1"># get the file path</span>
+        <span class="k">if</span> <span class="n">file_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>  <span class="c1"># check it&#39;s not blank</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_change_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when the change colour button is pressed</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span> <span class="o">==</span> <span class="p">{}:</span>  <span class="c1"># no one to assign to</span>
+            <span class="k">return</span>
+
+        <span class="n">color_tuple</span> <span class="o">=</span> <span class="n">colorchooser</span><span class="o">.</span><span class="n">askcolor</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Choose color&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">color_tuple</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="c1"># no colour picked</span>
+
+        <span class="c1"># modify the colours so they are 0-1</span>
+        <span class="n">color_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">color_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="n">color_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="n">color_tuple</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">)</span>
+
+        <span class="c1"># Get the athlete&#39;s key</span>
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Also need to find the current filename.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="c1"># if it is found then change it in the callback function</span>
+        <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">on_colour_change</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="n">color_tuple</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_remove_press</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When the remove athlete button is pressed this is called</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the athlete being removed</span>
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__delete_callback</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_athlete_swap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets called when you change which athlete is selected in the dropdown</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># *args must be here as we get 4 params, yet we do nothing with them so pylint unhappy</span>
+        <span class="c1"># Thus do something random with them</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__value_map_dropdown</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="c1"># update the info labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_athlete_data</span><span class="p">()</span>
+
+        <span class="c1"># Get the athlete currently on</span>
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Also need to find the current athlete key</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_finishline_athlete_selected</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">stop_finish_start_editing</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_name_change</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets triggered when the name change confirm button is pressed</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">changed_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__text_map_control_changename</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">valid_key</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Also need to find the current filename.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+            <span class="c1"># If the name we want to change to is already taken then its invalid</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">changed_to</span><span class="p">:</span>
+                <span class="n">valid_key</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Make sure an athlete is selected and the new name isn&#39;t blank</span>
+        <span class="n">valid_key</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="p">(</span><span class="n">changed_to</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">athlete_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">valid_key</span>
+
+        <span class="k">if</span> <span class="n">valid_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__changename_callback</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="n">changed_to</span><span class="p">)</span>  <span class="c1"># execute callback</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msgbox</span><span class="o">.</span><span class="n">showerror</span><span class="p">(</span><span class="s2">&quot;Invalid input&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;This was an invalid input,&quot;</span>
+                             <span class="s2">&quot; must be unique and athlete must be selected&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__text_map_control_changename</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># clear the entry field</span>
+
+<div class="viewcode-block" id="ControlMenuFrame.set_open_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_control_menu.ControlMenuFrame.set_open_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_open_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Open file callbacks</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the callback function to be used</span>
+
+<span class="sd">        :param func: The function to be called when a file is opened in control window</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="ControlMenuFrame.set_changename_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_control_menu.ControlMenuFrame.set_changename_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_changename_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the callback function to be used</span>
+
+<span class="sd">        :param func: The function to be called when a display name is changed</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__changename_callback</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="ControlMenuFrame.set_delete_callback">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_control_menu.ControlMenuFrame.set_delete_callback">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_delete_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the callback function to be used</span>
+
+<span class="sd">        :param func: The function to be called when an athlete is deleted</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__delete_callback</span> <span class="o">=</span> <span class="n">func</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.gui_stats_menu &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.gui_stats_menu</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.gui_stats_menu</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script contains the playback menu sub frame class related to the tk GUI</span>
+<span class="sd">The AppGUI class is the only one to use outside of this class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Pylint ignores</span>
+<span class="c1"># pylint: disable=R0902</span>
+<span class="c1"># pylint: disable=R0914</span>
+
+<span class="c1"># Import external libs</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_tkagg</span> <span class="kn">import</span> <span class="n">FigureCanvasTkAgg</span>  <span class="c1"># for importing figs to mpl</span>
+
+<span class="c1"># import our own library</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">sporting</span> <span class="k">as</span> <span class="n">sport</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">stats_graph_handler</span> <span class="k">as</span> <span class="n">sgh</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">sporting</span> <span class="k">as</span> <span class="n">sport</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">stats_graph_handler</span> <span class="k">as</span> <span class="n">sgh</span>
+
+
+<div class="viewcode-block" id="StatsMenuFrame">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_stats_menu.StatsMenuFrame">[docs]</a>
+<span class="k">class</span> <span class="nc">StatsMenuFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This widget contains and abstracts the features of the stats menu</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_class</span><span class="p">,</span> <span class="n">total_frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the StatsMenuFrame class</span>
+
+<span class="sd">        :param parent_class: pass in the parent_class so we can access its window and</span>
+<span class="sd">         other frames etc</span>
+<span class="sd">         :param total_frame: The whole frame all of the sim/graph elements are in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span> <span class="o">=</span> <span class="n">parent_class</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__total_frame</span> <span class="o">=</span> <span class="n">total_frame</span>
+
+        <span class="c1"># Athlete data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Create the surrounding frame for the graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__total_frame</span><span class="p">,</span> <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RAISED</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># center it</span>
+
+        <span class="c1"># Create the stats menu widgets</span>
+        <span class="c1"># Create the title</span>
+        <span class="n">label_stats_menu</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="p">,</span>
+                                     <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Statistics Menu&quot;</span><span class="p">,</span>
+                                     <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Minion Pro&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">))</span>
+        <span class="n">label_stats_menu</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># Create a dropdown speed units menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_dropdown</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># this is the value of the units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_units_menu</span><span class="p">()</span>
+
+        <span class="c1"># Create a dropdown graph menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph_dropdown</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_graph_type_dropdown</span><span class="p">()</span>
+
+        <span class="c1"># Create the checklist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menubutton</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_athlete_selection_menu</span><span class="p">()</span>  <span class="c1"># make it empty at the start</span>
+
+        <span class="c1"># Space in the grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">minsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># Big label below to show all the stats</span>
+        <span class="n">test_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label_stats_text</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__display_text</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+
+        <span class="c1"># Create the graph frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__total_frame</span><span class="p">,</span> <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RAISED</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_graph_update</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1"># this makes sure we don&#39;t update too often</span>
+
+        <span class="c1"># Create and add the graph plot to it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span> <span class="o">=</span> <span class="n">sgh</span><span class="o">.</span><span class="n">StatsGraph</span><span class="p">()</span>
+
+        <span class="c1"># update the stats graph with starting values</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">|&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_base_graph</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span> <span class="o">=</span> <span class="n">FigureCanvasTkAgg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">get_fig</span><span class="p">(),</span>
+                                          <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span><span class="o">.</span><span class="n">get_tk_widget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__map_widget</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;nsew&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__update_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This sets/ updates the mpl figure graph on the GUI</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># make sure hasn&#39;t been called too recently</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_graph_update</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__create_graph_type_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the graph type dropdown menu</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Encapsulate dropdown and dropdown label in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph_dropdown</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="p">,</span>
+                                                    <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">FLAT</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph_dropdown</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the dropdown menu</span>
+        <span class="n">graph_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Speed&#39;</span><span class="p">,</span> <span class="s1">&#39;Distance&#39;</span><span class="p">,</span> <span class="s1">&#39;Gap&#39;</span><span class="p">,</span> <span class="s1">&#39;Rate&#39;</span><span class="p">,</span> <span class="s1">&#39;Speed &amp; Rate&#39;</span><span class="p">]</span>  <span class="c1"># options for it</span>
+
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">graph_options</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># s/500m is default unit</span>
+
+        <span class="c1"># This doesn&#39;t need to be an instance var since we won&#39;t modify it again</span>
+        <span class="n">graph_dropdown</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph_dropdown</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">graph_options</span><span class="p">,</span>
+                                       <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_graph_option_change</span><span class="p">)</span>
+
+        <span class="n">graph_dropdown</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the label for it</span>
+        <span class="n">label_stats_graph_choice</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_graph_dropdown</span><span class="p">,</span>
+                                             <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Choose Graph Type:     &quot;</span><span class="p">)</span>
+        <span class="n">label_stats_graph_choice</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StatsMenuFrame.update_stats">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_stats_menu.StatsMenuFrame.update_stats">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the text statistics based on the time and who&#39;s selected</span>
+<span class="sd">        </span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">ready</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>  <span class="c1"># if everything isn&#39;t set up don&#39;t run</span>
+            <span class="k">return</span>
+
+        <span class="c1"># get current time</span>
+        <span class="n">playback_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_playback_time</span><span class="p">()</span>
+
+        <span class="c1"># put the data into a dict</span>
+        <span class="n">stats_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+            <span class="c1"># ignore this athlete if they&#39;re not in the selector options</span>
+            <span class="k">if</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># ignore this athlete if they aren&#39;t selected</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]],</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Fetch all the data needed for this entry</span>
+            <span class="n">athlete_time</span> <span class="o">=</span> <span class="n">playback_time</span> <span class="o">+</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span>
+
+            <span class="c1"># this makes sure no matter the modified start line it starts at a dist of 0m</span>
+            <span class="n">start_dist</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cumulative_dist_at_time</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span>
+                                                           <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>
+            <span class="n">current_dist</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cumulative_dist_at_time</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">athlete_time</span><span class="p">)</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">current_dist</span> <span class="o">-</span> <span class="n">start_dist</span><span class="p">)</span>
+
+            <span class="c1"># determine if the athlete has finished or not</span>
+            <span class="n">athlete_track_time</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">playback_time</span> <span class="o">&gt;=</span> <span class="n">athlete_track_time</span><span class="p">:</span>  <span class="c1"># finished</span>
+                <span class="c1"># so its high enough to trigger finished and its in order of finish time</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="mi">10000000</span> <span class="o">-</span> <span class="n">athlete_track_time</span>
+
+            <span class="n">speed</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_speed_at_time</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">athlete_time</span><span class="p">)</span>
+            <span class="n">cad</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cadence_at_time</span><span class="p">(</span><span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">athlete_time</span><span class="p">)</span>
+
+            <span class="c1"># change speed so its in correct units</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="n">speed</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">convert_speed_units</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">units</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;s/500m&#39;</span><span class="p">,</span> <span class="s1">&#39;s/km&#39;</span><span class="p">]:</span>  <span class="c1"># for units measured in mins and secs write diff format</span>
+                <span class="n">mins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">speed</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="n">secs</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">speed</span> <span class="o">%</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">secs</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>  <span class="c1"># so seconds starts with a preceeding 0</span>
+                    <span class="n">secs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;0</span><span class="si">{</span><span class="n">secs</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">speed</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mins</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">secs</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">speed</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">speed</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">&#39;</span>
+
+            <span class="n">stats_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dist&#39;</span><span class="p">:</span> <span class="n">dist</span><span class="p">,</span> <span class="s1">&#39;spd&#39;</span><span class="p">:</span> <span class="n">speed</span><span class="p">,</span> <span class="s1">&#39;cad&#39;</span><span class="p">:</span> <span class="n">cad</span><span class="p">}</span>  <span class="c1"># add to the dict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__display_text</span><span class="p">(</span><span class="n">stats_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_time_line</span><span class="p">(</span><span class="n">playback_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="StatsMenuFrame.set_athlete_list">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui_stats_menu.StatsMenuFrame.set_athlete_list">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_athlete_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athletes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for the athlete list</span>
+
+<span class="sd">        :param athletes: The athletes to set</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span> <span class="o">=</span> <span class="n">athletes</span>
+
+        <span class="c1"># remake athlete list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_athlete_selection_menu</span><span class="p">()</span>
+
+
+        <span class="c1"># Set the athlete list on the graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">set_athletes</span><span class="p">(</span><span class="n">athletes</span><span class="p">)</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">|&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_base_graph</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__display_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the stats text</span>
+
+<span class="sd">        :param data_in: A dictionary where boat display name is key and data is the value</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if nothing in the dictionary then set the text blank</span>
+        <span class="n">disp_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">data_in</span><span class="p">:</span>
+            <span class="c1"># Sort the athletes by highest dist, dodgy insertion sort</span>
+            <span class="n">modified_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_in</span><span class="p">):</span>
+                <span class="n">max_dist</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># no distance will not be greater than this</span>
+                <span class="n">max_key</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_in</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">test_val</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">test_val</span> <span class="o">&gt;</span> <span class="n">max_dist</span><span class="p">:</span>
+                        <span class="n">max_dist</span> <span class="o">=</span> <span class="n">test_val</span>
+                        <span class="n">max_key</span> <span class="o">=</span> <span class="n">key</span>
+
+                <span class="c1"># Make sure athlete distance renders correctly</span>
+                <span class="k">if</span> <span class="n">max_dist</span> <span class="o">&gt;</span> <span class="mi">100000</span><span class="p">:</span>
+                    <span class="c1"># if its over 100,000m (unrealistic number) say its finished</span>
+                    <span class="n">new_dist</span> <span class="o">=</span> <span class="s1">&#39;FIN&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_dist</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">max_dist</span><span class="si">}</span><span class="s1">m&#39;</span>
+                <span class="n">modified_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">max_key</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">:</span> <span class="n">new_dist</span><span class="p">,</span>
+                                      <span class="s1">&#39;spd&#39;</span><span class="p">:</span> <span class="n">data_in</span><span class="p">[</span><span class="n">max_key</span><span class="p">][</span><span class="s1">&#39;spd&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;cad&#39;</span><span class="p">:</span> <span class="n">data_in</span><span class="p">[</span><span class="n">max_key</span><span class="p">][</span><span class="s1">&#39;cad&#39;</span><span class="p">]})</span>
+                <span class="k">del</span> <span class="n">data_in</span><span class="p">[</span><span class="n">max_key</span><span class="p">]</span>
+
+            <span class="n">disp_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="n">max_athlete_dist_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">modified_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+
+            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">athlete_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">modified_data</span><span class="p">):</span>
+                <span class="c1"># make it so all the data starts lining up after names</span>
+                <span class="n">athlete_name</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">athlete_dist</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">]</span>
+                <span class="n">athlete_spd</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;spd&#39;</span><span class="p">]</span>
+                <span class="n">athlete_cad</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;cad&#39;</span><span class="p">]</span>
+
+                <span class="n">disp_text</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">. &#39;</span> <span class="o">+</span> <span class="n">athlete_name</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;   &#39;</span> <span class="o">+</span>
+                              <span class="n">athlete_dist</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_athlete_dist_len</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span>
+                            <span class="n">athlete_dist</span><span class="p">))</span> <span class="o">+</span> <span class="n">athlete_spd</span> <span class="o">+</span> <span class="s1">&#39;   &#39;</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">athlete_cad</span><span class="si">}</span><span class="s1"> s/m&#39;</span><span class="p">)</span>
+
+                <span class="n">disp_text</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>  <span class="c1"># so it starts on a new line</span>
+
+        <span class="c1"># If its been made before just modify text</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__label_stats_text</span><span class="p">,</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__label_stats_text</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">disp_text</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__label_stats_text</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">disp_text</span><span class="p">,</span>
+                                                <span class="n">font</span><span class="o">=</span><span class="s1">&#39;Courier&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__label_stats_text</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__create_athlete_selection_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the athlete selection menu from the athlete variable</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menubutton</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menubutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="p">,</span>
+                                          <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Choose Which athletes to show:&quot;</span><span class="p">,</span>
+                                          <span class="n">indicatoron</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menu</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__menubutton</span><span class="p">,</span> <span class="n">tearoff</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menubutton</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menubutton</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">display_name</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__menu</span><span class="o">.</span><span class="n">add_checkbutton</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">display_name</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">filename</span><span class="p">],</span>
+                                        <span class="n">onvalue</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">offvalue</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_change</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__create_units_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the frame with a units dropdown and button to confirm</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Encapsulate dropdown and dropdown label in a frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_dropdown</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_menu</span><span class="p">,</span> <span class="n">relief</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">FLAT</span><span class="p">,</span> <span class="n">borderwidth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_dropdown</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the dropdown menu</span>
+        <span class="n">speed_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;s/500m&#39;</span><span class="p">,</span> <span class="s1">&#39;s/km&#39;</span><span class="p">,</span> <span class="s1">&#39;m/s&#39;</span><span class="p">,</span> <span class="s1">&#39;km/h&#39;</span><span class="p">,</span> <span class="s1">&#39;mph&#39;</span><span class="p">]</span>  <span class="c1"># options for it</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">get_tk_window</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">StringVar</span><span class="p">(</span><span class="n">master</span> <span class="o">=</span> <span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">speed_options</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># s/500m is default unit</span>
+
+        <span class="c1"># This doesn&#39;t need to be an instance var since we won&#39;t modify it again</span>
+        <span class="n">speed_dropdown</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">OptionMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_dropdown</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="p">,</span>
+                                       <span class="o">*</span><span class="n">speed_options</span><span class="p">,</span>
+                                       <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_speed_option_change</span><span class="p">)</span>
+        <span class="n">speed_dropdown</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;nsew&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Create the label for it</span>
+        <span class="n">label_stats_speed_choice</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_stats_dropdown</span><span class="p">,</span>
+                                             <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Choose Speed Units:     &quot;</span><span class="p">)</span>
+        <span class="n">label_stats_speed_choice</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_athlete_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This gets called when an athlete gets selected or deselected</span>
+<span class="sd">        in the dropdown checklist</span>
+
+<span class="sd">        :param args: *args</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># *args is never used in this function but pylint will be upset it&#39;s not used</span>
+        <span class="c1"># Do some random stuff to it</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># update the stats with the new selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
+
+        <span class="c1"># only include the athletes selected on the graph</span>
+        <span class="n">graph_athletes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]],</span> <span class="n">tk</span><span class="o">.</span><span class="n">IntVar</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__menu_choices</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">graph_athletes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">ready</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">set_athletes</span><span class="p">(</span><span class="n">graph_athletes</span><span class="p">)</span>
+            <span class="n">option</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">|&#39;</span>
+                      <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_base_graph</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_speed_option_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when speed option changes</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># *args is never used in this function but pylint will be upset it&#39;s not used</span>
+        <span class="c1"># Do some random stuff to it</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># update the stats with the new units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
+
+        <span class="c1"># update the stats graph</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">|&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_base_graph</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__on_graph_option_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when graph option changes</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># *args is never used in this function but pylint will be upset it&#39;s not used</span>
+        <span class="c1"># Do some random stuff to it</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># update the stats graph</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_graph_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">|&#39;</span>
+                  <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__value_speed_selected_option</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stats_graph</span><span class="o">.</span><span class="n">draw_base_graph</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_graph</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

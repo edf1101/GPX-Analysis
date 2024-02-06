@@ -22,7 +22,7 @@ copyright = '2024, edf1101'
 author = 'edf1101'
 
 # The full version, including alpha/beta/rc tags
-release = 'V1.0'
+release = '1.6'
 
 
 # -- General configuration ---------------------------------------------------

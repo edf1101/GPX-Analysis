@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.gpx_parser &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.gpx_parser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.gpx_parser</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module parses a GPX file into the track class which is made up of track points</span>
+<span class="sd">(another new class).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+
+<div class="viewcode-block" id="TrackPoint">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint">[docs]</a>
+<span class="k">class</span> <span class="nc">TrackPoint</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class represents a track point in a GPX file.</span>
+<span class="sd">    Also features cadence and time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cad</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">raw_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        init function for setting up a track point</span>
+
+<span class="sd">        :param lat: World latitude position</span>
+<span class="sd">        :param lon: World longitude posisiton</span>
+<span class="sd">        :param cad: The cadence (stroke rate)</span>
+<span class="sd">        :param raw_time: the string form of the UTC time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_y</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cad</span> <span class="o">=</span> <span class="n">cad</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatted_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">raw_time</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TrackPoint.get_position_degrees">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.get_position_degrees">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_position_degrees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the position in degrees</span>
+
+<span class="sd">        :return: the position of the track point (lat,lon)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.get_position_standard">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.get_position_standard">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_position_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for the position in meters</span>
+
+<span class="sd">        :return: the position of the track point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_y</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.set_position_standard">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.set_position_standard">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_position_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nex_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">new_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the track point position fields</span>
+
+<span class="sd">        :param nex_x: The updated x value</span>
+<span class="sd">        :param new_y: The updated y value</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_x</span> <span class="o">=</span> <span class="n">nex_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_y</span> <span class="o">=</span> <span class="n">new_y</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.get_cadence">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.get_cadence">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cadence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for cadence</span>
+
+<span class="sd">        :return: the cadence of the track point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cad</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.get_formatted_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.get_formatted_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_formatted_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for formatted datetime time</span>
+
+<span class="sd">        :return: The datetime time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatted_time</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.set_relative_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.set_relative_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_relative_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relative_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for relative time</span>
+
+<span class="sd">        :param relative_time: the relative time of the track point</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">relative_time</span></div>
+
+
+<div class="viewcode-block" id="TrackPoint.get_relative_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.TrackPoint.get_relative_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_relative_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for relative time</span>
+
+<span class="sd">        :return: the relative time of the track point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Track">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.Track">[docs]</a>
+<span class="k">class</span> <span class="nc">Track</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class represents a track in a GPX file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This init func creates the track by parsing the gpx file</span>
+
+<span class="sd">        :param file_name: path to gpx file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+
+        <span class="c1"># Define namespaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gpx&#39;</span><span class="p">:</span> <span class="s1">&#39;http://www.topografix.com/GPX/1/1&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;gpxdata&#39;</span><span class="p">:</span> <span class="s1">&#39;http://www.cluetrust.com/XML/GPXDATA/1/0&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;gpxx&#39;</span><span class="p">:</span> <span class="s2">&quot;http://www.garmin.com/xmlschemas/GpxExtensions/v3&quot;</span><span class="p">,</span>
+                             <span class="s1">&#39;gpxtpx&#39;</span><span class="p">:</span> <span class="s2">&quot;http://www.garmin.com/xmlschemas/TrackPointExtension/v1&quot;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_track_points</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__redo_timings</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__has_cadence</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Track.get_filename">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.Track.get_filename">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the filename of this gpx track</span>
+
+<span class="sd">        :return: filename as a string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__file_name</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__create_track_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function parses the gpx file and creates track points</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__file_name</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+        <span class="c1"># Iterate through each track segment and track point</span>
+        <span class="k">for</span> <span class="n">track_segment</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//gpx:trkseg&quot;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">track_segment</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;gpx:trkpt&quot;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">):</span>
+
+                <span class="c1"># Error checking for lat and long values</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">))</span>
+                    <span class="n">lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;lat or long in the file isnt of type float&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+
+                <span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">point</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;gpx:time&quot;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">time</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;gpx:time&quot;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+                <span class="n">cadence_element</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;gpx:extensions/gpxdata:cadence&quot;</span><span class="p">,</span>
+                                             <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">cadence_element</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">cadence</span> <span class="o">=</span> <span class="n">cadence_element</span><span class="o">.</span><span class="n">text</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cadence_element</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;gpx:extensions/gpx:cadence&quot;</span><span class="p">,</span>
+                                                 <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__namespaces</span><span class="p">)</span>
+                    <span class="n">cadence</span> <span class="o">=</span> <span class="n">cadence_element</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">cadence_element</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">__has_cadence</span> <span class="o">=</span> <span class="n">cadence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__has_cadence</span><span class="p">:</span>
+                    <span class="n">cadence</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TrackPoint</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cadence</span><span class="p">),</span> <span class="n">time</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__redo_timings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert all the original datetime times into a relative time made of just seconds as a float</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_original_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">get_formatted_time</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span><span class="p">]</span>
+        <span class="n">min_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">all_original_times</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span><span class="p">:</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">set_relative_time</span><span class="p">((</span><span class="n">point</span><span class="o">.</span><span class="n">formatted_time</span> <span class="o">-</span> <span class="n">min_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Track.get_track_points">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.Track.get_track_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_track_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TrackPoint</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for track points</span>
+
+<span class="sd">        :return: The list of track points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span></div>
+
+
+<div class="viewcode-block" id="Track.get_has_cadence">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.Track.get_has_cadence">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_has_cadence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter for has_cadence</span>
+
+<span class="sd">        :return: Whether the track has cadence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__has_cadence</span></div>
+
+
+<div class="viewcode-block" id="Track.get_total_time">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gpx_parser.Track.get_total_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_total_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The total time willl just be the last one, return that</span>
+
+<span class="sd">        :return: The total time on the track</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__track_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

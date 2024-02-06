@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpx_analysis.stats_graph_handler &mdash; GPX Analysis 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GPX Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">gpx_analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GPX Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpx_analysis.stats_graph_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpx_analysis.stats_graph_handler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module handles the small stats line graph at the bottom of the screen</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># import external modules</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span> <span class="k">as</span> <span class="n">sys_pf</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># import our own</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">sporting</span> <span class="k">as</span> <span class="n">sport</span>
+    <span class="kn">from</span> <span class="nn">gpx_analysis.components</span> <span class="kn">import</span> <span class="n">lighten_color</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sporting</span> <span class="k">as</span> <span class="nn">sport</span>
+    <span class="kn">from</span> <span class="nn">components</span> <span class="kn">import</span> <span class="n">lighten_color</span>
+
+<span class="c1"># If on macos then run this to fix the mpl issues</span>
+<span class="k">if</span> <span class="n">sys_pf</span> <span class="o">==</span> <span class="s1">&#39;darwin&#39;</span><span class="p">:</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;TkAgg&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="StatsGraph">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.stats_graph_handler.StatsGraph">[docs]</a>
+<span class="k">class</span> <span class="nc">StatsGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class holds the stats graph and functions relating to it</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The constructor for the StatsGraph class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create the fig and axis for this class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__time_intervals</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># interval between points on the graph</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># initiate the dictionary of athletes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># the max time of all the athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__time_line</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Line on the graph to mark where the time is</span>
+
+<div class="viewcode-block" id="StatsGraph.draw_time_line">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.stats_graph_handler.StatsGraph.draw_time_line">[docs]</a>
+    <span class="k">def</span> <span class="nf">draw_time_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw a line on the graph to mark what time it is in the simulation</span>
+
+<span class="sd">        :param time: the current time</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># remove a previous time line if there is one</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__time_line</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__time_line</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+        <span class="n">graph_height_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">graph_height_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">graph_height_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__time_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">time</span><span class="p">,</span> <span class="n">time</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="n">graph_height_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                                           <span class="n">graph_height_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">offset</span><span class="p">],</span>
+                                          <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span>
+                                          <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                          <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="StatsGraph.draw_base_graph">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.stats_graph_handler.StatsGraph.draw_base_graph">[docs]</a>
+    <span class="k">def</span> <span class="nf">draw_base_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw a graph according to its mode</span>
+
+<span class="sd">        :param mode:  clears the graph if none, otherwise draw according to the mode</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mode</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="c1"># print(f&#39;new {unit}&#39;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+
+        <span class="c1"># reset the time axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_max_time</span><span class="p">()</span>  <span class="c1"># Update the max time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;Distance&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;meters&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="p">,</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cumulative_dist_at_time</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;Gap&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;meters&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_gap</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;Speed &amp; Rate&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;s/m&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="p">,</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_speed_at_time</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="p">,</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cadence_at_time</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;Speed&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># plot a graph of the speeds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="p">,</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_speed_at_time</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;Rate&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;s/m&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__secondary_visibility</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="p">,</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cadence_at_time</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__plot_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots a graph of the stats</span>
+
+<span class="sd">        :param axis: The axis to plot onto</span>
+<span class="sd">        :param func: The function to use for y values</span>
+<span class="sd">        :param units: None if not plotting speed, else the units to convert</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">)</span>
+        <span class="n">time_intervals</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__time_intervals</span><span class="p">)</span>
+
+        <span class="c1"># plot a graph of the rates</span>
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">track</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">]</span>
+            <span class="n">colour</span> <span class="o">=</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span>
+            <span class="n">colour</span> <span class="o">=</span> <span class="n">lighten_color</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span> <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span> <span class="k">else</span> <span class="n">colour</span>
+
+            <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">-</span> <span class="n">time_intervals</span><span class="p">,</span> <span class="n">time_intervals</span><span class="p">):</span>
+                <span class="n">start_point</span> <span class="o">=</span> <span class="n">time</span>
+                <span class="n">end_point</span> <span class="o">=</span> <span class="n">time</span> <span class="o">+</span> <span class="n">time_intervals</span>
+
+                <span class="c1"># make these for averages</span>
+                <span class="n">smth_start</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">start_point</span> <span class="o">+</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_intervals</span><span class="p">)</span>
+
+                <span class="n">start_y</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">start_point</span> <span class="o">+</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>
+                <span class="n">end_y</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">end_point</span> <span class="o">+</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">start_y</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="n">end_y</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="n">smth_start</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">end_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_y</span> <span class="o">+</span> <span class="n">start_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="n">start_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_y</span> <span class="o">+</span> <span class="n">smth_start</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+                <span class="k">if</span> <span class="n">start_y</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="n">end_y</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+                    <span class="n">start_y</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">convert_speed_units</span><span class="p">(</span><span class="n">start_y</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+                    <span class="n">end_y</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">convert_speed_units</span><span class="p">(</span><span class="n">end_y</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+
+                <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span><span class="p">],</span>
+                          <span class="p">[</span><span class="n">start_y</span><span class="p">,</span> <span class="n">end_y</span><span class="p">],</span>
+                          <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                          <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span> <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span> <span class="k">else</span> <span class="s1">&#39;solid&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__plot_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It woudld be very inefficient to plot the gap using the same method</span>
+<span class="sd">         as previously so we&#39;ll do it here</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">)</span>
+        <span class="n">time_intervals</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__time_intervals</span><span class="p">)</span>
+        <span class="c1"># self.__ax.plot([0,10,20],[20,30,10])</span>
+        <span class="n">athlete_points</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">-</span> <span class="n">time_intervals</span><span class="p">,</span> <span class="n">time_intervals</span><span class="p">):</span>
+
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">sport</span><span class="o">.</span><span class="n">get_cumulative_dist_at_time</span>  <span class="c1"># abbreviation for get_cumulative_dist func</span>
+
+            <span class="c1"># Get the furthest distance anyone has got at this time</span>
+            <span class="n">max_dist</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cdf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">time</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span> <span class="o">-</span>
+                           <span class="n">cdf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>  <span class="c1"># Makes sure it starts at 0</span>
+                           <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="c1"># append each athletes dist to an list this will be the y values</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">start_dist</span> <span class="o">=</span> <span class="n">cdf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>
+                <span class="n">current_dist</span> <span class="o">=</span> <span class="n">cdf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;track&#39;</span><span class="p">],</span> <span class="n">time</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="n">start_dist</span>
+                <span class="n">athlete_points</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_dist</span> <span class="o">-</span> <span class="n">current_dist</span><span class="p">)</span>
+
+        <span class="c1"># Plot the line for each athlete</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">athlete_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_time</span> <span class="o">-</span> <span class="n">time_intervals</span><span class="p">,</span> <span class="n">time_intervals</span><span class="p">),</span>
+                           <span class="n">athlete_points</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                           <span class="n">color</span><span class="o">=</span><span class="n">athlete_data</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                           <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__secondary_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the axis from a graph</span>
+
+<span class="sd">        :param state: whether we want it hidden or not</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax_2</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StatsGraph.set_athletes">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.stats_graph_handler.StatsGraph.set_athletes">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_athletes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athletes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for the list of athletes then update the graph</span>
+
+<span class="sd">        :param athletes: the new dictionary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="n">athletes</span>  <span class="c1"># set the new dictionary</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_max_time</span><span class="p">()</span>  <span class="c1"># Update the max time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_time</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StatsGraph.get_fig">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.stats_graph_handler.StatsGraph.get_fig">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_fig</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getter for the figure of the graph</span>
+
+<span class="sd">        :return: The figure of the graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.__fig.tight_layout()</span>
+        <span class="c1"># self.__fig.set_size_inches(6, 2.5)</span>
+        <span class="c1"># self.__fig.set_dpi(200)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fig</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__get_max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the maximum race time for all the athletes</span>
+
+<span class="sd">        :return: the maximum race time in the simulation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_time</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">athlete</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">max_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_time</span><span class="p">,</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;finish_time&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">athlete</span><span class="p">[</span><span class="s1">&#39;start_time&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">max_time</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, edf1101.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
