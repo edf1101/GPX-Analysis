@@ -17,8 +17,8 @@ try:
     from gpx_analysis import sporting as sport
     from gpx_analysis import stats_graph_handler as sgh
 except ImportError:
-    from .. import sporting as sport
-    from .. import stats_graph_handler as sgh
+    from gpx_analysis import sporting as sport
+    from gpx_analysis import stats_graph_handler as sgh
 
 
 class StatsMenuFrame:

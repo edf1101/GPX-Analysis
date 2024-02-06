@@ -15,13 +15,13 @@ import random
 try:
     from gpx_analysis import gpx_parser as gpx
     from gpx_analysis import graph_handler as gh
-    from gpx_analysis.guis.gui import AppGUI
+    from gpx_analysis.gui import AppGUI
     from gpx_analysis import sporting as sport
     from gpx_analysis import components as geo
 except ImportError:
     import gpx_parser as gpx
     import graph_handler as gh
-    from guis.gui import AppGUI
+    from gpx_analysis.gui import AppGUI
     import sporting as sport
     import components as geo
 
@@ -41,6 +41,7 @@ class GpxAnalysisApp:
 
         # Now instantiate the guis
         self.__root = tk.Tk()  # Create the tk window
+        self.__root.protocol("WM_DELETE_WINDOW", self.__shutdown)
         self.__gui = AppGUI(window=self.__root, map_class=self.__mpl_map)
 
         # Athletes are a dict: key = simple filename, value = dict of other properties
@@ -61,6 +62,16 @@ class GpxAnalysisApp:
         self.__last_update = time.time() + (self.update_speed / 1000)
         # MUST be last otherwise things may not be initialised
         self.__root.after(ms=self.update_speed, func=self.__update)
+
+    def __shutdown(self) -> None:
+        """
+        Shuts down the app
+
+        :return:None
+        """
+
+        self.__root.quit()
+        self.__root.destroy()
 
     def __link_callback_functions(self) -> None:
         """

@@ -10,6 +10,7 @@ import os.path
 from sys import platform as sys_pf
 import PIL.Image
 import numpy as np
+from appdirs import user_data_dir
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -72,14 +73,20 @@ def get_img(x_coord: int, y_coord: int, zoom: int):
     :return: The image
     """
 
-    # get abs path
-    working_directory = os.path.dirname(os.path.abspath(__file__))
+    # get the app data path and add the image cache folder on
+
+    app_data_path = user_data_dir("GPX Analysis", 'edf1101')
+    image_cache_dir = os.path.join(app_data_path, 'image_cache')
+
+    # create the image cache if it doesn't already exist
+    if not os.path.exists(image_cache_dir):
+        os.makedirs(image_cache_dir)
 
     # Check if its cached first
     endings = ['jpg', 'jpeg', 'png']  # the acceptable filetypes to use
     img = None
     for f_type in endings:
-        name = os.path.join(working_directory, f'image_cache/{zoom}-{y_coord}-{x_coord}.{f_type}')
+        name = os.path.join(image_cache_dir, f'{zoom}-{y_coord}-{x_coord}.{f_type}')
         if os.path.isfile(name):
             img = PIL.Image.open(name)
 
@@ -88,7 +95,7 @@ def get_img(x_coord: int, y_coord: int, zoom: int):
                      f'World_Topo_Map/MapServer/tile/{zoom}/{y_coord}/{x_coord}')
         with urllib.request.urlopen(image_url) as response:
             img = PIL.Image.open(io.BytesIO(response.read()))
-            path = os.path.join(working_directory, f'image_cache/{zoom}-{y_coord}-{x_coord}.jpg')
+            path = os.path.join(image_cache_dir, f'{zoom}-{y_coord}-{x_coord}.jpg')
             img.save(path)  # Save as jpg into cache folder
 
     return img

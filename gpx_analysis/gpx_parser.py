@@ -133,6 +133,7 @@ class Track:
 
         :return: None
         """
+
         tree = ET.parse(self.__file_name)
         root = tree.getroot()
 

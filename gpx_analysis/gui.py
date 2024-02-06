@@ -15,17 +15,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing
 # import the individual separate classes
 try:
     from gpx_analysis import graph_handler as gh
-    from gpx_analysis.guis.gui_control_menu import ControlMenuFrame
-    from gpx_analysis.guis.gui_finishline_menu import FinishlineMenuFrame
-    from gpx_analysis.guis.gui_playback_menu import PlaybackMenuFrame
-    from gpx_analysis.guis.gui_stats_menu import StatsMenuFrame
+    from gpx_analysis.gui_control_menu import ControlMenuFrame
+    from gpx_analysis.gui_finishline_menu import FinishlineMenuFrame
+    from gpx_analysis.gui_playback_menu import PlaybackMenuFrame
+    from gpx_analysis.gui_stats_menu import StatsMenuFrame
     from gpx_analysis.tkscrolledframe import ScrolledFrame
 except ImportError:
     from .gui_control_menu import ControlMenuFrame
     from .gui_finishline_menu import FinishlineMenuFrame
     from .gui_playback_menu import PlaybackMenuFrame
     from .gui_stats_menu import StatsMenuFrame
-    from .. import graph_handler as gh
+    from gpx_analysis import graph_handler as gh
     from gpx_analysis.tkscrolledframe import ScrolledFrame
 
 

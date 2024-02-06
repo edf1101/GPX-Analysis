@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gpx_analysis-edf1101",
-    version="1.0",
+    version="1.6",
     author="edf1101",
     author_email="blank@blank.com",
     description="GPX Analysis Program",
@@ -19,7 +19,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_data={'': ['image_cache/blank.txt']},
     python_requires=">=3.11",
-    install_requires=["matplotlib", "numpy", "tkScrolledFrame"]
+    install_requires=["matplotlib", "numpy", "appdirs"]
 )
