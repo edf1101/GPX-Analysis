@@ -9,6 +9,8 @@ PC and pip must be configured; you can test if pip is working by running in your
 If pip is installed correctly you can run ```pip install gpx_analysis_edf1101``` To test it works, run it by executing 
 ```python -m gpx_analysis```
 
+If pip is working but you get errors when you try to install the gpx_analysis_edf1101 module this may be because you are on an older version of python. This module **requires python 3.11 +**. To check your version you can run ```python -V``` in the terminal
+
 ## Finding GPX Files
 
 The best way of doing this is finding an activity on strava and using this tool https://mapstogpx.com/strava/ to download it
