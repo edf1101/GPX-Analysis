@@ -2,6 +2,8 @@
 
 <img src="readme_images/total.png" alt="drawing" width="400"/>
 
+[Video Demonstration](https://youtu.be/zElEyXIQTWE)
+
 
 ## Introduction
 _GPX Analysis for rowing written in Python with a tkinter matplotlib interface_
