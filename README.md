@@ -27,7 +27,7 @@ _Given it downloads map images from online it requires an internet connection to
 - For instructions on how to use please view the [Getting started page](Getting_started.md) on the project's GitHub
 
 ## Details
-The project is hosted online at https://github.com/edf1101/Rowing-GPX-Analysis
+The project is hosted online at https://github.com/edf1101/GPX-Analysis
 
 ### License & Policies
 - This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
