@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.11",
-    install_requires=["matplotlib", "numpy", "appdirs"]
+    install_requires=["matplotlib", "numpy", "appdirs","tkscrollableframe"]
 )
