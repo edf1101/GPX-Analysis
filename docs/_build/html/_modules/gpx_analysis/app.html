@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=9d552775"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -84,6 +84,7 @@
 <span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">gpx_parser</span> <span class="k">as</span> <span class="n">gpx</span>
@@ -94,7 +95,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">gpx_parser</span> <span class="k">as</span> <span class="nn">gpx</span>
     <span class="kn">import</span> <span class="nn">graph_handler</span> <span class="k">as</span> <span class="nn">gh</span>
-    <span class="kn">from</span> <span class="nn">gpx_analysis.gui</span> <span class="kn">import</span> <span class="n">AppGUI</span>
+    <span class="kn">from</span> <span class="nn">gui</span> <span class="kn">import</span> <span class="n">AppGUI</span>
     <span class="kn">import</span> <span class="nn">sporting</span> <span class="k">as</span> <span class="nn">sport</span>
     <span class="kn">import</span> <span class="nn">components</span> <span class="k">as</span> <span class="nn">geo</span>
 
@@ -167,6 +168,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_set_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__set_start_finish_times</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_get_start_finish_time_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_start_finish_times</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_on_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_colour_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">set_on_colourscheme_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_athlete_colourscheme_change</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__get_playing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -343,13 +345,28 @@
         <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="n">clean_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
 
+        <span class="c1"># calculate stats for athlete speed throughout the track</span>
+        <span class="n">speed_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">track_point</span> <span class="ow">in</span> <span class="n">new_track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">():</span>
+            <span class="n">speed_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sport</span><span class="o">.</span><span class="n">get_speed_at_time</span><span class="p">(</span><span class="n">new_track</span><span class="p">,</span> <span class="n">track_point</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+        <span class="n">speed_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">speed_data</span><span class="p">)</span>
+        <span class="n">speed_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">speed_data</span><span class="p">)</span>
+        <span class="n">speed_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">speed_data</span><span class="p">)</span>
+        <span class="n">speed_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">speed_data</span><span class="p">)</span>
+        <span class="n">outlier_std_count</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># how many standard deviations to consider an outlier</span>
+        <span class="c1"># calculate the acceptable range for the speed, outside of this range is considered outlier</span>
+        <span class="n">speed_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">speed_mean</span> <span class="o">-</span> <span class="n">outlier_std_count</span> <span class="o">*</span> <span class="n">speed_std</span><span class="p">,</span> <span class="n">speed_mean</span> <span class="o">+</span> <span class="n">outlier_std_count</span> <span class="o">*</span> <span class="n">speed_std</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">speed_range</span><span class="p">)</span>
+
         <span class="c1"># We will put the athlete data into the list as a dict of the important parts</span>
         <span class="n">athlete_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;track&#39;</span><span class="p">:</span> <span class="n">new_track</span><span class="p">,</span>
                         <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">clean_path</span><span class="p">,</span>
                         <span class="s1">&#39;display_name&#39;</span><span class="p">:</span> <span class="n">clean_path</span><span class="p">,</span>
                         <span class="s1">&#39;colour&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__assign_colour</span><span class="p">(),</span>
+                        <span class="s1">&#39;colour_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;start_time&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="s1">&#39;finish_time&#39;</span><span class="p">:</span> <span class="n">new_track</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">()}</span>
+                        <span class="s1">&#39;finish_time&#39;</span><span class="p">:</span> <span class="n">new_track</span><span class="o">.</span><span class="n">get_total_time</span><span class="p">(),</span>
+                        <span class="s1">&#39;speed_range&#39;</span><span class="p">:</span> <span class="n">speed_range</span><span class="p">}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">clean_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">athlete_data</span>
 
@@ -411,6 +428,26 @@
         <span class="c1"># update the gui&#39;s stats display with the new name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_stats</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">__on_athlete_colourscheme_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when an athlete&#39;s colour scheme is changed</span>
+
+<span class="sd">        :param athlete_key: The athlete to change</span>
+<span class="sd">        :param scheme: The new scheme to change to. (normal, speed)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">athlete_key</span><span class="si">}</span><span class="s1"> changed their colour scheme to </span><span class="si">{</span><span class="n">scheme</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># modify athlete data in this class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour_scheme&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scheme</span>
+
+        <span class="c1"># update the guis&#39;s list of athletes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span>
+
+        <span class="c1"># update the map&#39;s list of athletes and then update the map image on the GUI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">modify_athlete</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_map</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">__on_athlete_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">athlete_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                    <span class="n">colour</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -425,7 +462,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colour</span>
 
         <span class="c1"># update the guis&#39;s list of athletes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">,</span><span class="n">remake_widgets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gui</span><span class="o">.</span><span class="n">update_athletes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">,</span> <span class="n">remake_widgets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># update the map</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">modify_athlete</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">])</span>
@@ -438,7 +475,6 @@
 <span class="sd">        :param athlete_key: The dictionary key for the athlete we are deleting</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># print(f&#39;{athlete_key} got deleted&#39;)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if its now empty</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__mpl_map</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>

@@ -35,7 +35,6 @@ def get_surrounding_points_at_time(track: gpx.Track, time: float) \
     :return: Two gpx.Trackpoint points
     """
 
-
     track_points = track.get_track_points()
 
     # Iterate through all points to find the two points either side of the position
@@ -102,15 +101,24 @@ def get_speed_at_time(track: gpx.Track, time: float) -> float:
     # Get the points above and below
     point_below, point_above = get_surrounding_points_at_time(track, time)
 
+    # try to widen the range of points
+    if point_below is not None:
+        below_ind = track_points.index(point_below)
+    if point_above is not None:
+        above_ind = track_points.index(point_above)
+
+    can_expand = point_above is not None and point_below is not None and (below_ind - 2 > 0) and (above_ind + 2 < len(track_points))
+    if can_expand:
+        point_below = track_points[below_ind - 2]
+        point_above = track_points[above_ind + 2]
+
     try:
         position_below = point_below.get_position_degrees()
         position_above = point_above.get_position_degrees()
     except AttributeError:  # when out of range this happens
         return 0.1
 
-    time_below = point_below.get_relative_time()
-    time_above = point_above.get_relative_time()
-    time_delta = time_above - time_below
+    time_delta = point_above.get_relative_time() - point_below.get_relative_time()
 
     # Get distance between two points
     distance = geo.geo_distance(position_below[0], position_below[1],

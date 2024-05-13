@@ -16,7 +16,7 @@
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="_static/documentation_options.js?v=9d552775"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -110,10 +110,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.stats_graph_handler.StatsGraph"><code class="docutils literal notranslate"><span class="pre">StatsGraph</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis.tkscrolledframe">gpx_analysis.tkscrolledframe module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#gpx_analysis.tkscrolledframe.ScrolledFrame"><code class="docutils literal notranslate"><span class="pre">ScrolledFrame</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#gpx-analysis-tkscrolledframe-module">gpx_analysis.tkscrolledframe module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-gpx_analysis">Module contents</a></li>
 </ul>
 </li>
@@ -677,7 +674,7 @@ the max size of the image</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gpx_analysis.graph_handler.get_all_images_in_bounds">
-<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/Rowing-GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_in_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_in_bounds" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_in_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_in_bounds" title="Link to this definition"></a></dt>
 <dd><p>Get all the images in the bounds and put them in a dictionary with their
 tile index as the key</p>
 <dl class="field-list simple">
@@ -692,7 +689,7 @@ tile index as the key</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gpx_analysis.graph_handler.get_all_images_near_track">
-<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_near_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/Rowing-GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_near_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_near_track" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">gpx_analysis.graph_handler.</span></span><span class="sig-name descname"><span class="pre">get_all_images_near_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#gpx_analysis.gpx_parser.Track" title="gpx_analysis.gpx_parser.Track"><span class="pre">Track</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict[tuple,</span> <span class="pre">&lt;module</span> <span class="pre">'PIL.Image'</span> <span class="pre">from</span> <span class="pre">'/Users/edfillingham/Documents/Repos/GPX-Analysis/venv/lib/python3.11/site-packages/PIL/Image.py'&gt;]</span></span></span><a class="reference internal" href="_modules/gpx_analysis/graph_handler.html#get_all_images_near_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.graph_handler.get_all_images_near_track" title="Link to this definition"></a></dt>
 <dd><p>More Tile server friendly way of getting images, by only fetching the ones near the track</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -902,6 +899,20 @@ in the finishline menu</p>
 <dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_on_colour_change">
 <span class="sig-name descname"><span class="pre">set_on_colour_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_on_colour_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_on_colour_change" title="Link to this definition"></a></dt>
 <dd><p>Setter for on colour change callback func</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – the function to be called</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpx_analysis.gui.AppGUI.set_on_colourscheme_change">
+<span class="sig-name descname"><span class="pre">set_on_colourscheme_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/gpx_analysis/gui.html#AppGUI.set_on_colourscheme_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.gui.AppGUI.set_on_colourscheme_change" title="Link to this definition"></a></dt>
+<dd><p>Setter for on colourscheme change callback func</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>func</strong> – the function to be called</p>
@@ -1460,88 +1471,8 @@ eg. getting position,velocity etc. at a given time</p>
 </dd></dl>
 
 </section>
-<section id="module-gpx_analysis.tkscrolledframe">
-<span id="gpx-analysis-tkscrolledframe-module"></span><h2>gpx_analysis.tkscrolledframe module<a class="headerlink" href="#module-gpx_analysis.tkscrolledframe" title="Link to this heading"></a></h2>
-<p>Implementation of the scrollable frame widget.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpx_analysis.tkscrolledframe.</span></span><span class="sig-name descname"><span class="pre">ScrolledFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></p>
-<p>Scrollable Frame widget.</p>
-<p>Use display_widget() to set the interior widget. For example,
-to display a Label with the text “Hello, world!”, you can say:</p>
-<blockquote>
-<div><p>sf = ScrolledFrame(self)
-sf.pack()
-sf.display_widget(Label, text=”Hello, world!”)</p>
-</div></blockquote>
-<p>The constructor accepts the usual Tkinter keyword arguments, plus
-a handful of its own:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>scrollbars (str; default: “both”)</dt><dd><p>Which scrollbars to provide.
-Must be one of “vertical”, “horizontal,” “both”, or “neither”.</p>
-</dd>
-<dt>use_ttk (bool; default: False)</dt><dd><p>Whether to use ttk widgets if available.
-The default is to use standard Tk widgets. This setting has
-no effect if ttk is not available on your system.</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.bind_arrow_keys">
-<span class="sig-name descname"><span class="pre">bind_arrow_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.bind_arrow_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_arrow_keys" title="Link to this definition"></a></dt>
-<dd><p>Bind the specified widget’s arrow key events to the canvas.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.bind_scroll_wheel">
-<span class="sig-name descname"><span class="pre">bind_scroll_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.bind_scroll_wheel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.bind_scroll_wheel" title="Link to this definition"></a></dt>
-<dd><p>Bind the specified widget’s mouse scroll event to the canvas.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.cget">
-<span class="sig-name descname"><span class="pre">cget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.cget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.cget" title="Link to this definition"></a></dt>
-<dd><p>Return the resource value for a KEY given as string.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.config">
-<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cnf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.config" title="Link to this definition"></a></dt>
-<dd><p>Configure resources of a widget.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.configure">
-<span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cnf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.configure" title="Link to this definition"></a></dt>
-<dd><p>Configure resources of a widget.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.display_widget">
-<span class="sig-name descname"><span class="pre">display_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.display_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.display_widget" title="Link to this definition"></a></dt>
-<dd><p>Create and display a new widget.</p>
-<p>If fit_width == True, the interior widget will be stretched as
-needed to fit the width of the frame.</p>
-<p>Keyword arguments are passed to the widget_class constructor.</p>
-<p>Returns the new widget.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.erase">
-<span class="sig-name descname"><span class="pre">erase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.erase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.erase" title="Link to this definition"></a></dt>
-<dd><p>Erase the displayed widget.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="gpx_analysis.tkscrolledframe.ScrolledFrame.scroll_to_top">
-<span class="sig-name descname"><span class="pre">scroll_to_top</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gpx_analysis/tkscrolledframe.html#ScrolledFrame.scroll_to_top"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpx_analysis.tkscrolledframe.ScrolledFrame.scroll_to_top" title="Link to this definition"></a></dt>
-<dd><p>Scroll to the top-left corner of the canvas.</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="gpx-analysis-tkscrolledframe-module">
+<h2>gpx_analysis.tkscrolledframe module<a class="headerlink" href="#gpx-analysis-tkscrolledframe-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-gpx_analysis">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-gpx_analysis" title="Link to this heading"></a></h2>

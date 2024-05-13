@@ -11,6 +11,7 @@ import time
 import tkinter as tk
 import pathlib
 import random
+import numpy as np
 
 try:
     from gpx_analysis import gpx_parser as gpx
@@ -21,7 +22,7 @@ try:
 except ImportError:
     import gpx_parser as gpx
     import graph_handler as gh
-    from gpx_analysis.gui import AppGUI
+    from gui import AppGUI
     import sporting as sport
     import components as geo
 
@@ -92,6 +93,7 @@ class GpxAnalysisApp:
         self.__gui.set_set_start_finish_time_callback(self.__set_start_finish_times)
         self.__gui.set_get_start_finish_time_callback(self.__get_start_finish_times)
         self.__gui.set_on_colour_change(self.__on_athlete_colour_change)
+        self.__gui.set_on_colourscheme_change(self.__on_athlete_colourscheme_change)
 
     def __get_playing(self) -> bool:
         """
@@ -262,13 +264,28 @@ class GpxAnalysisApp:
         path = pathlib.PurePath(filename)
         clean_path = f'/{path.parent.name}/{path.name}'
 
+        # calculate stats for athlete speed throughout the track
+        speed_data = []
+        for track_point in new_track.get_track_points():
+            speed_data.append(sport.get_speed_at_time(new_track, track_point.time))
+        speed_data = np.array(speed_data)
+        speed_mean = np.mean(speed_data)
+        speed_max = np.max(speed_data)
+        speed_std = np.std(speed_data)
+        outlier_std_count = 1.5  # how many standard deviations to consider an outlier
+        # calculate the acceptable range for the speed, outside of this range is considered outlier
+        speed_range = [speed_mean - outlier_std_count * speed_std, speed_mean + outlier_std_count * speed_std]
+        print(speed_range)
+
         # We will put the athlete data into the list as a dict of the important parts
         athlete_data = {'track': new_track,
                         "filename": clean_path,
                         'display_name': clean_path,
                         'colour': self.__assign_colour(),
+                        'colour_scheme': 'normal',
                         'start_time': 0,
-                        'finish_time': new_track.get_total_time()}
+                        'finish_time': new_track.get_total_time(),
+                        'speed_range': speed_range}
 
         self.__athletes[clean_path] = athlete_data
 
@@ -330,6 +347,26 @@ class GpxAnalysisApp:
         # update the gui's stats display with the new name
         self.__gui.update_stats()
 
+    def __on_athlete_colourscheme_change(self, athlete_key: str, scheme: str):
+        """
+        Called when an athlete's colour scheme is changed
+
+        :param athlete_key: The athlete to change
+        :param scheme: The new scheme to change to. (normal, speed)
+        """
+
+        print(f'{athlete_key} changed their colour scheme to {scheme}')
+
+        # modify athlete data in this class
+        self.__athletes[athlete_key]['colour_scheme'] = scheme
+
+        # update the guis's list of athletes
+        self.__gui.update_athletes(self.__athletes)
+
+        # update the map's list of athletes and then update the map image on the GUI
+        self.__mpl_map.modify_athlete(athlete_key, self.__athletes[athlete_key])
+        self.__gui.update_map(force=True)
+
     def __on_athlete_colour_change(self, athlete_key: str,
                                    colour: tuple[float, float, float]) -> None:
         """
@@ -344,7 +381,7 @@ class GpxAnalysisApp:
         self.__athletes[athlete_key]['colour'] = colour
 
         # update the guis's list of athletes
-        self.__gui.update_athletes(self.__athletes,remake_widgets=False)
+        self.__gui.update_athletes(self.__athletes, remake_widgets=False)
 
         # update the map
         self.__mpl_map.modify_athlete(athlete_key, self.__athletes[athlete_key])
@@ -357,7 +394,6 @@ class GpxAnalysisApp:
         :param athlete_key: The dictionary key for the athlete we are deleting
         :return: None
         """
-        # print(f'{athlete_key} got deleted')
 
         if len(self.__athletes) - 1 == 0:  # if its now empty
             self.__mpl_map.reset()

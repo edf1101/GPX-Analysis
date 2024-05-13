@@ -40,6 +40,7 @@ class ControlMenuFrame:
         self.__frm_map_control_menu.grid_columnconfigure(0, weight=1)
 
         # Set up the widgets that won't ever change
+        self.__checkbox_control_colourscheme = None  # For changing colour scheme of a track
         self.__setup_static_widgets()
 
         # Create the name selector / deletion menu and initialise its variables here
@@ -82,6 +83,23 @@ class ControlMenuFrame:
 
         if remake_widgets:
             self.__create_name_selector()  # recreate name selector with new fields
+
+            # get selected athlete key
+            athlete_key = None
+            # Also need to find the current filename.
+            for key, value in self.__athlete_data.items():
+
+                if value['display_name'] == self.__last_selected:
+                    athlete_key = key
+
+            # if it is found then change it in the callback function
+
+            if athlete_key:
+                print('found')
+                speed_colourscheme_state = athlete_data[athlete_key]['colour_scheme'] == 'speed'
+                flag = 'selected' if speed_colourscheme_state else '!selected'
+                self.__checkbox_control_colourscheme.state(['!disabled', flag])
+
             self.__set_athlete_data()
 
     def __setup_namechange(self) -> None:
@@ -232,11 +250,48 @@ class ControlMenuFrame:
                                                   text="Change display name:")
         label_control_menu_changename.grid(row=7, column=0, sticky='w', )
 
+        self.__setup_colourscheme_checkbox()
+
         # add the button to change colours
         self.__btn_colour_picker = ttk.Button(master=self.__frm_map_control_menu,
                                               text="Change colour",
                                               command=self.__on_change_colour)
-        self.__btn_colour_picker.grid(row=9, column=0, sticky='w')
+        self.__btn_colour_picker.grid(row=10, column=0, sticky='w')
+
+    def __setup_colourscheme_checkbox(self):
+        """
+        Set up the colour scheme checkbox
+
+        :return: None
+        """
+
+        # have a checkbox to decide whether to show tracks as speed gradient
+        self.__checkbox_control_colourscheme = ttk.Checkbutton(master=self.__frm_map_control_menu,
+                                                               text="Speed Colour Scheme",
+                                                               command=self.__on_checkbox_change)
+        self.__checkbox_control_colourscheme.state(['!disabled', '!selected'])
+        self.__checkbox_control_colourscheme.state(['!alternate'])
+        self.__checkbox_control_colourscheme.grid(row=9, column=0, sticky='w')
+
+    def __on_checkbox_change(self):
+        """
+        Called when the checkbox is changed
+        """
+
+        state = self.__checkbox_control_colourscheme.instate(['selected'])
+
+        # Get the athlete's key
+        athlete_key = None
+
+        # Also need to find the current filename.
+        for key, value in self.__athlete_data.items():
+
+            if value['display_name'] == self.__last_selected:
+                athlete_key = key
+
+        # if it is found then change it in the callback function
+        if athlete_key:
+            self.__parent_class.on_colourscheme_change(athlete_key, "speed" if state else "normal")
 
     def __on_open_press(self) -> None:
         """
@@ -245,7 +300,7 @@ class ControlMenuFrame:
         :return: None
         """
 
-        file_path = filedialog.askopenfilename()  # get the file path
+        file_path = filedialog.askopenfilename(filetypes=[('GPX Files', '*.gpx')])  # get gpx path
         if file_path != '':  # check it's not blank
             self.__open_file_callback(file_path)
 
@@ -321,6 +376,12 @@ class ControlMenuFrame:
 
             if value['display_name'] == self.__last_selected:
                 athlete_key = key
+
+        # modify colourscheme checkbox
+        if athlete_key:
+            speed_colourscheme_state = self.__athlete_data[athlete_key]['colour_scheme'] == 'speed'
+            flag = 'selected' if speed_colourscheme_state else '!selected'
+            self.__checkbox_control_colourscheme.state(['!disabled', flag])
 
         self.__parent_class.set_finishline_athlete_selected(athlete_key)
         self.__parent_class.stop_finish_start_editing()

@@ -19,9 +19,11 @@ import matplotlib.patches as mpatches
 try:
     from gpx_analysis import components as geo
     from gpx_analysis import gpx_parser as gpx
+    from gpx_analysis import sporting as sport
 except ImportError:
     import components as geo
     import gpx_parser as gpx
+    import sporting as sport
 
 # If we are on macos then run this to fix the issues
 if sys_pf == 'darwin':
@@ -235,9 +237,11 @@ class MapClass:
         # modify new parts individually so we don't remove references to drawn tracks/ points
         self.__athletes[athlete_key]['colour'] = new_value['colour']
         self.__athletes[athlete_key]['display_name'] = new_value['display_name']
+        self.__athletes[athlete_key]['colour_scheme'] = new_value['colour_scheme']
 
         # redo track / legend which contain old data / colours
-        self.draw_track(athlete_key, new_value['colour'])
+        colour = new_value['colour'] if new_value['colour_scheme'] == 'normal' else 'speed'
+        self.draw_track(athlete_key, colour)
         self.__draw_legend()
 
     def modify_start_finish_times(self, athlete_key: str, start: float, finish: float) -> None:
@@ -459,6 +463,10 @@ class MapClass:
         track = self.__athletes[athlete_key]['track']
         line_data = []
 
+        color_scheme = 'speed' if color == 'speed' else 'normal'
+        if color == 'speed':
+            speed_range = self.__athletes[athlete_key]['speed_range']  # get the acceptable speed range
+
         for i in range(len(track.get_track_points()) - 1):
             start_point = track.get_track_points()[i]  # get start and end points of line
             end_point = track.get_track_points()[i + 1]
@@ -467,6 +475,19 @@ class MapClass:
             if (end_point.get_relative_time() < self.__athletes[athlete_key]['start_time'] or
                     start_point.get_relative_time() > self.__athletes[athlete_key]['finish_time']):
                 continue
+
+            if color_scheme == 'speed':  # if the colour scheme is speed then calculate the new colour
+                speed = sport.get_speed_at_time(track, start_point.get_relative_time())
+                # make it grey if it's an outlier
+                if speed is None or speed < speed_range[0] :
+                    color = 'grey'
+                elif speed > speed_range[1]:
+                    color = (0, 1, 0)
+                else:
+                    # scale the speed to be between 0 and 1
+                    speed = (speed - speed_range[0]) / (speed_range[1] - speed_range[0])
+                    # lerp between red and green
+                    color = (1 - speed, speed, 0)
 
             single_line = self.draw_line(start_point.get_position_degrees(),
                                          end_point.get_position_degrees(),

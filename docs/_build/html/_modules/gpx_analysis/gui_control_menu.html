@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=9d552775"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -115,6 +115,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="o">.</span><span class="n">grid_columnconfigure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Set up the widgets that won&#39;t ever change</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># For changing colour scheme of a track</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__setup_static_widgets</span><span class="p">()</span>
 
         <span class="c1"># Create the name selector / deletion menu and initialise its variables here</span>
@@ -159,6 +160,23 @@
 
         <span class="k">if</span> <span class="n">remake_widgets</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__create_name_selector</span><span class="p">()</span>  <span class="c1"># recreate name selector with new fields</span>
+
+            <span class="c1"># get selected athlete key</span>
+            <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># Also need to find the current filename.</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                    <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+            <span class="c1"># if it is found then change it in the callback function</span>
+
+            <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;found&#39;</span><span class="p">)</span>
+                <span class="n">speed_colourscheme_state</span> <span class="o">=</span> <span class="n">athlete_data</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour_scheme&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;speed&#39;</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;selected&#39;</span> <span class="k">if</span> <span class="n">speed_colourscheme_state</span> <span class="k">else</span> <span class="s1">&#39;!selected&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">state</span><span class="p">([</span><span class="s1">&#39;!disabled&#39;</span><span class="p">,</span> <span class="n">flag</span><span class="p">])</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">__set_athlete_data</span><span class="p">()</span></div>
 
 
@@ -310,11 +328,48 @@
                                                   <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Change display name:&quot;</span><span class="p">)</span>
         <span class="n">label_control_menu_changename</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setup_colourscheme_checkbox</span><span class="p">()</span>
+
         <span class="c1"># add the button to change colours</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__btn_colour_picker</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
                                               <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Change colour&quot;</span><span class="p">,</span>
                                               <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_change_colour</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__btn_colour_picker</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__btn_colour_picker</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setup_colourscheme_checkbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the colour scheme checkbox</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># have a checkbox to decide whether to show tracks as speed gradient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Checkbutton</span><span class="p">(</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__frm_map_control_menu</span><span class="p">,</span>
+                                                               <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Speed Colour Scheme&quot;</span><span class="p">,</span>
+                                                               <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__on_checkbox_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">state</span><span class="p">([</span><span class="s1">&#39;!disabled&#39;</span><span class="p">,</span> <span class="s1">&#39;!selected&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">state</span><span class="p">([</span><span class="s1">&#39;!alternate&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__on_checkbox_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the checkbox is changed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">instate</span><span class="p">([</span><span class="s1">&#39;selected&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Get the athlete&#39;s key</span>
+        <span class="n">athlete_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Also need to find the current filename.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
+                <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="c1"># if it is found then change it in the callback function</span>
+        <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">on_colourscheme_change</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">,</span> <span class="s2">&quot;speed&quot;</span> <span class="k">if</span> <span class="n">state</span> <span class="k">else</span> <span class="s2">&quot;normal&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__on_open_press</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -323,7 +378,7 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">file_path</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">()</span>  <span class="c1"># get the file path</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;GPX Files&#39;</span><span class="p">,</span> <span class="s1">&#39;*.gpx&#39;</span><span class="p">)])</span>  <span class="c1"># get gpx path</span>
         <span class="k">if</span> <span class="n">file_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>  <span class="c1"># check it&#39;s not blank</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__open_file_callback</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 
@@ -399,6 +454,12 @@
 
             <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_selected</span><span class="p">:</span>
                 <span class="n">athlete_key</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="c1"># modify colourscheme checkbox</span>
+        <span class="k">if</span> <span class="n">athlete_key</span><span class="p">:</span>
+            <span class="n">speed_colourscheme_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__athlete_data</span><span class="p">[</span><span class="n">athlete_key</span><span class="p">][</span><span class="s1">&#39;colour_scheme&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;speed&#39;</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="s1">&#39;selected&#39;</span> <span class="k">if</span> <span class="n">speed_colourscheme_state</span> <span class="k">else</span> <span class="s1">&#39;!selected&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__checkbox_control_colourscheme</span><span class="o">.</span><span class="n">state</span><span class="p">([</span><span class="s1">&#39;!disabled&#39;</span><span class="p">,</span> <span class="n">flag</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">set_finishline_athlete_selected</span><span class="p">(</span><span class="n">athlete_key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__parent_class</span><span class="o">.</span><span class="n">stop_finish_start_editing</span><span class="p">()</span>

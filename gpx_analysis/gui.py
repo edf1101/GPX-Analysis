@@ -2,16 +2,17 @@
 This script contains the main GUI class
 The AppGUI class is the only one to use outside of this class
 """
-# Pylint ignores
+# Pylint ignores some are just wrongly generated
 # pylint: disable=R0902
 # pylint: disable=R0914
 # pylint: disable=R0904
+# pylint: disable=E0401
 
 import tkinter as tk
 from tkinter import ttk
 import time
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # for importing figs to mpl
-from tkscrollableframe import ScrolledFrame, ScrollbarsType
+from tkscrollableframe import ScrolledFrame
 
 # import the individual separate classes
 try:
@@ -25,7 +26,6 @@ except ImportError:
     from .gui_finishline_menu import FinishlineMenuFrame
     from .gui_playback_menu import PlaybackMenuFrame
     from .gui_stats_menu import StatsMenuFrame
-    from gpx_analysis import graph_handler as gh
 
 
 class AppGUI:
@@ -105,6 +105,7 @@ class AppGUI:
         self.get_start_finish_time = None
 
         self.on_colour_change = None
+        self.on_colourscheme_change = None
 
         # Athlete list
         self.__athletes = {}
@@ -187,7 +188,7 @@ class AppGUI:
         if not isinstance(event.widget, ttk.Entry):
             self.__window.focus()
 
-    def update_map(self,force:bool = False) -> None:
+    def update_map(self, force: bool = False) -> None:
         """
         This sets/ updates the mpl figure map on the GUI
 
@@ -362,7 +363,7 @@ class AppGUI:
         """
         self.get_start_finish_time = func
 
-    def set_on_colour_change(self,func) -> None:
+    def set_on_colour_change(self, func) -> None:
         """
         Setter for on colour change callback func
 
@@ -370,3 +371,12 @@ class AppGUI:
         :return: None
         """
         self.on_colour_change = func
+
+    def set_on_colourscheme_change(self, func) -> None:
+        """
+        Setter for on colourscheme change callback func
+
+        :param func: the function to be called
+        :return: None
+        """
+        self.on_colourscheme_change = func

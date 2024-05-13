@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=9d552775"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -75,15 +75,17 @@
 <span class="sd">This script contains the main GUI class</span>
 <span class="sd">The AppGUI class is the only one to use outside of this class</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># Pylint ignores</span>
+<span class="c1"># Pylint ignores some are just wrongly generated</span>
 <span class="c1"># pylint: disable=R0902</span>
 <span class="c1"># pylint: disable=R0914</span>
 <span class="c1"># pylint: disable=R0904</span>
+<span class="c1"># pylint: disable=E0401</span>
 
 <span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
 <span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">matplotlib.backends.backend_tkagg</span> <span class="kn">import</span> <span class="n">FigureCanvasTkAgg</span>  <span class="c1"># for importing figs to mpl</span>
+<span class="kn">from</span> <span class="nn">tkscrollableframe</span> <span class="kn">import</span> <span class="n">ScrolledFrame</span>
 
 <span class="c1"># import the individual separate classes</span>
 <span class="k">try</span><span class="p">:</span>
@@ -92,14 +94,11 @@
     <span class="kn">from</span> <span class="nn">gpx_analysis.gui_finishline_menu</span> <span class="kn">import</span> <span class="n">FinishlineMenuFrame</span>
     <span class="kn">from</span> <span class="nn">gpx_analysis.gui_playback_menu</span> <span class="kn">import</span> <span class="n">PlaybackMenuFrame</span>
     <span class="kn">from</span> <span class="nn">gpx_analysis.gui_stats_menu</span> <span class="kn">import</span> <span class="n">StatsMenuFrame</span>
-    <span class="kn">from</span> <span class="nn">gpx_analysis.tkscrolledframe</span> <span class="kn">import</span> <span class="n">ScrolledFrame</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">.gui_control_menu</span> <span class="kn">import</span> <span class="n">ControlMenuFrame</span>
     <span class="kn">from</span> <span class="nn">.gui_finishline_menu</span> <span class="kn">import</span> <span class="n">FinishlineMenuFrame</span>
     <span class="kn">from</span> <span class="nn">.gui_playback_menu</span> <span class="kn">import</span> <span class="n">PlaybackMenuFrame</span>
     <span class="kn">from</span> <span class="nn">.gui_stats_menu</span> <span class="kn">import</span> <span class="n">StatsMenuFrame</span>
-    <span class="kn">from</span> <span class="nn">gpx_analysis</span> <span class="kn">import</span> <span class="n">graph_handler</span> <span class="k">as</span> <span class="n">gh</span>
-    <span class="kn">from</span> <span class="nn">gpx_analysis.tkscrolledframe</span> <span class="kn">import</span> <span class="n">ScrolledFrame</span>
 
 
 <div class="viewcode-block" id="AppGUI">
@@ -181,6 +180,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">get_start_finish_time</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">on_colour_change</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_colourscheme_change</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Athlete list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__athletes</span> <span class="o">=</span> <span class="p">{}</span>
@@ -280,7 +280,7 @@
 
 <div class="viewcode-block" id="AppGUI.update_map">
 <a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.update_map">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">force</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This sets/ updates the mpl figure map on the GUI</span>
 
@@ -503,7 +503,7 @@
 
 <div class="viewcode-block" id="AppGUI.set_on_colour_change">
 <a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_on_colour_change">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_on_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_on_colour_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setter for on colour change callback func</span>
 
@@ -511,6 +511,18 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_colour_change</span> <span class="o">=</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="AppGUI.set_on_colourscheme_change">
+<a class="viewcode-back" href="../../gpx_analysis.html#gpx_analysis.gui.AppGUI.set_on_colourscheme_change">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_on_colourscheme_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setter for on colourscheme change callback func</span>
+
+<span class="sd">        :param func: the function to be called</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_colourscheme_change</span> <span class="o">=</span> <span class="n">func</span></div>
 </div>
 
 </pre></div>

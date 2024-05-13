@@ -5,6 +5,7 @@ The AppGUI class is the only one to use outside of this class
 # Pylint ignores
 # pylint: disable=R0902
 # pylint: disable=R0914
+
 import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as msgbox  # for popups

@@ -15,7 +15,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=9d552775"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -113,7 +113,6 @@
 <span class="sd">    :return: Two gpx.Trackpoint points</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="n">track_points</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_track_points</span><span class="p">()</span>
 
     <span class="c1"># Iterate through all points to find the two points either side of the position</span>
@@ -186,15 +185,24 @@
     <span class="c1"># Get the points above and below</span>
     <span class="n">point_below</span><span class="p">,</span> <span class="n">point_above</span> <span class="o">=</span> <span class="n">get_surrounding_points_at_time</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
 
+    <span class="c1"># try to widen the range of points</span>
+    <span class="k">if</span> <span class="n">point_below</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">below_ind</span> <span class="o">=</span> <span class="n">track_points</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">point_below</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">point_above</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">above_ind</span> <span class="o">=</span> <span class="n">track_points</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">point_above</span><span class="p">)</span>
+
+    <span class="n">can_expand</span> <span class="o">=</span> <span class="n">point_above</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">point_below</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">below_ind</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">above_ind</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">track_points</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">can_expand</span><span class="p">:</span>
+        <span class="n">point_below</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="n">below_ind</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">point_above</span> <span class="o">=</span> <span class="n">track_points</span><span class="p">[</span><span class="n">above_ind</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">position_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
         <span class="n">position_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_position_degrees</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># when out of range this happens</span>
         <span class="k">return</span> <span class="mf">0.1</span>
 
-    <span class="n">time_below</span> <span class="o">=</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
-    <span class="n">time_above</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
-    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">time_above</span> <span class="o">-</span> <span class="n">time_below</span>
+    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">point_above</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span> <span class="o">-</span> <span class="n">point_below</span><span class="o">.</span><span class="n">get_relative_time</span><span class="p">()</span>
 
     <span class="c1"># Get distance between two points</span>
     <span class="n">distance</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">geo_distance</span><span class="p">(</span><span class="n">position_below</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_below</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
