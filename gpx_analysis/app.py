@@ -275,7 +275,6 @@ class GpxAnalysisApp:
         outlier_std_count = 1.5  # how many standard deviations to consider an outlier
         # calculate the acceptable range for the speed, outside of this range is considered outlier
         speed_range = [speed_mean - outlier_std_count * speed_std, speed_mean + outlier_std_count * speed_std]
-        print(speed_range)
 
         # We will put the athlete data into the list as a dict of the important parts
         athlete_data = {'track': new_track,
@@ -355,7 +354,7 @@ class GpxAnalysisApp:
         :param scheme: The new scheme to change to. (normal, speed)
         """
 
-        print(f'{athlete_key} changed their colour scheme to {scheme}')
+        # print(f'{athlete_key} changed their colour scheme to {scheme}')
 
         # modify athlete data in this class
         self.__athletes[athlete_key]['colour_scheme'] = scheme

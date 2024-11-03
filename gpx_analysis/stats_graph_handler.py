@@ -121,6 +121,22 @@ class StatsGraph:
 
             self.__plot_graph(self.__ax, sport.get_cadence_at_time, None)
 
+        elif mode == 'Elevation':
+            self.__ax.set_ylabel("meters")
+            self.__secondary_visibility(False)
+
+            self.__plot_graph(self.__ax, sport.get_elevation_at_time, None)
+
+        elif mode == 'Speed & Ele':
+            self.__ax.set_ylabel(unit)
+            self.__ax_2.set_ylabel("meters")
+            self.__ax_2.yaxis.set_label_position("right")
+            self.__ax_2.yaxis.tick_right()
+            self.__secondary_visibility(True)
+
+            self.__plot_graph(self.__ax, sport.get_speed_at_time, unit)
+            self.__plot_graph(self.__ax_2, sport.get_elevation_at_time, None)
+
     def __plot_graph(self, axis, func, units) -> None:
         """
         Plots a graph of the stats
@@ -149,6 +165,12 @@ class StatsGraph:
                 start_y = func(track, start_point + athlete['start_time'])
                 end_y = func(track, end_point + athlete['start_time'])
 
+                speed_at_start = sport.get_speed_at_time(track, start_point + athlete['start_time'])
+                speed_range = athlete['speed_range']
+
+                if speed_at_start < speed_range[0] or speed_at_start > speed_range[1]:
+                    continue
+
                 if start_y < 0.5 or end_y < 0.5 or smth_start < 0.5:
                     continue
 
@@ -169,8 +191,8 @@ class StatsGraph:
 
     def __plot_gap(self) -> None:
         """
-        It woudld be very inefficient to plot the gap using the same method
-         as previously so we'll do it here
+        It would be very inefficient to plot the gap using the same method
+        as previously so we'll do it here
 
         :return: None
         """
@@ -190,7 +212,7 @@ class StatsGraph:
 
             # append each athletes dist to an list this will be the y values
             for key, data in self.__athletes.items():
-                start_dist = cdf(data['track'],data['start_time'])
+                start_dist = cdf(data['track'], data['start_time'])
                 current_dist = cdf(data['track'], time + data['start_time']) - start_dist
                 athlete_points[key].append(max_dist - current_dist)
 

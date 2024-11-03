@@ -13,7 +13,7 @@ class TrackPoint:
     Also features cadence and time.
     """
 
-    def __init__(self, lat: float, lon: float, cad: int, raw_time: str):
+    def __init__(self, lat: float, lon: float, cad: int, raw_time: str, ele: float = 0):
         """
         init function for setting up a track point
 
@@ -21,12 +21,14 @@ class TrackPoint:
         :param lon: World longitude posisiton
         :param cad: The cadence (stroke rate)
         :param raw_time: the string form of the UTC time
+        :param ele: the elevation of the track point
         """
         self.standard_x = None
         self.standard_y = None
 
         self.lat = lat
         self.lon = lon
+        self.ele = ele
 
         self.cad = cad
 
@@ -93,6 +95,14 @@ class TrackPoint:
         """
         return self.time
 
+    def get_elevation(self) -> float:
+        """
+        Getter for elevation
+
+        :return: the elevation of the track point
+        """
+        return self.ele
+
 
 class Track:
     """
@@ -155,6 +165,11 @@ class Track:
                 cadence_element = point.find("gpx:extensions/gpxdata:cadence",
                                              namespaces=self.__namespaces)
 
+                ele = 0
+                if point.find("gpx:ele", namespaces=self.__namespaces) is not None:
+                    ele = point.find("gpx:ele", namespaces=self.__namespaces).text
+                    ele = float(ele)
+
                 if cadence_element is not None:
                     cadence = cadence_element.text
                 else:
@@ -167,7 +182,7 @@ class Track:
                 if not self.__has_cadence:
                     cadence = 0
 
-                self.__track_points.append(TrackPoint(lat, lon, int(cadence), time))
+                self.__track_points.append(TrackPoint(lat, lon, int(cadence), time, ele))
 
     def __redo_timings(self) -> None:
         """

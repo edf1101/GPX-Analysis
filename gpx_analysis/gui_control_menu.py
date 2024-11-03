@@ -95,7 +95,7 @@ class ControlMenuFrame:
             # if it is found then change it in the callback function
 
             if athlete_key:
-                print('found')
+                # print('found')
                 speed_colourscheme_state = athlete_data[athlete_key]['colour_scheme'] == 'speed'
                 flag = 'selected' if speed_colourscheme_state else '!selected'
                 self.__checkbox_control_colourscheme.state(['!disabled', flag])

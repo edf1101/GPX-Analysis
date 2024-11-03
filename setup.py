@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gpx_analysis-edf1101",
-    version="1.7",
+    version="1.8",
     author="edf1101",
     author_email="blank@blank.com",
     description="GPX Analysis Program",

@@ -125,7 +125,8 @@ class StatsMenuFrame:
         self.__frm_stats_graph_dropdown.grid(row=1, column=0, sticky='nsew')
 
         # Create the dropdown menu
-        graph_options = ['Speed', 'Distance', 'Gap', 'Rate', 'Speed & Rate']  # options for it
+        graph_options = ['Speed', 'Distance', 'Gap', 'Rate', 'Speed & Rate',
+                         'Elevation', 'Speed & Ele']  # options for it
 
         root = self.__parent_class.get_tk_window()
         self.__value_graph_selected_option = tk.StringVar(master=root)
@@ -219,7 +220,6 @@ class StatsMenuFrame:
 
         # remake athlete list
         self.__create_athlete_selection_menu()
-
 
         # Set the athlete list on the graph
         self.__stats_graph.set_athletes(athletes)
@@ -325,7 +325,7 @@ class StatsMenuFrame:
         speed_options = ['s/500m', 's/km', 'm/s', 'km/h', 'mph']  # options for it
         root = self.__parent_class.get_tk_window()
 
-        self.__value_speed_selected_option = tk.StringVar(master = root)
+        self.__value_speed_selected_option = tk.StringVar(master=root)
         self.__value_speed_selected_option.set(speed_options[0])  # s/500m is default unit
 
         # This doesn't need to be an instance var since we won't modify it again
@@ -366,7 +366,6 @@ class StatsMenuFrame:
             graph_athletes[key] = value
 
         if self.__parent_class.ready:
-
             self.__stats_graph.set_athletes(graph_athletes)
             option = (f'{self.__value_graph_selected_option.get()}|'
                       f'{self.__value_speed_selected_option.get()}')

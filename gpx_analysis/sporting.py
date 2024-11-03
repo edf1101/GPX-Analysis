@@ -32,7 +32,7 @@ def get_surrounding_points_at_time(track: gpx.Track, time: float) \
 
     :param track: The input track
     :param time: The time to get the points at
-    :return: Two gpx.Trackpoint points
+    :return: Two gpx.Trackpoint points. Or returns None, None if the time is out of range
     """
 
     track_points = track.get_track_points()
@@ -107,10 +107,15 @@ def get_speed_at_time(track: gpx.Track, time: float) -> float:
     if point_above is not None:
         above_ind = track_points.index(point_above)
 
-    can_expand = point_above is not None and point_below is not None and (below_ind - 2 > 0) and (above_ind + 2 < len(track_points))
+    expansion_time_width = 20
+    point_time_below = get_surrounding_points_at_time(track, time - (expansion_time_width / 2))[0]
+    point_time_above = get_surrounding_points_at_time(track, time + (expansion_time_width / 2))[1]
+    can_expand = (point_time_below is not None and point_time_above is not None
+                  and point_time_below.time < point_time_above.time)
+
     if can_expand:
-        point_below = track_points[below_ind - 2]
-        point_above = track_points[above_ind + 2]
+        point_below = point_time_below
+        point_above = point_time_above
 
     try:
         position_below = point_below.get_position_degrees()
@@ -160,6 +165,39 @@ def get_cadence_at_time(track: gpx.Track, time: float) -> float:
     cadence = round(map_ranges(time, time_below, time_above, cadence_below, cadence_above), 1)
 
     return cadence
+
+
+def get_elevation_at_time(track: gpx.Track, time: float) -> float:
+    """
+    Returns the elevation on a gpx track at a given time
+
+    :param track: The track to get the elevation from
+    :param time: The time to get the elevation at
+    :return: The elevation at the given time
+    """
+
+    track_points = track.get_track_points()
+
+    last_point = track_points[-1]
+    if time > last_point.get_relative_time():
+        # WARNING this time is after the end time it is technically invalid
+        return 0.0
+
+    # Get the points above and below
+    point_below, point_above = get_surrounding_points_at_time(track, time)
+
+    try:
+        elevation_below = point_below.get_elevation()
+        elevation_above = point_above.get_elevation()
+    except AttributeError:  # When out of range
+        return 0.0
+
+    time_below = point_below.get_relative_time()
+    time_above = point_above.get_relative_time()
+
+    elevation = round(map_ranges(time, time_below, time_above, elevation_below, elevation_above), 1)
+
+    return elevation
 
 
 def get_cumulative_dist_at_time(track: gpx.Track, time: float) -> float:
